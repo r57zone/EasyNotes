@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="description" content="eNotes"/>
+<title>Заметки</title>
+<link rel="stylesheet" href="all.css">
+<style type="text/css">
+html,body{padding:0;margin:0;}
+body{font-family:Segoe UI; color:#666666; background-color:#f8f8f8;}
+#clear{clear:both;float:none;height:0;}
+
+#header{background-color:#017d93; text-align:center; height:50px; color:white; border-bottom:solid 1px #005665; font-size: 16px; cursor: default;}
+#header #back{float:left; width:120px; height:46px;}
+#header #back_btn{margin:7px 10px; padding:7px 14px; cursor:pointer; background-color:#007185; }
+#header #back_btn:hover{background-color:#008aa3;}
+#header #MainTitle{display: inline-block; margin-top:10px; font-size:20px;}
+#header #button{margin:7px 10px; padding:7px 14px; cursor:pointer; background-color:#007185; }
+#header #button:hover{background-color:#008aa3;}
+
+#list{overflow:auto; height:528px; cursor:default; font-size:16px; color:black;}
+#list #note{cursor:pointer; height:40px; border-bottom:1px solid #ededed;}
+#list #note:hover{background-color:#ededed;}
+#list #note #title{float:left; margin:8px;}
+#list #note #date{float:right; color:#454545; font-size:10pt; margin:10px;}
+
+#meta{display:none; color:#ac5942; margin:8px 10px; font-size:11pt; cursor:default;}
+#meta #DayAgo{float:left; font-weight:bold;}
+#meta #DateNote{float:right;}
+
+#memo{display:none; margin-top:6px; color:#ac5942; background-image: url(bg.png);}
+#memo textarea{background-color:transparent; font-size: 16px; border:none; overflow:auto; width: 702px; height: inherit; line-height: 40px; margin: 0 8px; height:482px;}
+
+#additional{display:none; position:absolute; height:50px; width:100%; border-top:solid 1px #cecece; background-color:#dadada;}
+#add_btn, #add_btn2{float:left; margin:6px 0 6px 10px; padding:7px 14px; cursor:pointer; background-color:#b9b8b8; color:black;}
+#add_btn:hover, #add_btn2:hover{background-color:#afafaf;}
+#add_btn2{float:right; margin:6px 10px 6px 0;}
+</style>
+<script type="text/javascript">  
+	function btn()
+	{
+		switch (document.getElementById("button").innerHTML) {
+			case "+" :
+				document.location='#new';
+				break;
+			default:
+				document.location='#button';
+				break;
+		}
+	
+	}
+	
+	function GetSelectedText(){
+		var userSelection, ta;
+		if (window.getSelection && document.activeElement){
+			if (document.activeElement.nodeName == "TEXTAREA" ||
+			(document.activeElement.nodeName == "INPUT" &&
+			document.activeElement.getAttribute("type").toLowerCase() == "text")){
+				ta = document.activeElement;
+				userSelection = ta.value.substring(ta.selectionStart, ta.selectionEnd);
+			} else {
+				userSelection = window.getSelection();
+			}
+		return userSelection.toString();
+		} else {
+		// all browsers, except IE before version 9
+		if (document.getSelection){       
+			userSelection = document.getSelection();
+			return userSelection.toString();
+		}
+		// IE below version 9
+		else if (document.selection){
+			userSelection = document.selection.createRange();
+			return userSelection.text;
+			}	
+		}
+	}
+	
+	function CopySelect()
+	{
+		document.getElementById("Clipbrd_value").value=GetSelectedText();
+		document.getElementById("text").style.height='442px';
+		document.getElementById("additional").style.display='block';
+	}
+	
+	function copy()
+	{
+		document.location='#copy';
+		document.getElementById('additional').style.display='none';
+		document.getElementById('text').style.height='482px';
+	}	
+</script>
+</head>
+<body oncontextmenu="return false">
+<div id="header" onselectstart="return false">
+<div id="back"><div onclick="document.location='#all';" id="back_btn">Назад</div></div>
+<div id="MainTitle">Заметки (9)</div>
+<div style="float:right; width:120px; height:46px;"><div onclick="btn();" id="button">+</div></div>
+</div>
+<div id="list" onselectstart="return false">
+<div onclick="document.location='#note1';" id="note"><div id="title">Пример</div><div id="date">17:55</div></div>
+</div>
+<div id="meta" onselectstart="return false"><div id="DayAgo">3 дня назад</div><div id="DateNote">25 сент. 2:29</div></div>
+<div id="clear"></div>
+<div id="memo">
+<textarea onselect="CopySelect();" onkeypress="if (document.getElementById('button').innerHTML=='Удалить') document.getElementById('button').innerHTML='Обновить';if (document.getElementById('button').innerHTML=='Delete') document.getElementById('button').innerHTML='Update';" id="text"></textarea>
+<input id="Clipbrd_value" value="" type="hidden" />
+</div>
+<div id="additional" onselectstart="return false"><div onclick="copy();" id="add_btn">Копировать</div><div onclick="document.getElementById('additional').style.display='none';document.getElementById('text').style.height='482px';" id="add_btn2">↓</div></div>
+</body>
+</html>
