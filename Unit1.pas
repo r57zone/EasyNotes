@@ -2,7 +2,7 @@ unit Unit1;
 
 interface
 
-{eNotes 0.5, последнее обновление 27.10.2016
+{eNotes 0.5.1, последнее обновление 16.11.2016
 https://github.com/r57zone/eNotes}
 
 uses
@@ -155,15 +155,21 @@ end;
 
 function MyDateTime(sDate: string): string;
 var
-  mTime: string;
+  mTime, nYear: string;
 begin
   mTime:=Copy(sDate, Pos(' ', sDate)+1, Length(sDate)-Pos(' ', sDate));
-  Result:=FormatDateTime('d mmm.', StrToDate(Copy(sDate, 1, Pos(' ', sDate))))+' '+Copy(mTime, 1, Length(mTime)-3);
+  nYear:=FormatDateTime('yyyy', StrToDate(Copy(sDate, 1, Pos(' ', sDate))));
+  
+  if nYear = FormatDateTime('yyyy', Date) then
+    Result:=FormatDateTime('d mmm.', StrToDate(Copy(sDate, 1, Pos(' ', sDate))))+' '+Copy(mTime, 1, Length(mTime)-3)
+  else
+    Result:=FormatDateTime('d.mm.yyyy', StrToDate(Copy(sDate, 1, Pos(' ', sDate))))+' '+Copy(mTime, 1, Length(mTime)-3);
 end;
+
 
 function MyDateTime2(sDate: string): string;
 var
-  mTime, MyDate: string; DaysAgo: integer;
+  mTime, MyDate, nYear: string; DaysAgo: integer;
 begin
   DaysAgo:=DaysBetween(StrToDate(Copy(sDate,1,Pos(' ',sDate)-1)), Date);
 
@@ -171,14 +177,17 @@ begin
 
   MyDate:=FormatDateTime('d mmm.', StrToDate(Copy(sDate, 1, Pos(' ', sDate))));
 
-  if DaysAgo<DayOfTheWeek(Date) then begin
+  if DaysAgo < DayOfTheWeek(Date) then begin
     MyDate:=FormatDateTime('dddd', StrToDate(Copy(sDate, 1, Pos(' ', sDate))));
     MyDate[1]:=AnsiUpperCase(MyDate[1])[1];
   end;
 
-  if DaysAgo=0 then MyDate:=Copy(mTime, 1, Length(mTime)-3);
-  if DaysAgo=1 then if RuLang then MyDate:='Вчера' else MyDate:='Yesterday';
-  if DaysAgo>364 then MyDate:=FormatDateTime('d mmm. yyyy', StrToDate(Copy(sDate, 1, Pos(' ', sDate))))+' '+Copy(mTime, 1, Length(mTime)-3);
+  if DaysAgo = 0 then MyDate:=Copy(mTime, 1, Length(mTime)-3);
+  if DaysAgo = 1 then if RuLang then MyDate:='Вчера' else MyDate:='Yesterday';
+
+  nYear:=FormatDateTime('yyyy', StrToDate(Copy(sDate, 1, Pos(' ', sDate))));
+  if nYear <> FormatDateTime('yyyy', Date) then
+    MyDate:=FormatDateTime('d mmm. yyyy', StrToDate(Copy(sDate, 1, Pos(' ', sDate))));
 
   Result:=MyDate;
 end;
@@ -215,9 +224,9 @@ var
 begin
   sUrl:=ExtractFileName(StringReplace(url,'/','\',[rfReplaceAll]));
 
-  if pos('main.htm',sUrl)=0 then Cancel:=true;
+  if pos('main.htm',sUrl) = 0 then Cancel:=true;
 
-  if pos('main.htm#note',sUrl)>0 then begin
+  if pos('main.htm#note',sUrl) > 0 then begin
     Delete(sUrl,1,pos('#note',sUrl)+4);
     NoteIndex:=sUrl;
     SQLTB:=SQLDB.GetTable('SELECT ID, Note, DateTime FROM NOTES WHERE ID='+sURL);
@@ -244,26 +253,26 @@ begin
 
     if RuLang then begin
 
-      if IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))]='1' then NoteDate:=IntToStr(DaysAgo)+' день назад';
+      if IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))] = '1' then NoteDate:=IntToStr(DaysAgo)+' день назад';
     
-      if (IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))]='2') or
-      (IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))]='3') or
-      (IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))]='4') then NoteDate:=IntToStr(DaysAgo)+' дня назад';
+      if (IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))] = '2') or
+      (IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))] = '3') or
+      (IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))] = '4') then NoteDate:=IntToStr(DaysAgo)+' дня назад';
 
-      if (IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))]='5') or
-      (IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))]='6') or
-      (IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))]='7') or
-      (IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))]='8') or
-      (IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))]='9') or
-      (IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))]='0') then NoteDate:=IntToStr(DaysAgo)+' дней назад';
+      if (IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))]= '5') or
+      (IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))] = '6') or
+      (IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))] = '7') or
+      (IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))] = '8') or
+      (IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))] = '9') or
+      (IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))] = '0') then NoteDate:=IntToStr(DaysAgo)+' дней назад';
 
-      if DaysAgo=0 then NoteDate:='Сегодня';
-      if DaysAgo=1 then NoteDate:='Вчера';
+      if DaysAgo = 0 then NoteDate:='Сегодня';
+      if DaysAgo = 1 then NoteDate:='Вчера';
     end else begin
     
       NoteDate:=IntToStr(DaysAgo)+' days ago';
-      if DaysAgo=0 then NoteDate:='Today';
-      if DaysAgo=1 then NoteDate:='Yesterday';
+      if DaysAgo = 0 then NoteDate:='Today';
+      if DaysAgo = 1 then NoteDate:='Yesterday';
     end;
 
     WebView.OleObject.Document.getElementById('DayAgo').innerHTML:=NoteDate;
@@ -272,7 +281,7 @@ begin
 
   end else begin
 
-    if (sUrl='main.htm#new') and (WebView.OleObject.Document.getElementById('button').innerHTML='+') then begin
+    if (sUrl = 'main.htm#new') and (WebView.OleObject.Document.getElementById('button').innerHTML = '+') then begin
       WebView.OleObject.Document.getElementById('meta').style.display:='block';
       WebView.OleObject.Document.getElementById('memo').style.display:='block';
       WebView.OleObject.Document.getElementById('list').style.display:='none';
@@ -296,7 +305,7 @@ begin
       NoteIndex:='-1';
     end;
 
-    if (sUrl='main.htm#button') and ((WebView.OleObject.Document.getElementById('button').innerHTML='Готово') or (WebView.OleObject.Document.getElementById('button').innerHTML='Done')) then begin
+    if (sUrl = 'main.htm#button') and ((WebView.OleObject.Document.getElementById('button').innerHTML = 'Готово') or (WebView.OleObject.Document.getElementById('button').innerHTML='Done')) then begin
       WebView.OleObject.Document.getElementById('additional').style.display:='none';
       WebView.OleObject.Document.getElementById('meta').style.display:='none';
       WebView.OleObject.Document.getElementById('memo').style.display:='none';
@@ -307,12 +316,12 @@ begin
       LoadNotes;
     end;
 
-    if (sUrl='main.htm#copy') and (WebView.OleObject.Document.getElementById('Clipbrd_value').value<>'') then begin
+    if (sUrl = 'main.htm#copy') and (WebView.OleObject.Document.getElementById('Clipbrd_value').value <> '') then begin
       Clipboard.AsText:=WebView.OleObject.Document.getElementById('Clipbrd_value').value;
       WebView.OleObject.Document.getElementById('Clipbrd_value').value:='';
     end;
 
-    if (sUrl='main.htm#button') and ((WebView.OleObject.Document.getElementById('button').innerHTML='Обновить') or (WebView.OleObject.Document.getElementById('button').innerHTML='Update')) then begin
+    if (sUrl = 'main.htm#button') and ((WebView.OleObject.Document.getElementById('button').innerHTML = 'Обновить') or (WebView.OleObject.Document.getElementById('button').innerHTML = 'Update')) then begin
       WebView.OleObject.Document.getElementById('additional').style.display:='none';
       WebView.OleObject.Document.getElementById('meta').style.display:='none';
       WebView.OleObject.Document.getElementById('memo').style.display:='none';
@@ -323,7 +332,7 @@ begin
       LoadNotes;
     end;
 
-    if (sUrl='main.htm#button') and ((WebView.OleObject.Document.getElementById('button').innerHTML='Удалить') or (WebView.OleObject.Document.getElementById('button').innerHTML='Delete')) then begin
+    if (sUrl = 'main.htm#button') and ((WebView.OleObject.Document.getElementById('button').innerHTML = 'Удалить') or (WebView.OleObject.Document.getElementById('button').innerHTML = 'Delete')) then begin
       WebView.OleObject.Document.getElementById('additional').style.display:='none';
       WebView.OleObject.Document.getElementById('meta').style.display:='none';
       WebView.OleObject.Document.getElementById('memo').style.display:='none';
@@ -334,7 +343,7 @@ begin
       LoadNotes;
     end;
 
-    if sUrl='main.htm#all' then begin
+    if sUrl = 'main.htm#all' then begin
       WebView.OleObject.Document.getElementById('additional').style.display:='none';
       WebView.OleObject.Document.getElementById('meta').style.display:='none';
       WebView.OleObject.Document.getElementById('memo').style.display:='none';
@@ -354,7 +363,7 @@ var
 begin
   sUrl:=ExtractFileName(StringReplace(url,'/','\',[rfReplaceAll]));
   if pDisp=(Sender as TWebBrowser).Application then
-    if sUrl='main.htm' then begin
+    if sUrl = 'main.htm' then begin
       Main.Visible:=true;
       WebView.OleObject.Document.getElementById('back').innerHTML:='';
       if RuLang=false then WebView.OleObject.Document.getElementById('add_btn').innerHTML:='Copy';
@@ -364,8 +373,8 @@ end;
 
 procedure TMain.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  if (WebView.OleObject.Document.getElementById('button').innerHTML='Обновить') then
-        SQLDB.ExecSQL('UPDATE Notes SET Note="'+EncodeBase64(WebView.OleObject.Document.getElementById('text').innerHTML)+'", DateTime="'+DateToStr(Date)+' '+TimeToStr(Time)+'" WHERE ID='+NoteIndex);
+  if (WebView.OleObject.Document.getElementById('button').innerHTML = 'Обновить') then
+    SQLDB.ExecSQL('UPDATE Notes SET Note="'+EncodeBase64(WebView.OleObject.Document.getElementById('text').innerHTML)+'", DateTime="'+DateToStr(Date)+' '+TimeToStr(Time)+'" WHERE ID='+NoteIndex);
   SQLDB.Free;
   Application.OnMessage:=SaveMessageHandler;
   FOleInPlaceActiveObject:=nil;
