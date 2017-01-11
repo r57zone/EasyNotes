@@ -2,7 +2,7 @@ unit Unit1;
 
 interface
 
-{eNotes 0.5.2, последнее обновление 16.12.2016
+{eNotes 0.5.1, последнее обновление 16.11.2016
 https://github.com/r57zone/eNotes}
 
 uses
@@ -153,25 +153,10 @@ begin
   if Length(Text)>CountChar-1 then Result:=Copy(Text, 1, CountChar-3)+'...';
 end;
 
-function ConvertSQLDateTime(sDate: string): string;
-var
-  tDate, tYear, tMonth: string;
-begin
-  tDate:=sDate;
-  tDate:=Copy(tDate,1, Pos(' ', tDate)-1);
-  tYear:=Copy(tDate, 1, Pos('-', tDate)-1);
-  Delete(tDate, 1, Pos('-', tDate));
-  tMonth:=Copy(tDate, 1, Pos('-', tDate)-1);
-  Delete(tDate, 1, Pos('-', tDate));
-
-  Result:=tDate+'.'+tMonth+'.'+tYear+Copy(sDate, Pos(' ', sDate), Length(sDate)-Pos(' ', sDate)+1);
-end;
-
 function MyDateTime(sDate: string): string;
 var
   mTime, nYear: string;
 begin
-  sDate:=ConvertSQLDateTime(sDate);
   mTime:=Copy(sDate, Pos(' ', sDate)+1, Length(sDate)-Pos(' ', sDate));
   nYear:=FormatDateTime('yyyy', StrToDate(Copy(sDate, 1, Pos(' ', sDate))));
   
@@ -186,7 +171,6 @@ function MyDateTime2(sDate: string): string;
 var
   mTime, MyDate, nYear: string; DaysAgo: integer;
 begin
-  sDate:=ConvertSQLDateTime(sDate);
   DaysAgo:=DaysBetween(StrToDate(Copy(sDate,1,Pos(' ',sDate)-1)), Date);
 
   mTime:=Copy(sDate, Pos(' ', sDate)+1, Length(sDate)-Pos(' ', sDate));
@@ -212,7 +196,7 @@ procedure TMain.LoadNotes;
 var
 i: integer; SQLTB: TSQLiteTable;
 begin
-  SQLTB:=SQLDB.GetTable('SELECT * FROM Notes ORDER BY datetime(DateTime) DESC');
+  SQLTB:=SQLDB.GetTable('SELECT * FROM Notes ORDER BY ID DESC');
     try
       if RuLang then
         WebView.OleObject.Document.getElementById('MainTitle').innerHTML:='Заметки ('+IntToStr(SQLTB.Count)+')'
@@ -264,7 +248,7 @@ begin
 
     WebView.OleObject.Document.getElementById('MainTitle').innerHTML:=ExtractTitle(DecodeBase64(SQLTB.FieldAsString(1)), false);
 
-    NoteDate:=Copy(ConvertSQLDateTime(SQLTB.FieldAsString(2)), 1, Pos(' ',SQLTB.FieldAsString(2))-1);
+    NoteDate:=Copy(SQLTB.FieldAsString(2),1,Pos(' ',SQLTB.FieldAsString(2))-1);
     DaysAgo:=DaysBetween(StrToDate(NoteDate), Date);
 
     if RuLang then begin
@@ -328,7 +312,7 @@ begin
       WebView.OleObject.Document.getElementById('list').style.display:='block';
       WebView.OleObject.Document.getElementById('back').innerHTML:='';
       WebView.OleObject.Document.getElementById('button').innerHTML:='+';
-      SQLDB.ExecSQL('INSERT INTO Notes (ID, Note, DateTime) values(NULL, "'+EncodeBase64(WebView.OleObject.Document.getElementById('text').innerHTML)+'", "'+FormatDateTime('yyyy-mm-dd',Date)+' '+TimeToStr(Time)+'")');
+      SQLDB.ExecSQL('INSERT INTO Notes (ID, Note, DateTime) values(NULL, "'+EncodeBase64(WebView.OleObject.Document.getElementById('text').innerHTML)+'", "'+DateToStr(Date)+' '+TimeToStr(Time)+'")');
       LoadNotes;
     end;
 
@@ -344,7 +328,7 @@ begin
       WebView.OleObject.Document.getElementById('list').style.display:='block';
       WebView.OleObject.Document.getElementById('back').innerHTML:='';
       WebView.OleObject.Document.getElementById('button').innerHTML:='+';
-      SQLDB.ExecSQL('UPDATE Notes SET Note="'+EncodeBase64(WebView.OleObject.Document.getElementById('text').innerHTML)+'", DateTime="'+FormatDateTime('yyyy-mm-dd',Date)+' '+TimeToStr(Time)+'" WHERE ID='+NoteIndex);
+      SQLDB.ExecSQL('UPDATE Notes SET Note="'+EncodeBase64(WebView.OleObject.Document.getElementById('text').innerHTML)+'", DateTime="'+DateToStr(Date)+' '+TimeToStr(Time)+'" WHERE ID='+NoteIndex);
       LoadNotes;
     end;
 
@@ -390,7 +374,7 @@ end;
 procedure TMain.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   if (WebView.OleObject.Document.getElementById('button').innerHTML = 'Обновить') then
-    SQLDB.ExecSQL('UPDATE Notes SET Note="'+EncodeBase64(WebView.OleObject.Document.getElementById('text').innerHTML)+'", DateTime="'+FormatDateTime('yyyy-mm-dd',Date)+' '+TimeToStr(Time)+'" WHERE ID='+NoteIndex);
+    SQLDB.ExecSQL('UPDATE Notes SET Note="'+EncodeBase64(WebView.OleObject.Document.getElementById('text').innerHTML)+'", DateTime="'+DateToStr(Date)+' '+TimeToStr(Time)+'" WHERE ID='+NoteIndex);
   SQLDB.Free;
   Application.OnMessage:=SaveMessageHandler;
   FOleInPlaceActiveObject:=nil;
