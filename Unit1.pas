@@ -385,15 +385,12 @@ var
   iOIPAO: IOleInPlaceActiveObject;
   Dispatch: IDispatch;
 begin
-  { exit if we don't get back a webbrowser object }
-  if WebView = nil then
+  if not Assigned(WebView) then
   begin
     Handled := False;
     Exit;
   end;
-
-  Handled:=(IsDialogMessage(WebView.Handle, Msg) = True);
-
+  Handled := (IsDialogMessage(WebView.Handle, Msg) = True);
   if (Handled) and (not WebView.Busy) then
   begin
     if FOleInPlaceActiveObject = nil then
@@ -406,12 +403,12 @@ begin
           FOleInPlaceActiveObject := iOIPAO;
       end;
     end;
-
     if FOleInPlaceActiveObject <> nil then
       if ((Msg.message = WM_KEYDOWN) or (Msg.message = WM_KEYUP)) and
-         ((Msg.wParam = VK_BACK) or (Msg.wParam = VK_LEFT) or (Msg.wParam = VK_RIGHT)) then
-        //nothing - do not pass on Backspace, Left or Right arrows
-      else
+        ((Msg.wParam = VK_BACK) or (Msg.wParam = VK_LEFT) or (Msg.wParam = VK_RIGHT)
+        or (Msg.wParam = VK_UP) or (Msg.wParam = VK_DOWN)) then begin
+        exit;
+        end;
         FOleInPlaceActiveObject.TranslateAccelerator(Msg);
   end;
 end;
