@@ -83,12 +83,18 @@ body{font-family:Segoe UI; color:#666666; background-color:#f8f8f8;}
 		document.getElementById("additional").style.display='block';
 	}
 	
-	function copy()
+	function HideSubMenu()
 	{
-		document.location='#copy';
 		document.getElementById('additional').style.display='none';
 		document.getElementById('text').style.height='482px';
+	}
+	
+	function Copy()
+	{
+		document.location='#copy';
+		HideSubMenu();
 	}	
+	
 </script>
 </head>
 <body oncontextmenu="return false">
@@ -103,9 +109,9 @@ body{font-family:Segoe UI; color:#666666; background-color:#f8f8f8;}
 <div id="meta" onselectstart="return false"><div id="DayAgo">3 дня назад</div><div id="DateNote">25 сент. 2:29</div></div>
 <div id="clear"></div>
 <div id="memo">
-<textarea onselect="CopySelect();" onkeypress="if (document.getElementById('button').innerHTML=='Удалить') document.getElementById('button').innerHTML='Обновить';if (document.getElementById('button').innerHTML=='Delete') document.getElementById('button').innerHTML='Update';" id="text"></textarea>
+<textarea onselect="CopySelect();" onkeypress="if (document.getElementById('button').innerHTML=='Удалить') document.getElementById('button').innerHTML='Обновить';if (document.getElementById('button').innerHTML=='Delete') document.getElementById('button').innerHTML='Update';HideSubMenu();" id="text"></textarea>
 <input id="Clipbrd_value" value="" type="hidden" />
 </div>
-<div id="additional" onselectstart="return false"><div onclick="copy();" id="add_btn">Копировать</div><div onclick="document.getElementById('additional').style.display='none';document.getElementById('text').style.height='482px';" id="add_btn2">↓</div></div>
+<div id="additional" onselectstart="return false"><div onclick="Copy();" id="add_btn">Копировать</div><div onclick="HideSubMenu();" id="add_btn2">↓</div></div>
 </body>
 </html>
