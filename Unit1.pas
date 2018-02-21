@@ -2,7 +2,7 @@ unit Unit1;
 
 interface
 
-{eNotes 0.5.1, последнее обновление 16.11.2016
+{eNotes 0.7, последнее обновление 21.02.2018
 https://github.com/r57zone/eNotes}
 
 uses
@@ -24,6 +24,7 @@ type
     procedure FormDeactivate(Sender: TObject);
   private
     procedure LoadNotes;
+    procedure NewNote(MemoFocus: boolean);
     procedure MessageHandler(var Msg: TMsg; var Handled: Boolean);
     { Private declarations }
   public
@@ -36,13 +37,13 @@ var
   NoteIndex: string;
   FOleInPlaceActiveObject: IOleInPlaceActiveObject;
   SaveMessageHandler: TMessageEvent;
-  RuLang: boolean;
+  ID_NEW_NOTE, ID_NOTES, ID_TODAY, ID_YESTERDAY, ID_DAYSAGO: string;
 
 implementation
 
 {$R *.dfm}
 
-function EncodeBase64(const inStr: string): string;  //sqlite_escape_string
+function EncodeBase64(const inStr: string): string;  //sqlite escape string
   function Encode_Byte(b: Byte): char;
   const
     Base64Code: string[64] =
@@ -134,46 +135,56 @@ end;
 
 procedure TMain.FormCreate(Sender: TObject);
 begin
-  if GetLocaleInformation(LOCALE_SENGLANGUAGE)='Russian' then RuLang:=true;
+  if GetLocaleInformation(LOCALE_SENGLANGUAGE) = 'Russian' then begin
+    ID_NEW_NOTE:='Новая заметка';
+    ID_NOTES:='Заметки';
+    ID_TODAY:='Сегодня';
+    ID_YESTERDAY:='Вчера';
+    ID_DAYSAGO:='дн. назад';
+  end else begin
+    ID_NEW_NOTE:='New note';
+    ID_NOTES:='Notes';
+    ID_TODAY:='Today';
+    ID_YESTERDAY:='Yesterday';
+    ID_DAYSAGO:='day ago';
+  end;
   Application.Title:=Caption;
   Main.Visible:=false;
   WebView.Silent:=true;
-  WebView.Navigate(ExtractFilePath(ParamStr(0))+'main.htm');
+  WebView.Navigate(ExtractFilePath(ParamStr(0)) + 'main.htm');
   SQLDB:=TSQLiteDatabase.Create('Notes.db');
   if not SQLDB.TableExists('notes') then
     SQLDB.ExecSQL('CREATE TABLE Notes (ID INTEGER PRIMARY KEY, Note TEXT, DateTime DATETIME)');
 end;
 
-function ExtractTitle(Text: string; InList: boolean):string;
-var
-  CountChar: integer;
+function ExtractTitle(Str: string): string;
 begin
-  if InList then CountChar:=72 else CountChar:=40;
-  Result:=Text;
-  if Length(Text)>CountChar-1 then Result:=Copy(Text, 1, CountChar-3)+'...';
+  if Pos(#10, Str) > 0 then
+    Result:=Copy(Str, 1, Pos(#10, Str) - 1)
+  else
+    Result:=Copy(Str, 1, 150);
 end;
 
-function MyDateTime(sDate: string): string;
+function NoteDateTime(sDate: string): string;
 var
   mTime, nYear: string;
 begin
-  mTime:=Copy(sDate, Pos(' ', sDate)+1, Length(sDate)-Pos(' ', sDate));
+  mTime:=Copy(sDate, Pos(' ', sDate) + 1, Length(sDate) - Pos(' ', sDate));
   nYear:=FormatDateTime('yyyy', StrToDate(Copy(sDate, 1, Pos(' ', sDate))));
   
   if nYear = FormatDateTime('yyyy', Date) then
-    Result:=FormatDateTime('d mmm.', StrToDate(Copy(sDate, 1, Pos(' ', sDate))))+' '+Copy(mTime, 1, Length(mTime)-3)
+    Result:=FormatDateTime('d mmm.', StrToDate(Copy(sDate, 1, Pos(' ', sDate)))) + ' ' + Copy(mTime, 1, Length(mTime) - 3)
   else
-    Result:=FormatDateTime('d.mm.yyyy', StrToDate(Copy(sDate, 1, Pos(' ', sDate))))+' '+Copy(mTime, 1, Length(mTime)-3);
+    Result:=FormatDateTime('d.mm.yyyy', StrToDate(Copy(sDate, 1, Pos(' ', sDate)))) + ' ' + Copy(mTime, 1, Length(mTime) - 3);
 end;
 
-
-function MyDateTime2(sDate: string): string;
+function ListDateTime(sDate: string): string;
 var
   mTime, MyDate, nYear: string; DaysAgo: integer;
 begin
-  DaysAgo:=DaysBetween(StrToDate(Copy(sDate,1,Pos(' ',sDate)-1)), Date);
+  DaysAgo:=DaysBetween(StrToDate(Copy(sDate, 1, Pos(' ', sDate) - 1)), Date);
 
-  mTime:=Copy(sDate, Pos(' ', sDate)+1, Length(sDate)-Pos(' ', sDate));
+  mTime:=Copy(sDate, Pos(' ', sDate) + 1, Length(sDate) - Pos(' ', sDate));
 
   MyDate:=FormatDateTime('d mmm.', StrToDate(Copy(sDate, 1, Pos(' ', sDate))));
 
@@ -182,8 +193,8 @@ begin
     MyDate[1]:=AnsiUpperCase(MyDate[1])[1];
   end;
 
-  if DaysAgo = 0 then MyDate:=Copy(mTime, 1, Length(mTime)-3);
-  if DaysAgo = 1 then if RuLang then MyDate:='Вчера' else MyDate:='Yesterday';
+  if DaysAgo = 0 then MyDate:=Copy(mTime, 1, Length(mTime) - 3);
+  if DaysAgo = 1 then MyDate:=ID_YESTERDAY;
 
   nYear:=FormatDateTime('yyyy', StrToDate(Copy(sDate, 1, Pos(' ', sDate))));
   if nYear <> FormatDateTime('yyyy', Date) then
@@ -197,160 +208,90 @@ var
 i: integer; SQLTB: TSQLiteTable;
 begin
   SQLTB:=SQLDB.GetTable('SELECT * FROM Notes ORDER BY ID DESC');
-    try
-      if RuLang then
-        WebView.OleObject.Document.getElementById('MainTitle').innerHTML:='Заметки ('+IntToStr(SQLTB.Count)+')'
-      else
-        WebView.OleObject.Document.getElementById('MainTitle').innerHTML:='Notes ('+IntToStr(SQLTB.Count)+')';
-      WebView.OleObject.Document.getElementById('list').innerHTML:='';
-      for i:=0 to SQLTB.Count-1 do begin
-        WebView.OleObject.Document.getElementById('list').innerHTML:=WebView.OleObject.Document.getElementById('list').innerHTML+
-        '<div onclick="document.location=''#note'+SQLTB.FieldAsString(0)+''';" id="note"><div id="title">'+ExtractTitle(DecodeBase64(SQLTB.FieldAsString(1)),true)+'</div><div id="date">'+MyDateTime2(SQLTB.FieldAsString(2))+'</div></div>';
-        SQLTB.Next;
-      end;
-    finally
-      SQLTB.Free;
+  try
+    WebView.OleObject.Document.getElementById('NotesCount').innerHTML:=ID_NOTES + ' (' + IntToStr(SQLTB.Count) + ')';
+    WebView.OleObject.Document.getElementById('items').innerHTML:='';
+    for i:=0 to SQLTB.Count - 1 do begin
+      WebView.OleObject.Document.getElementById('items').innerHTML:=WebView.OleObject.Document.getElementById('items').innerHTML +
+      '<div onclick="document.location=''#note' + SQLTB.FieldAsString(0) + ''';" id="note"><div id="title">' + ExtractTitle(DecodeBase64(SQLTB.FieldAsString(1))) + '</div><div id="date">' + ListDateTime(SQLTB.FieldAsString(2)) + '</div></div>';
+      SQLTB.Next;
     end;
+  finally
+    SQLTB.Free;
+  end;
 end;
 
 procedure TMain.WebViewBeforeNavigate2(Sender: TObject;
   const pDisp: IDispatch; var URL, Flags, TargetFrameName, PostData,
   Headers: OleVariant; var Cancel: WordBool);
 var
-  sUrl, fUrl: string; i, DaysAgo: integer; all: OleVariant;
+  sUrl: string;
+  i, DaysAgo: integer;
   NoteDate: string;
-
   SQLTB: TSQLiteTable;
 begin
-  sUrl:=ExtractFileName(StringReplace(url,'/','\',[rfReplaceAll]));
+  sUrl:=ExtractFileName(StringReplace(Url, '/', '\', [rfReplaceAll]));
 
-  if pos('main.htm',sUrl) = 0 then Cancel:=true;
+  if Pos('main.htm', sUrl) = 0 then Cancel:=true;
 
-  if pos('main.htm#note',sUrl) > 0 then begin
-    Delete(sUrl,1,pos('#note',sUrl)+4);
+  if Pos('main.htm#note', sUrl) > 0 then begin
+    Delete(sUrl, 1, Pos('#note', sUrl) + 4);
     NoteIndex:=sUrl;
-    SQLTB:=SQLDB.GetTable('SELECT ID, Note, DateTime FROM NOTES WHERE ID='+sURL);
+    SQLTB:=SQLDB.GetTable('SELECT ID, Note, DateTime FROM NOTES WHERE ID=' + sURL);
 
-    WebView.OleObject.Document.getElementById('meta').style.display:='block';
-    WebView.OleObject.Document.getElementById('memo').style.display:='block';
-    WebView.OleObject.Document.getElementById('list').style.display:='none';
-    if RuLang then
-      WebView.OleObject.Document.getElementById('button').innerHTML:='Удалить'
-    else
-      WebView.OleObject.Document.getElementById('button').innerHTML:='Delete';
+    WebView.OleObject.Document.getElementById('NoteTitle').innerHTML:=ExtractTitle(DecodeBase64(SQLTB.FieldAsString(1)));
 
-    WebView.OleObject.Document.getElementById('Clipbrd_value').value:='';
-
-    if RuLang then
-      WebView.OleObject.Document.getElementById('back').innerHTML:='<div onclick="document.location=''#all'';" id="back_btn">Назад</div>'
-    else
-      WebView.OleObject.Document.getElementById('back').innerHTML:='<div onclick="document.location=''#all'';" id="back_btn">Back</div>';
-
-    WebView.OleObject.Document.getElementById('MainTitle').innerHTML:=ExtractTitle(DecodeBase64(SQLTB.FieldAsString(1)), false);
-
-    NoteDate:=Copy(SQLTB.FieldAsString(2),1,Pos(' ',SQLTB.FieldAsString(2))-1);
+    NoteDate:=Copy(SQLTB.FieldAsString(2), 1, Pos(' ', SQLTB.FieldAsString(2)) - 1);
     DaysAgo:=DaysBetween(StrToDate(NoteDate), Date);
 
-    if RuLang then begin
+    if ID_DAYSAGO='дн. назад' then begin
 
-      if IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))] = '1' then NoteDate:=IntToStr(DaysAgo)+' день назад';
+      if IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))] = '1' then NoteDate:=IntToStr(DaysAgo) + ' день назад';
     
       if (IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))] = '2') or
       (IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))] = '3') or
-      (IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))] = '4') then NoteDate:=IntToStr(DaysAgo)+' дня назад';
+      (IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))] = '4') then NoteDate:=IntToStr(DaysAgo) + ' дня назад';
 
       if (IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))]= '5') or
       (IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))] = '6') or
       (IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))] = '7') or
       (IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))] = '8') or
       (IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))] = '9') or
-      (IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))] = '0') then NoteDate:=IntToStr(DaysAgo)+' дней назад';
+      (IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))] = '0') then NoteDate:=IntToStr(DaysAgo) + ' дней назад';
+    end else
+      NoteDate:=IntToStr(DaysAgo) + ' ' + ID_DAYSAGO;
 
-      if DaysAgo = 0 then NoteDate:='Сегодня';
-      if DaysAgo = 1 then NoteDate:='Вчера';
-    end else begin
-    
-      NoteDate:=IntToStr(DaysAgo)+' days ago';
-      if DaysAgo = 0 then NoteDate:='Today';
-      if DaysAgo = 1 then NoteDate:='Yesterday';
-    end;
+    if DaysAgo = 0 then NoteDate:=ID_TODAY;
+    if DaysAgo = 1 then NoteDate:=ID_YESTERDAY;
 
     WebView.OleObject.Document.getElementById('DayAgo').innerHTML:=NoteDate;
-    WebView.OleObject.Document.getElementById('DateNote').innerHTML:=MyDateTime(SQLTB.FieldAsString(2));
-    WebView.OleObject.Document.getElementById('text').innerHTML:=DecodeBase64(SQLTB.FieldAsString(1));
+    WebView.OleObject.Document.getElementById('DateNote').innerHTML:=NoteDateTime(SQLTB.FieldAsString(2));
+    WebView.OleObject.Document.getElementById('memo').innerHTML:=DecodeBase64(SQLTB.FieldAsString(1));
 
   end else begin
 
-    if (sUrl = 'main.htm#new') and (WebView.OleObject.Document.getElementById('button').innerHTML = '+') then begin
-      WebView.OleObject.Document.getElementById('meta').style.display:='block';
-      WebView.OleObject.Document.getElementById('memo').style.display:='block';
-      WebView.OleObject.Document.getElementById('list').style.display:='none';
-      
-      if RuLang then begin
-        WebView.OleObject.Document.getElementById('button').innerHTML:='Готово';
-        WebView.OleObject.Document.getElementById('MainTitle').innerHTML:='Заметка';
-        WebView.OleObject.Document.getElementById('DayAgo').innerHTML:='Сегодня';
-        WebView.OleObject.Document.getElementById('back').innerHTML:='<div onclick="document.location=''#all'';" id="back_btn">Назад</div>';
-      end else begin
-        WebView.OleObject.Document.getElementById('button').innerHTML:='Done';
-        WebView.OleObject.Document.getElementById('MainTitle').innerHTML:='Note';
-        WebView.OleObject.Document.getElementById('DayAgo').innerHTML:='Today';
-        WebView.OleObject.Document.getElementById('back').innerHTML:='<div onclick="document.location=''#all'';" id="back_btn">Back</div>';
+    if sUrl = 'main.htm#new' then
+      NewNote(true);
+
+    if sUrl = 'main.htm#done' then begin
+      //Add
+      if (NoteIndex = '-1') and (Trim(WebView.OleObject.Document.getElementById('memo').innerHTML) <> '') then begin
+        SQLDB.ExecSQL('INSERT INTO Notes (ID, Note, DateTime) values(NULL, "'+EncodeBase64(WebView.OleObject.Document.getElementById('memo').innerHTML)+'", "'+DateToStr(Date) + ' ' + TimeToStr(Time) + '")');
+        NewNote(false);
       end;
 
-      WebView.OleObject.Document.getElementById('text').innerHTML:='';
-      WebView.OleObject.Document.getElementById('text').focus;
-      WebView.OleObject.Document.getElementById('Clipbrd_value').value:='';
-      WebView.OleObject.Document.getElementById('DateNote').innerHTML:=FormatDateTime('d mmm. h:nn', now);
-      NoteIndex:='-1';
-    end;
-
-    if (sUrl = 'main.htm#button') and ((WebView.OleObject.Document.getElementById('button').innerHTML = 'Готово') or (WebView.OleObject.Document.getElementById('button').innerHTML='Done')) then begin
-      WebView.OleObject.Document.getElementById('additional').style.display:='none';
-      WebView.OleObject.Document.getElementById('meta').style.display:='none';
-      WebView.OleObject.Document.getElementById('memo').style.display:='none';
-      WebView.OleObject.Document.getElementById('list').style.display:='block';
-      WebView.OleObject.Document.getElementById('back').innerHTML:='';
-      WebView.OleObject.Document.getElementById('button').innerHTML:='+';
-      SQLDB.ExecSQL('INSERT INTO Notes (ID, Note, DateTime) values(NULL, "'+EncodeBase64(WebView.OleObject.Document.getElementById('text').innerHTML)+'", "'+DateToStr(Date)+' '+TimeToStr(Time)+'")');
+      //Update
+      if NoteIndex <> '-1' then
+        SQLDB.ExecSQL('UPDATE Notes SET Note="' + EncodeBase64(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", DateTime="' + DateToStr(Date) + ' ' + TimeToStr(Time) + '" WHERE ID=' + NoteIndex);
       LoadNotes;
     end;
 
-    if (sUrl = 'main.htm#copy') and (WebView.OleObject.Document.getElementById('Clipbrd_value').value <> '') then begin
-      Clipboard.AsText:=WebView.OleObject.Document.getElementById('Clipbrd_value').value;
-      WebView.OleObject.Document.getElementById('Clipbrd_value').value:='';
-    end;
-
-    if (sUrl = 'main.htm#button') and ((WebView.OleObject.Document.getElementById('button').innerHTML = 'Обновить') or (WebView.OleObject.Document.getElementById('button').innerHTML = 'Update')) then begin
-      WebView.OleObject.Document.getElementById('additional').style.display:='none';
-      WebView.OleObject.Document.getElementById('meta').style.display:='none';
-      WebView.OleObject.Document.getElementById('memo').style.display:='none';
-      WebView.OleObject.Document.getElementById('list').style.display:='block';
-      WebView.OleObject.Document.getElementById('back').innerHTML:='';
-      WebView.OleObject.Document.getElementById('button').innerHTML:='+';
-      SQLDB.ExecSQL('UPDATE Notes SET Note="'+EncodeBase64(WebView.OleObject.Document.getElementById('text').innerHTML)+'", DateTime="'+DateToStr(Date)+' '+TimeToStr(Time)+'" WHERE ID='+NoteIndex);
+    //Delete
+    if (sUrl = 'main.htm#rem') and (NoteIndex <> '-1') then begin
+      WebView.OleObject.Document.getElementById('memo').innerHTML:='';
+      SQLDB.ExecSQL('DELETE FROM Notes WHERE ID=' + NoteIndex);
       LoadNotes;
-    end;
-
-    if (sUrl = 'main.htm#button') and ((WebView.OleObject.Document.getElementById('button').innerHTML = 'Удалить') or (WebView.OleObject.Document.getElementById('button').innerHTML = 'Delete')) then begin
-      WebView.OleObject.Document.getElementById('additional').style.display:='none';
-      WebView.OleObject.Document.getElementById('meta').style.display:='none';
-      WebView.OleObject.Document.getElementById('memo').style.display:='none';
-      WebView.OleObject.Document.getElementById('list').style.display:='block';
-      WebView.OleObject.Document.getElementById('button').innerHTML:='+';
-      WebView.OleObject.Document.getElementById('back').innerHTML:='';
-      SQLDB.ExecSQL('DELETE FROM Notes WHERE ID='+NoteIndex);
-      LoadNotes;
-    end;
-
-    if sUrl = 'main.htm#all' then begin
-      WebView.OleObject.Document.getElementById('additional').style.display:='none';
-      WebView.OleObject.Document.getElementById('meta').style.display:='none';
-      WebView.OleObject.Document.getElementById('memo').style.display:='none';
-      WebView.OleObject.Document.getElementById('list').style.display:='block';
-      WebView.OleObject.Document.getElementById('button').innerHTML:='+';
-      WebView.OleObject.Document.getElementById('back').innerHTML:='';
-      LoadNotes;
+      NewNote(false);
     end;
 
   end;
@@ -361,20 +302,19 @@ procedure TMain.WebViewDocumentComplete(Sender: TObject;
 var
   sUrl: string;
 begin
-  sUrl:=ExtractFileName(StringReplace(url,'/','\',[rfReplaceAll]));
+  sUrl:=ExtractFileName(StringReplace(Url, '/', '\', [rfReplaceAll]));
   if pDisp=(Sender as TWebBrowser).Application then
     if sUrl = 'main.htm' then begin
       Main.Visible:=true;
-      WebView.OleObject.Document.getElementById('back').innerHTML:='';
-      if RuLang=false then WebView.OleObject.Document.getElementById('add_btn').innerHTML:='Copy';
       LoadNotes;
+      NewNote(false);
     end;
 end;
 
 procedure TMain.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  if (WebView.OleObject.Document.getElementById('button').innerHTML = 'Обновить') then
-    SQLDB.ExecSQL('UPDATE Notes SET Note="'+EncodeBase64(WebView.OleObject.Document.getElementById('text').innerHTML)+'", DateTime="'+DateToStr(Date)+' '+TimeToStr(Time)+'" WHERE ID='+NoteIndex);
+  if NoteIndex <> '-1' then
+    SQLDB.ExecSQL('UPDATE Notes SET Note="' + EncodeBase64(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", DateTime="' + DateToStr(Date) + ' ' + TimeToStr(Time) + '" WHERE ID=' + NoteIndex);
   SQLDB.Free;
   Application.OnMessage:=SaveMessageHandler;
   FOleInPlaceActiveObject:=nil;
@@ -385,8 +325,7 @@ var
   iOIPAO: IOleInPlaceActiveObject;
   Dispatch: IDispatch;
 begin
-  if not Assigned(WebView) then
-  begin
+  if not Assigned(WebView) then begin
     Handled := False;
     Exit;
   end;
@@ -406,9 +345,7 @@ begin
     if FOleInPlaceActiveObject <> nil then
       if ((Msg.message = WM_KEYDOWN) or (Msg.message = WM_KEYUP)) and
         ((Msg.wParam = VK_BACK) or (Msg.wParam = VK_LEFT) or (Msg.wParam = VK_RIGHT)
-        or (Msg.wParam = VK_UP) or (Msg.wParam = VK_DOWN)) then begin
-        exit;
-        end;
+        or (Msg.wParam = VK_UP) or (Msg.wParam = VK_DOWN)) then exit;
         FOleInPlaceActiveObject.TranslateAccelerator(Msg);
   end;
 end;
@@ -423,5 +360,22 @@ procedure TMain.FormDeactivate(Sender: TObject);
 begin
   Application.OnMessage:=SaveMessageHandler;
 end;
+
+procedure TMain.NewNote(MemoFocus: boolean);
+begin
+  WebView.OleObject.Document.getElementById('NoteTitle').innerHTML:=ID_NEW_NOTE;
+  WebView.OleObject.Document.getElementById('DayAgo').innerHTML:=ID_TODAY;
+  WebView.OleObject.Document.getElementById('DateNote').innerHTML:=FormatDateTime('d mmm. h:nn', Now);
+  WebView.OleObject.Document.getElementById('memo').innerHTML:='';
+  if MemoFocus then
+    WebView.OleObject.Document.getElementById('memo').focus;
+  NoteIndex:='-1';
+end;
+
+initialization
+ OleInitialize(nil);
+
+finalization
+ OleUninitialize;
 
 end.

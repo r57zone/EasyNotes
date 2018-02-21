@@ -2,116 +2,72 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="description" content="eNotes"/>
-<title>Заметки</title>
+<meta name="description" content="Описание"/>
+<title>Заголовок</title>
 <link rel="stylesheet" href="all.css">
 <style type="text/css">
 html,body{padding:0;margin:0;}
 body{font-family:Segoe UI; color:#666666; background-color:#f8f8f8;}
-#clear{clear:both;float:none;height:0;}
+#clear{clear:both;float:none; height:0;}
 
-#header{background-color:#017d93; text-align:center; height:50px; color:white; border-bottom:solid 1px #005665; font-size: 16px; cursor: default;}
-#header #back{float:left; width:120px; height:46px;}
-#header #back_btn{margin:7px 10px; padding:7px 14px; cursor:pointer; background-color:#007185; }
-#header #back_btn:hover{background-color:#008aa3;}
-#header #MainTitle{display: inline-block; margin-top:10px; font-size:20px;}
-#header #button{margin:7px 10px; padding:7px 14px; cursor:pointer; background-color:#007185; }
-#header #button:hover{background-color:#008aa3;}
+#wrapper{position:fixed; width:100%;height:100%;}
 
-#list{overflow:auto; height:528px; cursor:default; font-size:16px; color:black;}
-#list #note{cursor:pointer; height:40px; border-bottom:1px solid #ededed;}
-#list #note:hover{background-color:#ededed;}
-#list #note #title{float:left; margin:8px;}
-#list #note #date{float:right; color:#454545; font-size:10pt; margin:10px;}
+#panel{width:100%; height:40px; overflow:hidden; background-color:#017d93; color:white; text-align:center; cursor:default;}
+#btn{width:20px; height:20px; padding:9px 10px; cursor:pointer;}
+#btn:hover{opacity:0.7;}
 
-#meta{display:none; color:#ac5942; margin:8px 10px; font-size:11pt; cursor:default;}
-#meta #DayAgo{float:left; font-weight:bold;}
-#meta #DateNote{float:right;}
+#panel .title{display:inline-block; max-width:60%; margin-top:7px; font-size:16px; font-weight:400px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
 
-#memo{display:none; margin-top:6px; color:#ac5942; background-image: url(bg.png);}
-#memo textarea{background-color:transparent; font-family:Segoe UI; font-size: 16px; border:none; overflow:auto; width: 702px; height: inherit; line-height: 40px; margin: 0 8px; height:482px;}
+#list{float:left; width:33%; height:100%; font-size:14px; color:black;}
+#list #items{overflow:auto; border-right: 1px solid #d5d5d5;}
+#list #items #note{cursor:pointer; height:40px; border-bottom:1px solid #ededed; overflow:hidden;}
+#list #items #note:hover{background-color:#ededed;}
+#list #items #note #title{float:left; margin:10px 4px 10px 8px; width:48%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+#list #items #note #date{float:right; color:#454545; font-size:10pt; margin:10px 10px 10px 4px;}
 
-#additional{display:none; position:absolute; height:50px; width:100%; border-top:solid 1px #cecece; background-color:#dadada;}
-#add_btn, #add_btn2{float:left; margin:6px 0 6px 10px; padding:7px 14px; cursor:pointer; background-color:#b9b8b8; color:black;}
-#add_btn:hover, #add_btn2:hover{background-color:#afafaf;}
-#add_btn2{float:right; margin:6px 10px 6px 0;}
+#editor{float:right; width:67%; height:100%;}
+#meta{color:#ac5942; height:38px; width:100%; font-size:14px; cursor:default; overflow:hidden; white-space:nowrap;}
+#meta #DayAgo{float:left; font-weight:bold; margin:8px 0 0 12px;}
+#meta #DateNote{float:right; margin:8px 12px 0 0;}
+
+#editor #memo{display:block; width:96%; margin:0% 2%; background-color:transparent; font-family:Segoe UI; font-size: 14px; border:none; overflow:auto; }
 </style>
-<script type="text/javascript">  
-	function btn()
-	{
-		switch (document.getElementById("button").innerHTML) {
-			case "+" :
-				document.location='#new';
-				break;
-			default:
-				document.location='#button';
-				break;
-		}
-	
-	}
-	
-	function GetSelectedText(){
-		var userSelection, ta;
-		if (window.getSelection && document.activeElement){
-			if (document.activeElement.nodeName == "TEXTAREA" ||
-			(document.activeElement.nodeName == "INPUT" &&
-			document.activeElement.getAttribute("type").toLowerCase() == "text")){
-				ta = document.activeElement;
-				userSelection = ta.value.substring(ta.selectionStart, ta.selectionEnd);
-			} else {
-				userSelection = window.getSelection();
-			}
-		return userSelection.toString();
-		} else {
-		// all browsers, except IE before version 9
-		if (document.getSelection){       
-			userSelection = document.getSelection();
-			return userSelection.toString();
-		}
-		// IE below version 9
-		else if (document.selection){
-			userSelection = document.selection.createRange();
-			return userSelection.text;
-			}	
-		}
-	}
-	
-	function CopySelect()
-	{
-		document.getElementById("Clipbrd_value").value=GetSelectedText();
-		document.getElementById("text").style.height='442px';
-		document.getElementById("additional").style.display='block';
-	}
-	
-	function HideSubMenu()
-	{
-		document.getElementById('additional').style.display='none';
-		document.getElementById('text').style.height='482px';
-	}
-	
-	function Copy()
-	{
-		document.location='#copy';
-		HideSubMenu();
-	}	
-	
+<script type="text/javascript"> 
+function UpdateSizes(){
+	if (window.innerHeight - 40 > 0)
+		document.getElementById("items").style.height=window.innerHeight - 40 + 'px';
+	if (window.innerHeight - 82 > 0)
+		document.getElementById("memo").style.height=window.innerHeight - 82 + 'px';
+}
+ 
+document.addEventListener("DOMContentLoaded", function(event) {
+	UpdateSizes();
+});
+
+window.onresize = function(event) {
+	UpdateSizes();
+}
 </script>
 </head>
 <body oncontextmenu="return false">
-<div id="header" onselectstart="return false">
-<div id="back"><div onclick="document.location='#all';" id="back_btn">Назад</div></div>
-<div id="MainTitle">Заметки (9)</div>
-<div style="float:right; width:120px; height:46px;"><div onclick="btn();" id="button">+</div></div>
+<div id="wrapper">
+	<div id="list" onselectstart="return false">
+		<div id="panel">
+			<div id="btn" class="add" style="float:left;" onclick="document.location='#new';"><img src="new.png" /></div>
+			<div class="title" id="NotesCount">Заметки (3)</div>
+			<div id="btn" style="float:right;cursor:default;"></div>
+		</div>
+		<div id="items">
+			<div onclick="document.location='#note1';" id="note"><div id="title">Пример</div><div id="date">17:55</div></div>
+		</div>
+	</div>
+	
+	<div id="editor">
+		<div id="panel" onselectstart="return false"><div id="btn" style="float:left;" onclick="document.location='#rem';"><img src="rm.png" /></div><div class="title" id="NoteTitle">Заметка</div><div id="btn" style="float:right;" onclick="document.location='#done';"><img src="done.png" /></div></div>
+		<div id="meta" onselectstart="return false"><div id="DayAgo">3 дня назад</div><div id="DateNote">25 сент. 2:29</div></div>
+		<div id="clear"></div>
+		<textarea id="memo">Текст</textarea>
+	</div>
 </div>
-<div id="list" onselectstart="return false">
-<div onclick="document.location='#note1';" id="note"><div id="title">Пример</div><div id="date">17:55</div></div>
-</div>
-<div id="meta" onselectstart="return false"><div id="DayAgo">3 дня назад</div><div id="DateNote">25 сент. 2:29</div></div>
-<div id="clear"></div>
-<div id="memo">
-<textarea onselect="CopySelect();" onkeypress="if (document.getElementById('button').innerHTML=='Удалить') document.getElementById('button').innerHTML='Обновить';if (document.getElementById('button').innerHTML=='Delete') document.getElementById('button').innerHTML='Update';HideSubMenu();" id="text"></textarea>
-<input id="Clipbrd_value" value="" type="hidden" />
-</div>
-<div id="additional" onselectstart="return false"><div onclick="Copy();" id="add_btn">Копировать</div><div onclick="HideSubMenu();" id="add_btn2">↓</div></div>
 </body>
 </html>
