@@ -1,27 +1,14 @@
-# eNotes (Ru)
-Приложение для заметок.<br>
+[![RU](https://user-images.githubusercontent.com/9499881/27683795-5b0fbac6-5cd8-11e7-929c-057833e01fb1.png)](https://github.com/r57zone/eNotes/blob/master/README.md) 
+[![EN](https://user-images.githubusercontent.com/9499881/33184537-7be87e86-d096-11e7-89bb-f3286f752bc6.png)](https://github.com/r57zone/eNotes/blob/master/README.EN.md) 
+# eNotes
+Приложение для заметок.
 
-## Скриншоты
-![](https://cloud.githubusercontent.com/assets/9499881/19200091/334e171a-8cd8-11e6-822a-3af4807a9709.jpg)<br>
-![](https://cloud.githubusercontent.com/assets/9499881/19200094/33668886-8cd8-11e6-9e8a-981e0ec86157.jpg)
+## Скриншот
+![](https://user-images.githubusercontent.com/9499881/36497289-50808284-1754-11e8-9036-5fb93489a5c0.PNG)
 
 ## Загрузка
->Версия для Windows XP, ReactOS, Windows 7, Windows 8.1, Windows 10.<br>
+>Версия для Windows 7, Windows 8.1, Windows 10.<br>
 **[Загрузить](https://github.com/r57zone/eNotes/releases)**
 
 ## Обратная связь
 `r57zone[собака]gmail.com`
-
-# eNotes (En)
-Application for notes.
-
-## Screenshots
-![](https://cloud.githubusercontent.com/assets/9499881/19200092/335e9216-8cd8-11e6-93fa-5a9f1531ef9d.jpg)<br>
-![](https://cloud.githubusercontent.com/assets/9499881/19200093/33650f60-8cd8-11e6-8aa0-478a3c7566b5.jpg)
-
-## Download
->Version for Windows XP, ReactOS, Windows 7, Windows 8.1, Windows 10.<br>
-**[Download](https://github.com/r57zone/eNotes/releases)**
-
-## Feedback
-`r57zone[at]gmail.com`
