@@ -31,36 +31,20 @@ scrollbar-darkshadow-color: #dedede;
 
 #panel .title{display:inline-block; max-width:60%; margin-top:7px; font-size:16px; font-weight:400px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
 
-#list{float:left; width:33%; height:100%; font-size:14px; color:black;}
-#list #items{overflow:auto; border-right: 1px solid #d5d5d5;}
+#list{float:left; width:37%; height:100%; font-size:14px; color:black;}
+#list #items{height:calc(100% - 40px); overflow:auto; border-right: 1px solid #d5d5d5;}
 #list #items #note{cursor:pointer; height:40px; border-bottom:1px solid #ededed; overflow:hidden;}
 #list #items #note:hover{background-color:#ededed;}
-#list #items #note #title{float:left; margin:10px 4px 10px 8px; width:48%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-#list #items #note #date{float:right; color:#454545; font-size:10pt; margin:10px 10px 10px 4px;}
+#list #items #note #title{float:left; width:calc(100% - 130px); margin:10px 0 0 8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+#list #items #note #date{float:right; width:90px; margin:10px 10px 0 0; color:#454545; font-size:10pt; text-align:right;}
 
-#editor{float:right; width:67%; height:100%;}
+#editor{float:right; width:63%; height:100%;}
 #meta{color:#ac5942; height:38px; width:100%; font-size:14px; cursor:default; overflow:hidden; white-space:nowrap;}
 #meta #DayAgo{float:left; font-weight:bold; margin:8px 0 0 12px;}
 #meta #DateNote{float:right; margin:8px 12px 0 0;}
 
-#editor #memo{display:block; width:96%; margin:0% 2%; background-color:transparent; font-family:Segoe UI; font-size: 14px; border:none; overflow:auto; }
+#editor #memo{display:block; width:calc(100% - 24px); height:calc(100% - 78px); padding:0 12px; background-color:transparent; font-family:Segoe UI; font-size: 14px; border:none; overflow:auto; }
 </style>
-<script type="text/javascript"> 
-function UpdateSizes(){
-	if (window.innerHeight - 40 > 0)
-		document.getElementById("items").style.height=window.innerHeight - 40 + 'px';
-	if (window.innerHeight - 82 > 0)
-		document.getElementById("memo").style.height=window.innerHeight - 82 + 'px';
-}
- 
-document.addEventListener("DOMContentLoaded", function(event) {
-	UpdateSizes();
-});
-
-window.onresize = function(event) {
-	UpdateSizes();
-}
-</script>
 </head>
 <body oncontextmenu="return false">
 <div id="wrapper">
@@ -71,7 +55,10 @@ window.onresize = function(event) {
 			<div id="btn" style="float:right;cursor:default;"></div>
 		</div>
 		<div id="items">
-			<div onclick="document.location='#note1';" id="note"><div id="title">Пример</div><div id="date">17:55</div></div>
+			<div onclick="document.location='#note1';" id="note">
+				<div id="title">Заголовок</div>
+				<div id="date">28 сен. 2018</div>
+			</div>
 		</div>
 	</div>
 	
