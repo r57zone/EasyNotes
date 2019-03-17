@@ -2,13 +2,13 @@ unit Unit1;
 
 interface
 
-{eNotes 0.7, последнее обновление 21.02.2018
+{eNotes 0.7.1, последнее обновление 17.03.2019
 https://github.com/r57zone/eNotes}
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, OleCtrls, ExtCtrls, StdCtrls, SQLite3, SQLiteTable3, SHDocVw, ActiveX,
-  DateUtils, ClipBRD;
+  DateUtils, IniFiles;
 
 type
   TMain = class(TForm)
@@ -34,7 +34,7 @@ type
 var
   Main: TMain;
   SQLDB: TSQLiteDatabase;
-  NoteIndex: string;
+  NoteIndex, LatestNote: string;
   FOleInPlaceActiveObject: IOleInPlaceActiveObject;
   SaveMessageHandler: TMessageEvent;
   ID_NEW_NOTE, ID_NOTES, ID_TODAY, ID_YESTERDAY, ID_DAYSAGO: string;
@@ -43,84 +43,26 @@ implementation
 
 {$R *.dfm}
 
-function EncodeBase64(const inStr: string): string;  //sqlite escape string
-  function Encode_Byte(b: Byte): char;
-  const
-    Base64Code: string[64] =
-      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-  begin
-    Result := Base64Code[(b and $3F)+1];
-  end;
-
+function StrToCharCodes(Str: string): string;
 var
-  i: Integer;
+  i: integer;
 begin
-  i := 1;
-  Result := '';
-  while i <= Length(InStr) do
-  begin
-    Result := Result + Encode_Byte(Byte(inStr[i]) shr 2);
-    Result := Result + Encode_Byte((Byte(inStr[i]) shl 4) or (Byte(inStr[i+1]) shr 4));
-    if i+1 <= Length(inStr) then
-      Result := Result + Encode_Byte((Byte(inStr[i+1]) shl 2) or (Byte(inStr[i+2]) shr 6))
-    else
-      Result := Result + '=';
-    if i+2 <= Length(inStr) then
-      Result := Result + Encode_Byte(Byte(inStr[i+2]))
-    else
-      Result := Result + '=';
-    Inc(i, 3);
-  end;
+  Result:='';
+  for i:=1 to Length(Str) do
+    Result:=Result + 'x' + IntToStr( Ord( Str[i] ) );
 end;
 
-function DecodeBase64(const CinLine: string): string;
-const
-  RESULT_ERROR = -2;
+function CharCodesToStr(Str: string): string;
 var
-  inLineIndex: Integer;
-  c: Char;
-  x: SmallInt;
-  c4: Word;
-  StoredC4: array[0..3] of SmallInt;
-  InLineLength: Integer;
+  i: integer;
 begin
-  Result := '';
-  inLineIndex := 1;
-  c4 := 0;
-  InLineLength := Length(CinLine);
-
-  while inLineIndex <= InLineLength do
-  begin
-    while (inLineIndex <= InLineLength) and (c4 < 4) do
-    begin
-      c := CinLine[inLineIndex];
-      case c of
-        '+'     : x := 62;
-        '/'     : x := 63;
-        '0'..'9': x := Ord(c) - (Ord('0')-52);
-        '='     : x := -1;
-        'A'..'Z': x := Ord(c) - Ord('A');
-        'a'..'z': x := Ord(c) - (Ord('a')-26);
-      else
-        x := RESULT_ERROR;
-      end;
-      if x <> RESULT_ERROR then
-      begin
-        StoredC4[c4] := x;
-        Inc(c4);
-      end;
-      Inc(inLineIndex);
-    end;
-
-    if c4 = 4 then
-    begin
-      c4 := 0;
-      Result := Result + Char((StoredC4[0] shl 2) or (StoredC4[1] shr 4));
-      if StoredC4[2] = -1 then Exit;
-      Result := Result + Char((StoredC4[1] shl 4) or (StoredC4[2] shr 2));
-      if StoredC4[3] = -1 then Exit;
-      Result := Result + Char((StoredC4[2] shl 6) or (StoredC4[3]));
-    end;
+  Result:='';
+  if Str[1] <> 'x' then Exit;
+  Delete(Str, 1, 1);
+  Str:=Str + 'x';
+  while Pos('x', Str) > 0 do begin
+    Result:=Result + Chr( StrToIntDef ( Copy( Str, 1, Pos('x', Str) - 1), 0 ) );
+    Delete(Str, 1, Pos('x', Str));
   end;
 end;
 
@@ -134,7 +76,13 @@ begin
 end;
 
 procedure TMain.FormCreate(Sender: TObject);
+var
+  Ini: TIniFile;
 begin
+  Ini:=TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Config.ini');
+  Width:=Ini.ReadInteger('Main', 'Width', Width);
+  Height:=Ini.ReadInteger('Main', 'Height', Height);
+  Ini.Free;
   if GetLocaleInformation(LOCALE_SENGLANGUAGE) = 'Russian' then begin
     ID_NEW_NOTE:='Новая заметка';
     ID_NOTES:='Заметки';
@@ -213,7 +161,7 @@ begin
     WebView.OleObject.Document.getElementById('items').innerHTML:='';
     for i:=0 to SQLTB.Count - 1 do begin
       WebView.OleObject.Document.getElementById('items').innerHTML:=WebView.OleObject.Document.getElementById('items').innerHTML +
-      '<div onclick="document.location=''#note' + SQLTB.FieldAsString(0) + ''';" id="note"><div id="title">' + ExtractTitle(DecodeBase64(SQLTB.FieldAsString(1))) + '</div><div id="date">' + ListDateTime(SQLTB.FieldAsString(2)) + '</div></div>';
+      '<div onclick="document.location=''#note' + SQLTB.FieldAsString(0) + ''';" id="note"><div id="title">' + ExtractTitle(CharCodesToStr(SQLTB.FieldAsString(1))) + '</div><div id="date">' + ListDateTime(SQLTB.FieldAsString(2)) + '</div></div>';
       SQLTB.Next;
     end;
   finally
@@ -239,7 +187,8 @@ begin
     NoteIndex:=sUrl;
     SQLTB:=SQLDB.GetTable('SELECT ID, Note, DateTime FROM NOTES WHERE ID=' + sURL);
 
-    WebView.OleObject.Document.getElementById('NoteTitle').innerHTML:=ExtractTitle(DecodeBase64(SQLTB.FieldAsString(1)));
+    WebView.OleObject.Document.getElementById('NoteTitle').innerHTML:=ExtractTitle(CharCodesToStr(SQLTB.FieldAsString(1)));
+    LatestNote:=CharCodesToStr(SQLTB.FieldAsString(1));
 
     NoteDate:=Copy(SQLTB.FieldAsString(2), 1, Pos(' ', SQLTB.FieldAsString(2)) - 1);
     DaysAgo:=DaysBetween(StrToDate(NoteDate), Date);
@@ -266,7 +215,7 @@ begin
 
     WebView.OleObject.Document.getElementById('DayAgo').innerHTML:=NoteDate;
     WebView.OleObject.Document.getElementById('DateNote').innerHTML:=NoteDateTime(SQLTB.FieldAsString(2));
-    WebView.OleObject.Document.getElementById('memo').innerHTML:=DecodeBase64(SQLTB.FieldAsString(1));
+    WebView.OleObject.Document.getElementById('memo').innerHTML:=CharCodesToStr(SQLTB.FieldAsString(1));
 
   end else begin
 
@@ -276,13 +225,13 @@ begin
     if sUrl = 'main.htm#done' then begin
       //Add
       if (NoteIndex = '-1') and (Trim(WebView.OleObject.Document.getElementById('memo').innerHTML) <> '') then begin
-        SQLDB.ExecSQL('INSERT INTO Notes (ID, Note, DateTime) values(NULL, "'+EncodeBase64(WebView.OleObject.Document.getElementById('memo').innerHTML)+'", "'+DateToStr(Date) + ' ' + TimeToStr(Time) + '")');
-        NewNote(false);
+        SQLDB.ExecSQL('INSERT INTO Notes (ID, Note, DateTime) values(NULL, "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML)+'", "'+DateToStr(Date) + ' ' + TimeToStr(Time) + '")');
+        LoadNotes;
       end;
 
       //Update
-      if NoteIndex <> '-1' then
-        SQLDB.ExecSQL('UPDATE Notes SET Note="' + EncodeBase64(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", DateTime="' + DateToStr(Date) + ' ' + TimeToStr(Time) + '" WHERE ID=' + NoteIndex);
+      if (NoteIndex <> '-1') and (Trim(LatestNote) <> Trim(WebView.OleObject.Document.getElementById('memo').innerHTML)) then
+        SQLDB.ExecSQL('UPDATE Notes SET Note="' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", DateTime="' + DateToStr(Date) + ' ' + TimeToStr(Time) + '" WHERE ID=' + NoteIndex);
       LoadNotes;
     end;
 
@@ -312,9 +261,23 @@ begin
 end;
 
 procedure TMain.FormClose(Sender: TObject; var Action: TCloseAction);
+var
+  Ini: TIniFile;
 begin
-  if NoteIndex <> '-1' then
-    SQLDB.ExecSQL('UPDATE Notes SET Note="' + EncodeBase64(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", DateTime="' + DateToStr(Date) + ' ' + TimeToStr(Time) + '" WHERE ID=' + NoteIndex);
+  Ini:=TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Config.ini');
+  Ini.WriteInteger('Main', 'Width', Width);
+  Ini.WriteInteger('Main', 'Height', Height);
+  Ini.Free;
+
+  //Add
+  if (NoteIndex = '-1') and (Trim(WebView.OleObject.Document.getElementById('memo').innerHTML) <> '') then begin
+    SQLDB.ExecSQL('INSERT INTO Notes (ID, Note, DateTime) values(NULL, "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML)+'", "'+DateToStr(Date) + ' ' + TimeToStr(Time) + '")');
+  end;
+
+  //Update
+  if (NoteIndex <> '-1') and (Trim(LatestNote) <> Trim(WebView.OleObject.Document.getElementById('memo').innerHTML)) then
+    SQLDB.ExecSQL('UPDATE Notes SET Note="' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", DateTime="' + DateToStr(Date) + ' ' + TimeToStr(Time) + '" WHERE ID=' + NoteIndex);
+
   SQLDB.Free;
   Application.OnMessage:=SaveMessageHandler;
   FOleInPlaceActiveObject:=nil;
@@ -370,6 +333,7 @@ begin
   if MemoFocus then
     WebView.OleObject.Document.getElementById('memo').focus;
   NoteIndex:='-1';
+  LatestNote:='';
 end;
 
 initialization
