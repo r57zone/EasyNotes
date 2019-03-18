@@ -43,6 +43,16 @@ implementation
 
 {$R *.dfm}
 
+//TimeStamp UTC - 0
+function GetTimeStamp: int64;
+var
+ SystemTime: TSystemTime;
+begin
+  GetSystemTime(SystemTime);
+  with SystemTime do
+    Result:=DateTimeToUNIX(EncodeDate(wYear, wMonth, wDay) + EncodeTime(wHour, wMinute, wSecond, wMilliseconds));
+end;
+
 function StrToCharCodes(Str: string): string;
 var
   i: integer;
@@ -102,7 +112,7 @@ begin
   WebView.Navigate(ExtractFilePath(ParamStr(0)) + 'main.htm');
   SQLDB:=TSQLiteDatabase.Create('Notes.db');
   if not SQLDB.TableExists('notes') then
-    SQLDB.ExecSQL('CREATE TABLE Notes (ID INTEGER PRIMARY KEY, Note TEXT, DateTime DATETIME)');
+    SQLDB.ExecSQL('CREATE TABLE Notes (ID TIMESTAMP, Note TEXT, DateTime TIMESTAMP)');
 end;
 
 function ExtractTitle(Str: string): string;
@@ -117,9 +127,11 @@ function NoteDateTime(sDate: string): string;
 var
   mTime, nYear: string;
 begin
+  sDate:=DateTimeToStr(UNIXToDateTime(StrToInt64(sDate))); //ѕеревод TimeStamp в DateTimeStr
+
   mTime:=Copy(sDate, Pos(' ', sDate) + 1, Length(sDate) - Pos(' ', sDate));
   nYear:=FormatDateTime('yyyy', StrToDate(Copy(sDate, 1, Pos(' ', sDate))));
-  
+
   if nYear = FormatDateTime('yyyy', Date) then
     Result:=FormatDateTime('d mmm.', StrToDate(Copy(sDate, 1, Pos(' ', sDate)))) + ' ' + Copy(mTime, 1, Length(mTime) - 3)
   else
@@ -130,6 +142,8 @@ function ListDateTime(sDate: string): string;
 var
   mTime, MyDate, nYear: string; DaysAgo: integer;
 begin
+  sDate:=DateTimeToStr(UNIXToDateTime(StrToInt64(sDate))); //ѕеревод TimeStamp в DateTimeStr
+
   DaysAgo:=DaysBetween(StrToDate(Copy(sDate, 1, Pos(' ', sDate) - 1)), Date);
 
   mTime:=Copy(sDate, Pos(' ', sDate) + 1, Length(sDate) - Pos(' ', sDate));
@@ -155,13 +169,13 @@ procedure TMain.LoadNotes;
 var
 i: integer; SQLTB: TSQLiteTable;
 begin
-  SQLTB:=SQLDB.GetTable('SELECT * FROM Notes ORDER BY ID DESC');
+  SQLTB:=SQLDB.GetTable('SELECT * FROM Notes ORDER BY DateTime DESC');
   try
     WebView.OleObject.Document.getElementById('NotesCount').innerHTML:=ID_NOTES + ' (' + IntToStr(SQLTB.Count) + ')';
     WebView.OleObject.Document.getElementById('items').innerHTML:='';
     for i:=0 to SQLTB.Count - 1 do begin
       WebView.OleObject.Document.getElementById('items').innerHTML:=WebView.OleObject.Document.getElementById('items').innerHTML +
-      '<div onclick="document.location=''#note' + SQLTB.FieldAsString(0) + ''';" id="note"><div id="title">' + ExtractTitle(CharCodesToStr(SQLTB.FieldAsString(1))) + '</div><div id="date">' + ListDateTime(SQLTB.FieldAsString(2)) + '</div></div>';
+      '<div onclick="document.location=''#note' + SQLTB.FieldAsString(0) + ''';" id="note"><div id="title">' + ExtractTitle(CharCodesToStr(SQLTB.FieldAsString(1))) + '</div><div id="date">' + ListDateTime(SQLTB.FieldAsString(2))  + '</div></div>';
       SQLTB.Next;
     end;
   finally
@@ -175,8 +189,9 @@ procedure TMain.WebViewBeforeNavigate2(Sender: TObject;
 var
   sUrl: string;
   i, DaysAgo: integer;
-  NoteDate: string;
+  NoteDate, sDate: string;
   SQLTB: TSQLiteTable;
+  CurTimeStamp: int64;
 begin
   sUrl:=ExtractFileName(StringReplace(Url, '/', '\', [rfReplaceAll]));
 
@@ -190,7 +205,8 @@ begin
     WebView.OleObject.Document.getElementById('NoteTitle').innerHTML:=ExtractTitle(CharCodesToStr(SQLTB.FieldAsString(1)));
     LatestNote:=CharCodesToStr(SQLTB.FieldAsString(1));
 
-    NoteDate:=Copy(SQLTB.FieldAsString(2), 1, Pos(' ', SQLTB.FieldAsString(2)) - 1);
+    sDate:=DateTimeToStr(UNIXToDateTime(StrToInt64(SQLTB.FieldAsString(2)))); //ѕеревод TimeStamp в DateTimeStr
+    NoteDate:=Copy(sDate, 1, Pos(' ', sDate) - 1);
     DaysAgo:=DaysBetween(StrToDate(NoteDate), Date);
 
     if ID_DAYSAGO='дн. назад' then begin
@@ -223,15 +239,19 @@ begin
       NewNote(true);
 
     if sUrl = 'main.htm#done' then begin
+
       //Add
       if (NoteIndex = '-1') and (Trim(WebView.OleObject.Document.getElementById('memo').innerHTML) <> '') then begin
-        SQLDB.ExecSQL('INSERT INTO Notes (ID, Note, DateTime) values(NULL, "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML)+'", "'+DateToStr(Date) + ' ' + TimeToStr(Time) + '")');
+        CurTimeStamp:=GetTimeStamp;
+        SQLDB.ExecSQL('INSERT INTO Notes (ID, Note, DateTime) values("' + IntToStr(CurTimeStamp) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML)+'", "' + IntToStr(DateTimeToUnix(Now)) + '")');
+        NoteIndex:=IntToStr(CurTimeStamp); //ƒл€ того, чтобы последн€€ запись не создавалась снова и снова
+        LatestNote:=WebView.OleObject.Document.getElementById('memo').innerHTML;
         LoadNotes;
       end;
 
       //Update
       if (NoteIndex <> '-1') and (Trim(LatestNote) <> Trim(WebView.OleObject.Document.getElementById('memo').innerHTML)) then
-        SQLDB.ExecSQL('UPDATE Notes SET Note="' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", DateTime="' + DateToStr(Date) + ' ' + TimeToStr(Time) + '" WHERE ID=' + NoteIndex);
+        SQLDB.ExecSQL('UPDATE Notes SET Note="' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", DateTime="' + IntToStr(DateTimeToUnix(Now)) + '" WHERE ID=' + NoteIndex);
       LoadNotes;
     end;
 
@@ -256,7 +276,7 @@ begin
     if sUrl = 'main.htm' then begin
       Main.Visible:=true;
       LoadNotes;
-      NewNote(false);
+      NewNote(true);
     end;
 end;
 
@@ -270,13 +290,12 @@ begin
   Ini.Free;
 
   //Add
-  if (NoteIndex = '-1') and (Trim(WebView.OleObject.Document.getElementById('memo').innerHTML) <> '') then begin
-    SQLDB.ExecSQL('INSERT INTO Notes (ID, Note, DateTime) values(NULL, "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML)+'", "'+DateToStr(Date) + ' ' + TimeToStr(Time) + '")');
-  end;
+  if (NoteIndex = '-1') and (Trim(WebView.OleObject.Document.getElementById('memo').innerHTML) <> '') then
+    SQLDB.ExecSQL('INSERT INTO Notes (ID, Note, DateTime) values("' + IntToStr(GetTimeStamp) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML)+'", "'+ IntToStr(DateTimeToUnix(Now)) + '")');
 
   //Update
   if (NoteIndex <> '-1') and (Trim(LatestNote) <> Trim(WebView.OleObject.Document.getElementById('memo').innerHTML)) then
-    SQLDB.ExecSQL('UPDATE Notes SET Note="' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", DateTime="' + DateToStr(Date) + ' ' + TimeToStr(Time) + '" WHERE ID=' + NoteIndex);
+    SQLDB.ExecSQL('UPDATE Notes SET Note="' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", DateTime="' + IntToStr(DateTimeToUnix(Now)) + '" WHERE ID=' + NoteIndex);
 
   SQLDB.Free;
   Application.OnMessage:=SaveMessageHandler;
