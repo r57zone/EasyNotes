@@ -17,9 +17,9 @@
 ![](https://user-images.githubusercontent.com/9499881/54496678-ad271b80-490b-11e9-89b4-6a87ba156e43.PNG)
 
 ### iOS
-![Setup](https://user-images.githubusercontent.com/9499881/54852962-d2e76280-4d07-11e9-841a-06d50fafb3c4.gif)
-![](https://user-images.githubusercontent.com/9499881/54852821-6ff5cb80-4d07-11e9-889f-2858175af05a.PNG)
 ![](https://user-images.githubusercontent.com/9499881/54852979-e1ce1500-4d07-11e9-8c0a-91dca563fcf7.PNG)
+![](https://user-images.githubusercontent.com/9499881/54852821-6ff5cb80-4d07-11e9-889f-2858175af05a.PNG)
+![Setup](https://user-images.githubusercontent.com/9499881/54852962-d2e76280-4d07-11e9-841a-06d50fafb3c4.gif)
 
 ## Загрузка
 >Версия для Windows 7, 8.1, 10.
@@ -33,6 +33,7 @@
 | `IP/getfullnotes` | GET | Получение списка идентификатора, заметки (в Base64) и времени заметки. | &lt;notes&gt;&lt;note id="1553285632" datetime="1553300032"&gt;Mw==&lt;/note&gt;&lt;note id="1553248570" datetime="1553262970"&gt;Mg==&lt;/note&gt;&lt;/notes&gt; |
 | `IP//getnote=ID` | GET | Получение содержимого заметки по идентификатору. | &lt;notes&gt;&lt;note id="1553285632" datetime="1553300032"&gt;Mw==&lt;/note&gt;&lt;/notes&gt; |
 | `IP/syncnotes` | POST | Отправка созданных и измененных клиентом заметок. | &lt;notes&gt;&lt;insert id="1553285632" datetime="1553300032"&gt;Mw==&lt;/insert&gt;&lt;update id="1553248570" datetime="1553262970"&gt;Mg==&lt;/update&gt;&lt;delete id="1553248570"&gt;&lt;/delete&gt;&lt;/notes&gt; |
+
 Где IP это адрес, с запущенным приложением для Windows. Данные получаются и передаются в разметке XML.
 
 ## Обратная связь

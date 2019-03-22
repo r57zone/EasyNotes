@@ -17,9 +17,9 @@ To correctly display the Windows interface of the application run the file "ie11
 ![](https://user-images.githubusercontent.com/9499881/54496688-d6e04280-490b-11e9-9c08-9e8b13d96cc8.PNG)
 
 ### iOS
-![Setup](https://user-images.githubusercontent.com/9499881/54852962-d2e76280-4d07-11e9-841a-06d50fafb3c4.gif)
-![](https://user-images.githubusercontent.com/9499881/54852821-6ff5cb80-4d07-11e9-889f-2858175af05a.PNG)
 ![](https://user-images.githubusercontent.com/9499881/54852979-e1ce1500-4d07-11e9-8c0a-91dca563fcf7.PNG)
+![](https://user-images.githubusercontent.com/9499881/54852821-6ff5cb80-4d07-11e9-889f-2858175af05a.PNG)
+![Setup](https://user-images.githubusercontent.com/9499881/54852962-d2e76280-4d07-11e9-841a-06d50fafb3c4.gif)
 
 ## Download
 >Version for Windows 7, 8.1, 10.
@@ -33,6 +33,7 @@ To correctly display the Windows interface of the application run the file "ie11
 | `IP/getfullnotes` | GET | Getting a list of ID, notes (in Base64) and time notes. | &lt;notes&gt;&lt;note id="1553285632" datetime="1553300032"&gt;Mw==&lt;/note&gt;&lt;note id="1553248570" datetime="1553262970"&gt;Mg==&lt;/note&gt;&lt;/notes&gt; |
 | `IP//getnote=ID` | GET | Getting a note by id. | &lt;notes&gt;&lt;note id="1553285632" datetime="1553300032"&gt;Mw==&lt;/note&gt;&lt;/notes&gt; |
 | `IP/syncnotes` | POST | Sending created and modified notes by the client. | &lt;notes&gt;&lt;insert id="1553285632" datetime="1553300032"&gt;Mw==&lt;/insert&gt;&lt;update id="1553248570" datetime="1553262970"&gt;Mg==&lt;/update&gt;&lt;delete id="1553248570"&gt;&lt;/delete&gt;&lt;/notes&gt; |
+
 Where IP is the address running the application for Windows. Data is received and sending in XML markdown.
 
 ## Feedback
