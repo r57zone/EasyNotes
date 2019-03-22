@@ -1,0 +1,12 @@
+CACHE MANIFEST
+
+CACHE:
+/images/back.png
+/images/done.png
+/images/new.png
+/images/rm.png
+/images/sync.png
+/images/launch.png
+
+NETWORK:
+*

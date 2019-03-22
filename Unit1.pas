@@ -2,17 +2,19 @@ unit Unit1;
 
 interface
 
-{eNotes 0.7.1, последнее обновление 17.03.2019
+{eNotes 0.8, последнее обновление 23.03.2019
 https://github.com/r57zone/eNotes}
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, OleCtrls, ExtCtrls, StdCtrls, SQLite3, SQLiteTable3, SHDocVw, ActiveX,
-  DateUtils, IniFiles;
+  DateUtils, IniFiles, IdBaseComponent, IdComponent, IdTCPServer,
+  IdCustomHTTPServer, IdHTTPServer, XMLDoc, XMLIntf;
 
 type
   TMain = class(TForm)
     WebView: TWebBrowser;
+    IdHTTPServer: TIdHTTPServer;
     procedure FormCreate(Sender: TObject);
     procedure WebViewBeforeNavigate2(Sender: TObject;
       const pDisp: IDispatch; var URL, Flags, TargetFrameName, PostData,
@@ -22,6 +24,9 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormActivate(Sender: TObject);
     procedure FormDeactivate(Sender: TObject);
+    procedure IdHTTPServerCommandGet(AThread: TIdPeerThread;
+      ARequestInfo: TIdHTTPRequestInfo;
+      AResponseInfo: TIdHTTPResponseInfo);
   private
     procedure LoadNotes;
     procedure NewNote(MemoFocus: boolean);
@@ -37,13 +42,14 @@ var
   NoteIndex, LatestNote: string;
   FOleInPlaceActiveObject: IOleInPlaceActiveObject;
   SaveMessageHandler: TMessageEvent;
-  ID_NEW_NOTE, ID_NOTES, ID_TODAY, ID_YESTERDAY, ID_DAYSAGO: string;
+  ID_NEW_NOTE, ID_NOTES, ID_TODAY, ID_YESTERDAY, ID_DAYSAGO, ID_SYNC: string;
+  AllowIPs: TStringList;
 
 implementation
 
 {$R *.dfm}
 
-//TimeStamp UTC - 0
+//TimeStamp по Гринвичу GMT или UTC+0
 function GetTimeStamp: int64;
 var
  SystemTime: TSystemTime;
@@ -67,6 +73,7 @@ var
   i: integer;
 begin
   Result:='';
+  if Length(Str) = 0 then Exit;
   if Str[1] <> 'x' then Exit;
   Delete(Str, 1, 1);
   Str:=Str + 'x';
@@ -93,26 +100,33 @@ begin
   Width:=Ini.ReadInteger('Main', 'Width', Width);
   Height:=Ini.ReadInteger('Main', 'Height', Height);
   Ini.Free;
+  IdHTTPServer.Active:=true;
   if GetLocaleInformation(LOCALE_SENGLANGUAGE) = 'Russian' then begin
     ID_NEW_NOTE:='Новая заметка';
     ID_NOTES:='Заметки';
     ID_TODAY:='Сегодня';
     ID_YESTERDAY:='Вчера';
     ID_DAYSAGO:='дн. назад';
+    ID_SYNC:='Синхронизация'
   end else begin
     ID_NEW_NOTE:='New note';
     ID_NOTES:='Notes';
     ID_TODAY:='Today';
     ID_YESTERDAY:='Yesterday';
     ID_DAYSAGO:='day ago';
+    ID_SYNC:='Sync'
   end;
   Application.Title:=Caption;
   Main.Visible:=false;
   WebView.Silent:=true;
-  WebView.Navigate(ExtractFilePath(ParamStr(0)) + 'main.htm');
+  WebView.Navigate(ExtractFilePath(ParamStr(0)) + 'main.html');
   SQLDB:=TSQLiteDatabase.Create('Notes.db');
   if not SQLDB.TableExists('notes') then
     SQLDB.ExecSQL('CREATE TABLE Notes (ID TIMESTAMP, Note TEXT, DateTime TIMESTAMP)');
+
+  //Ограничение IP адресов доступа
+  AllowIPs:=TStringList.Create;
+  AllowIPs.LoadFromFile(ExtractFilePath(ParamStr(0)) + 'Allow.txt');
 end;
 
 function ExtractTitle(Str: string): string;
@@ -123,7 +137,7 @@ begin
     Result:=Copy(Str, 1, 150);
 end;
 
-function NoteDateTime(sDate: string): string;
+function NoteDateTime(sDate: string): string; //Без "вчера" и "сегодня"
 var
   mTime, nYear: string;
 begin
@@ -167,7 +181,7 @@ end;
 
 procedure TMain.LoadNotes;
 var
-i: integer; SQLTB: TSQLiteTable;
+  i: integer; SQLTB: TSQLiteTable;
 begin
   SQLTB:=SQLDB.GetTable('SELECT * FROM Notes ORDER BY DateTime DESC');
   try
@@ -195,9 +209,9 @@ var
 begin
   sUrl:=ExtractFileName(StringReplace(Url, '/', '\', [rfReplaceAll]));
 
-  if Pos('main.htm', sUrl) = 0 then Cancel:=true;
+  if Pos('main.html', sUrl) = 0 then Cancel:=true;
 
-  if Pos('main.htm#note', sUrl) > 0 then begin
+  if Pos('main.html#note', sUrl) > 0 then begin
     Delete(sUrl, 1, Pos('#note', sUrl) + 4);
     NoteIndex:=sUrl;
     SQLTB:=SQLDB.GetTable('SELECT ID, Note, DateTime FROM NOTES WHERE ID=' + sURL);
@@ -235,18 +249,19 @@ begin
 
   end else begin
 
-    if sUrl = 'main.htm#new' then
+    if sUrl = 'main.html#new' then
       NewNote(true);
 
-    if sUrl = 'main.htm#done' then begin
+    if sUrl = 'main.html#done' then begin
 
       //Add
       if (NoteIndex = '-1') and (Trim(WebView.OleObject.Document.getElementById('memo').innerHTML) <> '') then begin
         CurTimeStamp:=GetTimeStamp;
         SQLDB.ExecSQL('INSERT INTO Notes (ID, Note, DateTime) values("' + IntToStr(CurTimeStamp) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML)+'", "' + IntToStr(DateTimeToUnix(Now)) + '")');
         NoteIndex:=IntToStr(CurTimeStamp); //Для того, чтобы последняя запись не создавалась снова и снова
-        LatestNote:=WebView.OleObject.Document.getElementById('memo').innerHTML;
+        //LatestNote:=WebView.OleObject.Document.getElementById('memo').innerHTML; //Оставлять старую заметку
         LoadNotes;
+        NewNote(true); //Новая заметка
       end;
 
       //Update
@@ -256,7 +271,7 @@ begin
     end;
 
     //Delete
-    if (sUrl = 'main.htm#rem') and (NoteIndex <> '-1') then begin
+    if (sUrl = 'main.html#rem') and (NoteIndex <> '-1') then begin
       WebView.OleObject.Document.getElementById('memo').innerHTML:='';
       SQLDB.ExecSQL('DELETE FROM Notes WHERE ID=' + NoteIndex);
       LoadNotes;
@@ -273,7 +288,7 @@ var
 begin
   sUrl:=ExtractFileName(StringReplace(Url, '/', '\', [rfReplaceAll]));
   if pDisp=(Sender as TWebBrowser).Application then
-    if sUrl = 'main.htm' then begin
+    if sUrl = 'main.html' then begin
       Main.Visible:=true;
       LoadNotes;
       NewNote(true);
@@ -288,6 +303,7 @@ begin
   Ini.WriteInteger('Main', 'Width', Width);
   Ini.WriteInteger('Main', 'Height', Height);
   Ini.Free;
+  IdHTTPServer.Active:=false;
 
   //Add
   if (NoteIndex = '-1') and (Trim(WebView.OleObject.Document.getElementById('memo').innerHTML) <> '') then
@@ -300,6 +316,7 @@ begin
   SQLDB.Free;
   Application.OnMessage:=SaveMessageHandler;
   FOleInPlaceActiveObject:=nil;
+  AllowIPs.Free;
 end;
 
 procedure TMain.MessageHandler(var Msg: TMsg; var Handled: Boolean);
@@ -321,7 +338,7 @@ begin
       begin
         Dispatch.QueryInterface(IOleInPlaceActiveObject, iOIPAO);
         if iOIPAO <> nil then
-          FOleInPlaceActiveObject := iOIPAO;
+          FOleInPlaceActiveObject:=iOIPAO;
       end;
     end;
     if FOleInPlaceActiveObject <> nil then
@@ -353,6 +370,213 @@ begin
     WebView.OleObject.Document.getElementById('memo').focus;
   NoteIndex:='-1';
   LatestNote:='';
+end;
+
+function EncodeBase64(const inStr: string): string;
+  function Encode_Byte(b: Byte): char;
+  const
+    Base64Code: string[64] =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+  begin
+    Result := Base64Code[(b and $3F)+1];
+  end;
+
+var
+  i: Integer;
+begin
+  i := 1;
+  Result := '';
+  while i <= Length(InStr) do
+  begin
+    Result := Result + Encode_Byte(Byte(inStr[i]) shr 2);
+    Result := Result + Encode_Byte((Byte(inStr[i]) shl 4) or (Byte(inStr[i+1]) shr 4));
+    if i+1 <= Length(inStr) then
+      Result := Result + Encode_Byte((Byte(inStr[i+1]) shl 2) or (Byte(inStr[i+2]) shr 6))
+    else
+      Result := Result + '=';
+    if i+2 <= Length(inStr) then
+      Result := Result + Encode_Byte(Byte(inStr[i+2]))
+    else
+      Result := Result + '=';
+    Inc(i, 3);
+  end;
+end;
+
+function DecodeBase64(const CinLine: string): string;
+const
+  RESULT_ERROR = -2;
+var
+  inLineIndex: Integer;
+  c: Char;
+  x: SmallInt;
+  c4: Word;
+  StoredC4: array[0..3] of SmallInt;
+  InLineLength: Integer;
+begin
+  Result := '';
+  inLineIndex := 1;
+  c4 := 0;
+  InLineLength := Length(CinLine);
+
+  while inLineIndex <= InLineLength do
+  begin
+    while (inLineIndex <= InLineLength) and (c4 < 4) do
+    begin
+      c := CinLine[inLineIndex];
+      case c of
+        '+'     : x := 62;
+        '/'     : x := 63;
+        '0'..'9': x := Ord(c) - (Ord('0')-52);
+        '='     : x := -1;
+        'A'..'Z': x := Ord(c) - Ord('A');
+        'a'..'z': x := Ord(c) - (Ord('a')-26);
+      else
+        x := RESULT_ERROR;
+      end;
+      if x <> RESULT_ERROR then
+      begin
+        StoredC4[c4] := x;
+        Inc(c4);
+      end;
+      Inc(inLineIndex);
+    end;
+
+    if c4 = 4 then
+    begin
+      c4 := 0;
+      Result := Result + Char((StoredC4[0] shl 2) or (StoredC4[1] shr 4));
+      if StoredC4[2] = -1 then Exit;
+      Result := Result + Char((StoredC4[1] shl 4) or (StoredC4[2] shr 2));
+      if StoredC4[3] = -1 then Exit;
+      Result := Result + Char((StoredC4[2] shl 6) or (StoredC4[3]));
+    end;
+  end;
+end;
+
+procedure TMain.IdHTTPServerCommandGet(AThread: TIdPeerThread;
+  ARequestInfo: TIdHTTPRequestInfo; AResponseInfo: TIdHTTPResponseInfo);
+var
+  i: integer; SQLTB: TSQLiteTable; NotesIDs: TStringList;
+  XMLDoc: IXMLDocument;
+  XMLNode: IXMLNode;
+  RequestDocument: string;
+begin
+  CoInitialize(nil);
+
+  if (AllowIPs.Count > 0) and (Trim(AnsiUpperCase(AllowIPs.Strings[0])) <> 'ALL') then
+    if Pos(AThread.Connection.Socket.Binding.PeerIP, AllowIPs.Text) = 0 then Exit;
+
+  if ARequestInfo.Document = '/getnotes' then begin
+
+    SQLTB:=SQLDB.GetTable('SELECT * FROM Notes ORDER BY DateTime DESC');
+    try
+      AResponseInfo.ContentText:='<notes>' + #13#10;
+      for i:=0 to SQLTB.Count - 1 do begin
+        AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<note id="' + SQLTB.FieldAsString(0) + '" datetime="' + AnsiToUTF8(SQLTB.FieldAsString(2)) + '"></note>' + #13#10;
+        SQLTB.Next;
+      end;
+    finally
+      AResponseInfo.ContentText:=AResponseInfo.ContentText + '</notes>';
+      SQLTB.Free;
+    end;
+
+    RequestDocument:='none';
+  end;
+
+  if ARequestInfo.Document = '/getfullnotes' then begin
+
+    SQLTB:=SQLDB.GetTable('SELECT * FROM Notes ORDER BY DateTime DESC');
+    try
+      AResponseInfo.ContentText:='<notes>' + #13#10;
+      for i:=0 to SQLTB.Count - 1 do begin
+        AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<note id="' + SQLTB.FieldAsString(0) + '" datetime="' + SQLTB.FieldAsString(2) + '">' + EncodeBase64(AnsiToUTF8(CharCodesToStr(SQLTB.FieldAsString(1)))) + '</note>' + #13#10;
+        SQLTB.Next;
+      end;
+    finally
+      AResponseInfo.ContentText:=AResponseInfo.ContentText + '</notes>';
+      SQLTB.Free;
+    end;
+
+    RequestDocument:='none';
+  end;
+
+  if Copy(ARequestInfo.Document, 1, 9)= '/getnote=' then begin
+    NotesIDs:=TStringList.Create;
+    NotesIDs.Text:=Copy(ARequestInfo.Document, 10, Length(ARequestInfo.Document));
+    NotesIDs.Text:=StringReplace(NotesIDs.Text, ',', #13#10, [rfReplaceAll]);
+
+    AResponseInfo.ContentText:='<notes>' + #13#10;
+    for i:=0 to NotesIDs.Count - 1 do
+      if Trim(NotesIDs.Strings[i]) <> '' then begin
+        SQLTB:=SQLDB.GetTable('SELECT ID, Note, DateTime FROM NOTES WHERE ID=' + NotesIDs.Strings[i]);
+        try
+          AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<note id="' + SQLTB.FieldAsString(0) + '" datetime="' + SQLTB.FieldAsString(2) + '">' + EncodeBase64(AnsiToUTF8(CharCodesToStr(SQLTB.FieldAsString(1)))) + '</note>' + #13#10;
+        finally
+          SQLTB.Free;
+        end;
+      end;
+
+    AResponseInfo.ContentText:=AResponseInfo.ContentText + '</notes>';
+    NotesIDs.Free;
+    RequestDocument:='none';
+  end;
+
+  if (ARequestInfo.Document = '/syncnotes') and (ARequestInfo.Command = 'POST') and (Trim(ARequestInfo.Params.Text) <> '') then begin
+    Caption:='EasyNotes - ' + ID_SYNC;
+    Application.Title:=Caption;
+    XMLDoc:=TXMLDocument.Create(nil);
+    XMLDoc:=LoadXMLData(ARequestInfo.Params.Text);
+    XMLDoc.Active:=true;
+
+    XMLNode:=XMLDoc.DocumentElement;
+    for i:=0 to XMLNode.ChildNodes.Count - 1 do
+      try
+        if (XMLNode.ChildNodes[i].NodeName = 'insert') and (Trim(StrToCharCodes(UTF8ToAnsi(DecodeBase64(XMLNode.ChildNodes[i].NodeValue)))) <> '') then
+          SQLDB.ExecSQL('INSERT INTO Notes (ID, Note, DateTime) values("' + XMLNode.ChildNodes[i].Attributes['id'] + '", "' + StrToCharCodes(UTF8ToAnsi(DecodeBase64(XMLNode.ChildNodes[i].NodeValue))) + '", "' + XMLNode.ChildNodes[i].Attributes['datetime'] + '")');
+
+        if XMLNode.ChildNodes[i].NodeName = 'update' then
+          SQLDB.ExecSQL('UPDATE Notes SET Note="' + StrToCharCodes(UTF8ToAnsi(DecodeBase64(XMLNode.ChildNodes[i].NodeValue))) + '", DateTime="' + XMLNode.ChildNodes[i].Attributes['datetime'] + '" WHERE ID=' + XMLNode.ChildNodes[i].Attributes['id']);
+
+        if XMLNode.ChildNodes[i].NodeName = 'delete' then
+          SQLDB.ExecSQL('DELETE FROM Notes WHERE ID=' + XMLNode.ChildNodes[i].Attributes['id']);
+
+        AResponseInfo.ContentText:='ok';
+      except
+        AResponseInfo.ContentText:='error';
+        Application.MessageBox(PChar(Caption), 'Sync error', MB_ICONWARNING);
+      end;
+
+    if XMLNode.ChildNodes.Count = 0 then
+      AResponseInfo.ContentText:='ok';
+
+    //Проблема с мгновенным выводом, поэтому просто обновляем страницу и LoadNotes загружается снова.
+    WebView.Navigate(ExtractFilePath(ParamStr(0)) + 'main.html');
+
+    Caption:='EasyNotes';
+    Application.Title:=Caption;
+    XMLDoc.Active:=false;
+    RequestDocument:='none';
+  end;
+
+  if (RequestDocument <> 'none') then begin
+    RequestDocument:=ExtractFilePath(ParamStr(0)) + '\webapp' + StringReplace(ARequestInfo.Document, '/', '\', [rfReplaceAll]);
+    RequestDocument:=StringReplace(RequestDocument, '\\', '\', [rfReplaceAll]);
+
+    if ARequestInfo.Document = '/webapp' then //по webapp отдаем главный файл
+      RequestDocument:=ExtractFilePath(ParamStr(0)) + 'webapp\main.html';
+
+    if FileExists(RequestDocument) then begin
+      AResponseInfo.ContentType:=IdHTTPServer.MIMETable.GetDefaultFileExt(RequestDocument);
+
+    if ARequestInfo.Document = '/app.manifest' then
+      AResponseInfo.ContentType:='text/cache-manifest';
+
+      IdHTTPServer.ServeFile(AThread, AResponseinfo, RequestDocument);
+    end else
+      AResponseInfo.ContentText:='error';
+  end;
+
+  CoUninitialize;
 end;
 
 initialization

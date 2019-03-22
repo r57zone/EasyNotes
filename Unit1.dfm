@@ -3,7 +3,7 @@ object Main: TMain
   Top = 129
   Width = 621
   Height = 462
-  Caption = 'eNotes'
+  Caption = 'EasyNotes'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -33,5 +33,17 @@ object Main: TMain
       2B2E126208000000000000004C0000000114020000000000C000000000000046
       8000000000000000000000000000000000000000000000000000000000000000
       00000000000000000100000000000000000000000000000000000000}
+  end
+  object IdHTTPServer: TIdHTTPServer
+    Bindings = <>
+    CommandHandlers = <>
+    Greeting.NumericCode = 0
+    MaxConnectionReply.NumericCode = 0
+    ReplyExceptionCode = 0
+    ReplyTexts = <>
+    ReplyUnknownCommand.NumericCode = 0
+    OnCommandGet = IdHTTPServerCommandGet
+    Left = 8
+    Top = 8
   end
 end
