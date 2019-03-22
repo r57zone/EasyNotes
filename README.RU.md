@@ -31,7 +31,7 @@
 | ------------- | ------------- | ------------- | ------------- |
 | `IP/getnotes` | GET | Получение списка идентификатора (Unix timestamp) и времени заметки (Unix timestamp с UTC смещением). | &lt;notes&gt;&lt;note id="1553287432" datetime="1553301832"&gt;&lt;/note&gt;&lt;note id="1553287428" datetime="1553301828"&gt;&lt;/note&gt;&lt;/notes&gt; |
 | `IP/getfullnotes` | GET | Получение списка идентификатора, заметки (в Base64) и времени заметки. | &lt;notes&gt;&lt;note id="1553285632" datetime="1553300032"&gt;Mw==&lt;/note&gt;&lt;note id="1553248570" datetime="1553262970"&gt;Mg==&lt;/note&gt;&lt;/notes&gt; |
-| `IP//getnote=ID` | GET | Получение содержимого заметки по идентификатору. | &lt;notes&gt;&lt;note id="1553285632" datetime="1553300032"&gt;Mw==&lt;/note&gt;&lt;/notes&gt; |
+| `IP/getnote=ID` | GET | Получение содержимого заметки по идентификатору. | &lt;notes&gt;&lt;note id="1553285632" datetime="1553300032"&gt;Mw==&lt;/note&gt;&lt;/notes&gt; |
 | `IP/syncnotes` | POST | Отправка созданных и измененных клиентом заметок. | &lt;notes&gt;&lt;insert id="1553285632" datetime="1553300032"&gt;Mw==&lt;/insert&gt;&lt;update id="1553248570" datetime="1553262970"&gt;Mg==&lt;/update&gt;&lt;delete id="1553248570"&gt;&lt;/delete&gt;&lt;/notes&gt; |
 
 Где IP это адрес, с запущенным приложением для Windows. Данные получаются и передаются в разметке XML.
