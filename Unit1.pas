@@ -9,7 +9,7 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, OleCtrls, ExtCtrls, StdCtrls, SQLite3, SQLiteTable3, SHDocVw, ActiveX,
   DateUtils, IniFiles, IdBaseComponent, IdComponent, IdTCPServer,
-  IdCustomHTTPServer, IdHTTPServer, XMLDoc, XMLIntf;
+  IdCustomHTTPServer, IdHTTPServer, XMLDoc, XMLIntf, Registry;
 
 type
   TMain = class(TForm)
@@ -38,6 +38,7 @@ type
 
 var
   Main: TMain;
+  CloseDuplicate: boolean;
   SQLDB: TSQLiteDatabase;
   NoteIndex, LatestNote: string;
   FOleInPlaceActiveObject: IOleInPlaceActiveObject;
@@ -95,11 +96,32 @@ end;
 procedure TMain.FormCreate(Sender: TObject);
 var
   Ini: TIniFile;
+  Reg: TRegistry;
+  WND: HWND;
 begin
+  //Предотвращение повторого запуска
+  WND:=FindWindow('TMain', 'EasyNotes');
+  if WND <> 0 then begin
+    SetForegroundWindow(WND);
+    Halt;
+  end;
+  Caption:='EasyNotes';
+
   Ini:=TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Config.ini');
   Width:=Ini.ReadInteger('Main', 'Width', Width);
   Height:=Ini.ReadInteger('Main', 'Height', Height);
+  if Ini.ReadBool('Main', 'FirstRun', true) then begin
+    Ini.WriteBool('Main', 'FirstRun', false);
+    Reg:=TRegistry.Create;
+    Reg.RootKey:=HKEY_CURRENT_USER;
+    if Reg.OpenKey('\Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_BROWSER_EMULATION', true) then begin
+        Reg.WriteInteger(ExtractFileName(ParamStr(0)), 11000);
+      Reg.CloseKey;
+    end;
+    Reg.Free;
+  end;
   Ini.Free;
+
   IdHTTPServer.Active:=true;
   if GetLocaleInformation(LOCALE_SENGLANGUAGE) = 'Russian' then begin
     ID_NEW_NOTE:='Новая заметка';

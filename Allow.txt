@@ -1,5 +1,13 @@
+# Allowed IP addresses, delete unnecessary ones, add necessary ones or replace everything with the word "ALL" for access from all IP addresses.
+# Разрешенные IP адреса, удалите ненужные, добавьте нужные или замените все на слово "ALL" для доступа со всех IP адресов.
 127.0.0.1
+192.168.0.1
+192.168.0.2
+192.168.0.3
+192.168.0.4
+192.168.0.5
 192.168.0.101
 192.168.0.102
 192.168.0.103
 192.168.0.104
+192.168.0.105

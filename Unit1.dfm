@@ -3,7 +3,6 @@ object Main: TMain
   Top = 129
   Width = 621
   Height = 462
-  Caption = 'EasyNotes'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
