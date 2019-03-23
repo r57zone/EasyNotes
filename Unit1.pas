@@ -560,9 +560,8 @@ begin
     XMLNode:=XMLDoc.DocumentElement;
     for i:=0 to XMLNode.ChildNodes.Count - 1 do
       try
-        if (XMLNode.ChildNodes[i].NodeName = 'insert') and (Trim(StrToCharCodes(UTF8ToAnsi(DecodeBase64(XMLNode.ChildNodes[i].NodeValue)))) <> '') then begin
+        if (XMLNode.ChildNodes[i].NodeName = 'insert') and (Trim(StrToCharCodes(UTF8ToAnsi(DecodeBase64(XMLNode.ChildNodes[i].NodeValue)))) <> '') then
           SQLDB.ExecSQL('INSERT INTO Notes (ID, Note, DateTime) values("' + XMLNode.ChildNodes[i].Attributes['id'] + '", "' + StrToCharCodes(UTF8ToAnsi(DecodeBase64(XMLNode.ChildNodes[i].NodeValue))) + '", "' + XMLNode.ChildNodes[i].Attributes['datetime'] + '")');
-          end;
 
         if XMLNode.ChildNodes[i].NodeName = 'update' then
           SQLDB.ExecSQL('UPDATE Notes SET Note="' + StrToCharCodes(UTF8ToAnsi(DecodeBase64(XMLNode.ChildNodes[i].NodeValue))) + '", DateTime="' + XMLNode.ChildNodes[i].Attributes['datetime'] + '" WHERE ID=' + XMLNode.ChildNodes[i].Attributes['id']);
