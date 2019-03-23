@@ -2,7 +2,7 @@ unit Unit1;
 
 interface
 
-{eNotes 0.8, последнее обновление 23.03.2019
+{eNotes 0.8.1, последнее обновление 24.03.2019
 https://github.com/r57zone/eNotes}
 
 uses
@@ -80,6 +80,47 @@ begin
   Str:=Str + 'x';
   while Pos('x', Str) > 0 do begin
     Result:=Result + Chr( StrToIntDef ( Copy( Str, 1, Pos('x', Str) - 1), 0 ) );
+    Delete(Str, 1, Pos('x', Str));
+  end;
+end;
+
+function StringToWideString(const s: AnsiString; codePage: Word): WideString;
+var
+  l: integer;
+begin
+  if s = '' then
+    Result:=''
+  else
+  begin
+    l:=MultiByteToWideChar(codePage, MB_PRECOMPOSED, PChar(@s[1]), -1, nil, 0);
+    SetLength(Result, l - 1);
+    if l > 1 then
+      MultiByteToWideChar(CodePage, MB_PRECOMPOSED, PChar(@s[1]), -1, PWideChar(@Result[1]), l - 1);
+  end;
+end;
+
+function StrToWideCharCodes(Str: string): string;
+var
+  i: integer;
+  WStr: WideString;
+begin
+  Result:='';
+  WStr:=StringToWideString(Str, CP_ACP);
+  for i:=1 to Length(WStr) do
+    Result:=Result + 'x' + IntToStr( Ord( WStr[i] ) );
+end;
+
+function WideCharCodesToStr(Str: string): string;
+var
+  i: integer;
+begin
+  Result:='';
+  if Length(Str) = 0 then Exit;
+  if Str[1] <> 'x' then Exit;
+  Delete(Str, 1, 1);
+  Str:=Str + 'x';
+  while Pos('x', Str) > 0 do begin
+    Result:=Result + WideChar( StrToIntDef ( Copy( Str, 1, Pos('x', Str) - 1), 0 ) );
     Delete(Str, 1, Pos('x', Str));
   end;
 end;
@@ -396,87 +437,6 @@ begin
   LatestNote:='';
 end;
 
-function EncodeBase64(const inStr: string): string;
-  function Encode_Byte(b: Byte): char;
-  const
-    Base64Code: string[64] =
-      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-  begin
-    Result := Base64Code[(b and $3F)+1];
-  end;
-
-var
-  i: Integer;
-begin
-  i := 1;
-  Result := '';
-  while i <= Length(InStr) do
-  begin
-    Result := Result + Encode_Byte(Byte(inStr[i]) shr 2);
-    Result := Result + Encode_Byte((Byte(inStr[i]) shl 4) or (Byte(inStr[i+1]) shr 4));
-    if i+1 <= Length(inStr) then
-      Result := Result + Encode_Byte((Byte(inStr[i+1]) shl 2) or (Byte(inStr[i+2]) shr 6))
-    else
-      Result := Result + '=';
-    if i+2 <= Length(inStr) then
-      Result := Result + Encode_Byte(Byte(inStr[i+2]))
-    else
-      Result := Result + '=';
-    Inc(i, 3);
-  end;
-end;
-
-function DecodeBase64(const CinLine: string): string;
-const
-  RESULT_ERROR = -2;
-var
-  inLineIndex: Integer;
-  c: Char;
-  x: SmallInt;
-  c4: Word;
-  StoredC4: array[0..3] of SmallInt;
-  InLineLength: Integer;
-begin
-  Result := '';
-  inLineIndex := 1;
-  c4 := 0;
-  InLineLength := Length(CinLine);
-
-  while inLineIndex <= InLineLength do
-  begin
-    while (inLineIndex <= InLineLength) and (c4 < 4) do
-    begin
-      c := CinLine[inLineIndex];
-      case c of
-        '+'     : x := 62;
-        '/'     : x := 63;
-        '0'..'9': x := Ord(c) - (Ord('0')-52);
-        '='     : x := -1;
-        'A'..'Z': x := Ord(c) - Ord('A');
-        'a'..'z': x := Ord(c) - (Ord('a')-26);
-      else
-        x := RESULT_ERROR;
-      end;
-      if x <> RESULT_ERROR then
-      begin
-        StoredC4[c4] := x;
-        Inc(c4);
-      end;
-      Inc(inLineIndex);
-    end;
-
-    if c4 = 4 then
-    begin
-      c4 := 0;
-      Result := Result + Char((StoredC4[0] shl 2) or (StoredC4[1] shr 4));
-      if StoredC4[2] = -1 then Exit;
-      Result := Result + Char((StoredC4[1] shl 4) or (StoredC4[2] shr 2));
-      if StoredC4[3] = -1 then Exit;
-      Result := Result + Char((StoredC4[2] shl 6) or (StoredC4[3]));
-    end;
-  end;
-end;
-
 procedure TMain.IdHTTPServerCommandGet(AThread: TIdPeerThread;
   ARequestInfo: TIdHTTPRequestInfo; AResponseInfo: TIdHTTPResponseInfo);
 var
@@ -513,7 +473,7 @@ begin
     try
       AResponseInfo.ContentText:='<notes>' + #13#10;
       for i:=0 to SQLTB.Count - 1 do begin
-        AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<note id="' + SQLTB.FieldAsString(0) + '" datetime="' + SQLTB.FieldAsString(2) + '">' + EncodeBase64(AnsiToUTF8(CharCodesToStr(SQLTB.FieldAsString(1)))) + '</note>' + #13#10;
+        AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<note id="' + SQLTB.FieldAsString(0) + '" datetime="' + SQLTB.FieldAsString(2) + '">' + StrToWideCharCodes(CharCodesToStr(SQLTB.FieldAsString(1))) + '</note>' + #13#10;
         SQLTB.Next;
       end;
     finally
@@ -534,7 +494,7 @@ begin
       if Trim(NotesIDs.Strings[i]) <> '' then begin
         SQLTB:=SQLDB.GetTable('SELECT ID, Note, DateTime FROM NOTES WHERE ID=' + NotesIDs.Strings[i]);
         try
-          AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<note id="' + SQLTB.FieldAsString(0) + '" datetime="' + SQLTB.FieldAsString(2) + '">' + EncodeBase64(AnsiToUTF8(CharCodesToStr(SQLTB.FieldAsString(1)))) + '</note>' + #13#10;
+          AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<note id="' + SQLTB.FieldAsString(0) + '" datetime="' + SQLTB.FieldAsString(2) + '">' + StrToWideCharCodes(AnsiToUTF8(CharCodesToStr(SQLTB.FieldAsString(1)))) + '</note>' + #13#10;
         finally
           SQLTB.Free;
         end;
@@ -560,19 +520,16 @@ begin
     XMLNode:=XMLDoc.DocumentElement;
     for i:=0 to XMLNode.ChildNodes.Count - 1 do
       try
-        if (XMLNode.ChildNodes[i].NodeName = 'insert') and (Trim(StrToCharCodes(UTF8ToAnsi(DecodeBase64(XMLNode.ChildNodes[i].NodeValue)))) <> '') then
-          SQLDB.ExecSQL('INSERT INTO Notes (ID, Note, DateTime) values("' + XMLNode.ChildNodes[i].Attributes['id'] + '", "' + StrToCharCodes(UTF8ToAnsi(DecodeBase64(XMLNode.ChildNodes[i].NodeValue))) + '", "' + XMLNode.ChildNodes[i].Attributes['datetime'] + '")');
+        if (XMLNode.ChildNodes[i].NodeName = 'insert')  and (Trim( StrToCharCodes( WideCharCodesToStr(XMLNode.ChildNodes[i].NodeValue) ) ) <> '') then
+          SQLDB.ExecSQL('INSERT INTO Notes (ID, Note, DateTime) values("' + XMLNode.ChildNodes[i].Attributes['id'] + '", "' + StrToCharCodes(WideCharCodesToStr(XMLNode.ChildNodes[i].NodeValue)) + '", "' + XMLNode.ChildNodes[i].Attributes['datetime'] + '")');
 
         if XMLNode.ChildNodes[i].NodeName = 'update' then
-          SQLDB.ExecSQL('UPDATE Notes SET Note="' + StrToCharCodes(UTF8ToAnsi(DecodeBase64(XMLNode.ChildNodes[i].NodeValue))) + '", DateTime="' + XMLNode.ChildNodes[i].Attributes['datetime'] + '" WHERE ID=' + XMLNode.ChildNodes[i].Attributes['id']);
+          SQLDB.ExecSQL('UPDATE Notes SET Note="' + StrToCharCodes(WideCharCodesToStr(XMLNode.ChildNodes[i].NodeValue)) + '", DateTime="' + XMLNode.ChildNodes[i].Attributes['datetime'] + '" WHERE ID=' + XMLNode.ChildNodes[i].Attributes['id']);
 
         if XMLNode.ChildNodes[i].NodeName = 'delete' then
           SQLDB.ExecSQL('DELETE FROM Notes WHERE ID=' + XMLNode.ChildNodes[i].Attributes['id']);
       except
       end;
-
-    if XMLNode.ChildNodes.Count = 0 then
-      AResponseInfo.ContentText:='ok';
 
     //ѕроблема с мгновенным выводом, поэтому просто обновл€ем страницу и LoadNotes загружаетс€ снова.
     WebView.Navigate(ExtractFilePath(ParamStr(0)) + 'main.html');

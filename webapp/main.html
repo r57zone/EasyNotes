@@ -93,13 +93,27 @@ textarea:focus{outline:none;}
 	{
 		return Math.floor(new Date() / 1000);
 	}
-
-	function EncodeStr(Str){
-		return btoa(unescape(encodeURIComponent(Str)));
+	
+	function StrToCharCodes(Str){
+		var NewStr = '';
+		var CharCode = 0;
+		for (var i = 0; i < Str.length; i++)
+			NewStr += 'x' + Str.charCodeAt(i);
+			
+		return NewStr;
 	}
 	
-	function DecodeStr(Str){
-		return decodeURIComponent(escape(window.atob(Str)));
+	function CharCodesToStr(Str){
+		var NewStr = '';
+		if (Str.length = 0) return '';
+		if (Str[0] != 'x') return '';
+		Str = Str.substring(1, Str.length);
+		Str += 'x';
+		while (Str.indexOf('x') > 0) {
+			NewStr += String.fromCharCode(parseInt(Str.substring(0, Str.indexOf('x')), 0));
+			Str = Str.substring(Str.indexOf('x') + 1, Str.length);
+		}	
+		return NewStr;
 	}
 	
 	function DropBDs()
@@ -188,7 +202,7 @@ textarea:focus{outline:none;}
 			tx.executeSql('SELECT * FROM Notes ORDER BY DateTime DESC', [], function (tx, results) {
 
 				for (var i = 0; i < results.rows.length; i++) 
-					Notes += '<div onclick="GetNote(' + results.rows.item(i).ID  + ')" id="note"><div id="title">' + DecodeStr(results.rows.item(i).Note) + '</div><div id="date">' + ListDate(results.rows.item(i).DateTime) + '</div></div>';
+					Notes += '<div onclick="GetNote(' + results.rows.item(i).ID  + ')" id="note"><div id="title">' + CharCodesToStr(results.rows.item(i).Note) + '</div><div id="date">' + ListDate(results.rows.item(i).DateTime) + '</div></div>';
 
 				document.getElementById('NotesCount').innerHTML = IDS_NOTES + ' (' + results.rows.length + ')';
 				document.getElementById('items').innerHTML = Notes; //Заменяем, чтобы не мерцала пустота
@@ -229,9 +243,9 @@ textarea:focus{outline:none;}
 		document.getElementById('editor').style.display='block';
 		NotesDB.transaction(function (tx) {
 			tx.executeSql('SELECT * FROM Notes WHERE id=' + e, [], function (tx, results) {
-				document.getElementById('memo').value = DecodeStr(results.rows.item(0).Note);
+				document.getElementById('memo').value = CharCodesToStr(results.rows.item(0).Note);
 				LatestNote = document.getElementById('memo').value;
-				document.getElementById('NoteTitle').innerHTML = ExtractTitle(DecodeStr(results.rows.item(0).Note));
+				document.getElementById('NoteTitle').innerHTML = ExtractTitle(CharCodesToStr(results.rows.item(0).Note));
 				document.getElementById('DayAgo').innerHTML = NoteDateAgo(results.rows.item(0).DateTime);
 				document.getElementById('DateNote').innerHTML = NoteDate(results.rows.item(0).DateTime); 
 				CurNoteID = results.rows.item(0).ID;
@@ -250,22 +264,22 @@ textarea:focus{outline:none;}
 		
 			if (document.getElementById('memo').value.trim() != '') { 
 				NotesDB.transaction(function (tx) {
-					tx.executeSql('INSERT INTO Notes (ID, Note, DateTime) VALUES (' + TimeStamp + ', "' + EncodeStr(document.getElementById('memo').value) + '", ' + UTCTimeStamp + ')');
+					tx.executeSql('INSERT INTO Notes (ID, Note, DateTime) VALUES (' + TimeStamp + ', "' + StrToCharCodes(document.getElementById('memo').value) + '", ' + UTCTimeStamp + ')');
 				});
 				
 				ActionsDB.transaction(function (tx) {
-					tx.executeSql('INSERT INTO Actions (Action, ID, Note, DateTime) VALUES ("insert", ' + TimeStamp + ', "' + EncodeStr(document.getElementById('memo').value) + '",' + UTCTimeStamp + ')');
+					tx.executeSql('INSERT INTO Actions (Action, ID, Note, DateTime) VALUES ("insert", ' + TimeStamp + ', "' + StrToCharCodes(document.getElementById('memo').value) + '",' + UTCTimeStamp + ')');
 				});
 			}
 			//console.log('Inserted done');
 		} else if (LatestNote.trim() != document.getElementById('memo').value.trim()) { //Добавлять только при наличии изменений
 
 			NotesDB.transaction(function (tx) {
-				tx.executeSql('UPDATE Notes SET Note="' + EncodeStr(document.getElementById('memo').value) + '", DateTime=' + UTCTimeStamp + ' WHERE ID=' + CurNoteID);
+				tx.executeSql('UPDATE Notes SET Note="' + StrToCharCodes(document.getElementById('memo').value) + '", DateTime=' + UTCTimeStamp + ' WHERE ID=' + CurNoteID);
 			});
 		
 			ActionsDB.transaction(function (tx) {
-				tx.executeSql('INSERT INTO Actions (Action, ID, Note, DateTime) VALUES ("update", ' + CurNoteID + ', "' + EncodeStr(document.getElementById('memo').value) + '",' + UTCTimeStamp + ')');
+				tx.executeSql('INSERT INTO Actions (Action, ID, Note, DateTime) VALUES ("update", ' + CurNoteID + ', "' + StrToCharCodes(document.getElementById('memo').value) + '",' + UTCTimeStamp + ')');
 			});
 			//console.log('Updated done');
 		}
