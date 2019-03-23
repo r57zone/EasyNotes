@@ -321,10 +321,12 @@ procedure TMain.FormClose(Sender: TObject; var Action: TCloseAction);
 var
   Ini: TIniFile;
 begin
-  Ini:=TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Config.ini');
-  Ini.WriteInteger('Main', 'Width', Width);
-  Ini.WriteInteger('Main', 'Height', Height);
-  Ini.Free;
+  if Main.WindowState <> wsMaximized then begin
+    Ini:=TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Config.ini');
+    Ini.WriteInteger('Main', 'Width', Width);
+    Ini.WriteInteger('Main', 'Height', Height);
+    Ini.Free;
+  end;
   IdHTTPServer.Active:=false;
 
   //Add
@@ -547,25 +549,27 @@ begin
     Caption:='EasyNotes - ' + ID_SYNC;
     Application.Title:=Caption;
     XMLDoc:=TXMLDocument.Create(nil);
-    XMLDoc:=LoadXMLData(ARequestInfo.Params.Text);
-    XMLDoc.Active:=true;
+    try
+      XMLDoc:=LoadXMLData(ARequestInfo.Params.Text);
+      XMLDoc.Active:=true;
+      AResponseInfo.ContentText:='ok';
+    except;
+       AResponseInfo.ContentText:='error';
+    end;
 
     XMLNode:=XMLDoc.DocumentElement;
     for i:=0 to XMLNode.ChildNodes.Count - 1 do
       try
-        if (XMLNode.ChildNodes[i].NodeName = 'insert') and (Trim(StrToCharCodes(UTF8ToAnsi(DecodeBase64(XMLNode.ChildNodes[i].NodeValue)))) <> '') then
+        if (XMLNode.ChildNodes[i].NodeName = 'insert') and (Trim(StrToCharCodes(UTF8ToAnsi(DecodeBase64(XMLNode.ChildNodes[i].NodeValue)))) <> '') then begin
           SQLDB.ExecSQL('INSERT INTO Notes (ID, Note, DateTime) values("' + XMLNode.ChildNodes[i].Attributes['id'] + '", "' + StrToCharCodes(UTF8ToAnsi(DecodeBase64(XMLNode.ChildNodes[i].NodeValue))) + '", "' + XMLNode.ChildNodes[i].Attributes['datetime'] + '")');
+          end;
 
         if XMLNode.ChildNodes[i].NodeName = 'update' then
           SQLDB.ExecSQL('UPDATE Notes SET Note="' + StrToCharCodes(UTF8ToAnsi(DecodeBase64(XMLNode.ChildNodes[i].NodeValue))) + '", DateTime="' + XMLNode.ChildNodes[i].Attributes['datetime'] + '" WHERE ID=' + XMLNode.ChildNodes[i].Attributes['id']);
 
         if XMLNode.ChildNodes[i].NodeName = 'delete' then
           SQLDB.ExecSQL('DELETE FROM Notes WHERE ID=' + XMLNode.ChildNodes[i].Attributes['id']);
-
-        AResponseInfo.ContentText:='ok';
       except
-        AResponseInfo.ContentText:='error';
-        Application.MessageBox(PChar(Caption), 'Sync error', MB_ICONWARNING);
       end;
 
     if XMLNode.ChildNodes.Count = 0 then
