@@ -12,11 +12,11 @@
 
 ## Скриншоты
 ### Windows
-![](https://user-images.githubusercontent.com/9499881/54496678-ad271b80-490b-11e9-89b4-6a87ba156e43.PNG)
+![](https://user-images.githubusercontent.com/9499881/54879010-b3f2e880-4e4d-11e9-8d46-3d983cb8495e.PNG)
 
 ### iOS
-![](https://user-images.githubusercontent.com/9499881/54852979-e1ce1500-4d07-11e9-8c0a-91dca563fcf7.PNG)
-![](https://user-images.githubusercontent.com/9499881/54852821-6ff5cb80-4d07-11e9-889f-2858175af05a.PNG)
+![](https://user-images.githubusercontent.com/9499881/54878998-87d76780-4e4d-11e9-89ae-bd15ea494f73.PNG)
+![](https://user-images.githubusercontent.com/9499881/54879001-9887dd80-4e4d-11e9-9618-5993cb06e93a.PNG)
 ![Setup](https://user-images.githubusercontent.com/9499881/54852962-d2e76280-4d07-11e9-841a-06d50fafb3c4.gif)
 
 ## Загрузка

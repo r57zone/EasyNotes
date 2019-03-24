@@ -18,7 +18,7 @@ body{font-family:Segoe UI; font-size:16px; color: #333; background-color:#f8f8f8
 
 #clear{clear:both;float:none; height:0;}
 
-#wrapper{position:absolute; width:100%;height:100%;}
+#wrapper{position:fixed; width:100%;height:100%; overflow:hidden;}
 
 #panel{width:100%; height:45px; overflow:hidden; background-color:#017d93; color:white; text-align:center; cursor:default;}
 #btn{width:45px; height:45px; cursor:pointer;}
@@ -34,12 +34,12 @@ body{font-family:Segoe UI; font-size:16px; color: #333; background-color:#f8f8f8
 #list #items #note #date{float:right; font-size:14px; width:90px; margin:12px 10px 0 0; color:#454545; text-align:right;}
 
 #editor{display:none; width:100%; height:100%;}
-#meta{color:#ac5942; height:38px; width:100%; cursor:default; overflow:hidden; white-space:nowrap;}
-#meta #DayAgo{float:left; margin:8px 0 0 12px;}
+#meta{color:#ac5942; height:32px; width:100%; cursor:default; overflow:hidden; white-space:nowrap;}
+#meta #DayAgo{float:left; margin:8px 0 0 12px; }
 #meta #DateNote{float:right; margin:8px 12px 0 0;}
 
-#editor #memo{display:block; padding:4px 12px 4px 12px; background-color:transparent; font-family:Segoe UI; border:none;}
-textarea{font-weight:normal;  font-size:16px; overflow-y:auto; -webkit-overflow-scrolling:touch; border-radius:0; -webkit-tap-highlight-color: rgba(0,0,0,0);}
+#editor #memo{display:block; padding:4px 12px 4px 12px; background-color:transparent; border:none;}
+textarea{font-weight:normal; font-size:17px; font-family:"HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;  color:#333; overflow-y:auto; -webkit-overflow-scrolling:touch; border-radius:0; -webkit-tap-highlight-color: rgba(0,0,0,0);}
 textarea:focus{outline:none;}
 #sub-panel{position:absolute; bottom:0; width:100%; height:45px; overflow:hidden; background-color:#e7e7e7; text-align:center; cursor:default;}
 
@@ -60,7 +60,7 @@ textarea:focus{outline:none;}
 	var dayofweek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 	var IDS_TODAY = 'Today';
 	var IDS_YESTERDAY = 'Yesterday';
-	var IDS_DAYAGO = 'day ago';
+	var IDS_DAYSAGO = 'days ago';
 	var IDS_NEW_NOTE = 'New note';
 	var IDS_NOTES = 'Notes';
 	var IDS_SYNC_SUCCESSFUL = 'Sync successful';
@@ -75,7 +75,7 @@ textarea:focus{outline:none;}
 		dayofweek = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
 		IDS_TODAY = 'Сегодня';
 		IDS_YESTERDAY = 'Вчера';
-		IDS_DAYAGO = 'дн. назад';
+		IDS_DAYSAGO = 'дн. назад';
 		IDS_NEW_NOTE = 'Новая заметка';
 		IDS_NOTES = 'Заметки';
 		IDS_SYNC_SUCCESSFUL = 'Синхронизация успешно завершена';
@@ -144,7 +144,7 @@ textarea:focus{outline:none;}
 		
 		if (DaysAgo == 0) MyDate = IDS_TODAY;
 		if (DaysAgo == 1) MyDate = IDS_YESTERDAY;
-		if (DaysAgo > 1) MyDate = DaysAgo + ' ' + IDS_DAYAGO;
+		if (DaysAgo > 1) MyDate = DaysAgo + ' ' + IDS_DAYSAGO;
 
 		return MyDate;
 	}
@@ -404,8 +404,8 @@ textarea:focus{outline:none;}
 	
 	function UpdateSizes(){
 		document.getElementById('items').style.height=window.innerHeight - 45 + 'px';
-		document.getElementById('memo').style.width=window.innerWidth - 8 + 'px';
-		document.getElementById('memo').style.height=window.innerHeight - 130 + 'px';
+		document.getElementById('memo').style.width=window.innerWidth - 24 + 'px';
+		document.getElementById('memo').style.height=window.innerHeight - 134 + 'px';
 		
 		document.ontouchmove = function(e){
 			e.preventDefault();

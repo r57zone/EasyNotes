@@ -12,11 +12,11 @@ Apps notes for Windows and iOS, with sync. The server is a Windows application s
 
 ## Screenshot
 ### Windows
-![](https://user-images.githubusercontent.com/9499881/54496688-d6e04280-490b-11e9-9c08-9e8b13d96cc8.PNG)
+![](https://user-images.githubusercontent.com/9499881/54879005-a89fbd00-4e4d-11e9-8278-62a3f7b52955.PNG)
 
 ### iOS
-![](https://user-images.githubusercontent.com/9499881/54852979-e1ce1500-4d07-11e9-8c0a-91dca563fcf7.PNG)
-![](https://user-images.githubusercontent.com/9499881/54852821-6ff5cb80-4d07-11e9-889f-2858175af05a.PNG)
+![](https://user-images.githubusercontent.com/9499881/54878988-66767b80-4e4d-11e9-941b-696836b3cb46.PNG)
+![](https://user-images.githubusercontent.com/9499881/54878994-755d2e00-4e4d-11e9-9dfc-b3ff67bb55d6.PNG)
 ![Setup](https://user-images.githubusercontent.com/9499881/54852962-d2e76280-4d07-11e9-841a-06d50fafb3c4.gif)
 
 ## Download

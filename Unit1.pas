@@ -176,7 +176,7 @@ begin
     ID_NOTES:='Notes';
     ID_TODAY:='Today';
     ID_YESTERDAY:='Yesterday';
-    ID_DAYSAGO:='day ago';
+    ID_DAYSAGO:='days ago';
     ID_SYNC:='Sync'
   end;
   Application.Title:=Caption;
@@ -520,7 +520,7 @@ begin
     XMLNode:=XMLDoc.DocumentElement;
     for i:=0 to XMLNode.ChildNodes.Count - 1 do
       try
-        if (XMLNode.ChildNodes[i].NodeName = 'insert')  and (Trim( StrToCharCodes( WideCharCodesToStr(XMLNode.ChildNodes[i].NodeValue) ) ) <> '') then
+        if (XMLNode.ChildNodes[i].NodeName = 'insert') and (Trim( StrToCharCodes( WideCharCodesToStr(XMLNode.ChildNodes[i].NodeValue) ) ) <> '') then
           SQLDB.ExecSQL('INSERT INTO Notes (ID, Note, DateTime) values("' + XMLNode.ChildNodes[i].Attributes['id'] + '", "' + StrToCharCodes(WideCharCodesToStr(XMLNode.ChildNodes[i].NodeValue)) + '", "' + XMLNode.ChildNodes[i].Attributes['datetime'] + '")');
 
         if XMLNode.ChildNodes[i].NodeName = 'update' then
