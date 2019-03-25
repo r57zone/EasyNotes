@@ -6,7 +6,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
 <meta name="apple-mobile-web-app-capable" content="yes">
 <!--<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />-->
-<meta name="description" content="Описание"/>
 <title>EasyNotes</title>
 <meta name="apple-mobile-web-app-title" content="EasyNotes">
 <!--<link rel="stylesheet" href="all.css">-->
@@ -57,7 +56,7 @@ textarea:focus{outline:none;}
 	
 	//Перевод, по умолчанию English
 	var months=['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-	var dayofweek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+	var dayofweek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 	var IDS_TODAY = 'Today';
 	var IDS_YESTERDAY = 'Yesterday';
 	var IDS_DAYSAGO = 'days ago';
@@ -72,7 +71,7 @@ textarea:focus{outline:none;}
 	//в iOS языки прописными буквами
 	if (navigator.language.toLowerCase() == 'ru-ru') {
 		months=['янв.', 'фев.', 'мар.', 'апр.', 'май', 'июн.', 'июл.', 'авг.', 'сен.', 'окт.', 'ноя.', 'дек.'];
-		dayofweek = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
+		dayofweek = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'];
 		IDS_TODAY = 'Сегодня';
 		IDS_YESTERDAY = 'Вчера';
 		IDS_DAYSAGO = 'дн. назад';
@@ -165,6 +164,8 @@ textarea:focus{outline:none;}
 		return MyDate;
 	}
 	
+	
+	
 	function ListDate(e)
 	{
 		var date = new Date();
@@ -183,7 +184,10 @@ textarea:focus{outline:none;}
 		
 		var DaysAgo = Math.floor((DCurDate - DDate) / (1000 * 60 * 60 * 24));
 		
-		if (DaysAgo < DDate.getDay()) MyDate = dayofweek[DDate.getDay()];
+		var GetCurDay = CurDate.getDay(); 
+		if (GetCurDay == 0) GetCurDay = 7;
+		
+		if (DaysAgo < GetCurDay) MyDate = dayofweek[GetCurDay - 1];
 
 		if (DaysAgo == 0) MyDate = mTime;
 		if (DaysAgo == 1) MyDate = IDS_YESTERDAY;
