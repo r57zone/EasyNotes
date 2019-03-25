@@ -164,8 +164,6 @@ textarea:focus{outline:none;}
 		return MyDate;
 	}
 	
-	
-	
 	function ListDate(e)
 	{
 		var date = new Date();
@@ -195,7 +193,6 @@ textarea:focus{outline:none;}
 		return MyDate;
 	}
 	
-	
 	function ShowNotes()
 	{
 		document.getElementById('editor').style.display='none';
@@ -216,7 +213,6 @@ textarea:focus{outline:none;}
 		});
 		//console.log('ShowNotes');
 	}
-	
 	
 	function NewNote()
 	{
@@ -405,7 +401,6 @@ textarea:focus{outline:none;}
 		}
 	}
 	
-	
 	function UpdateSizes(){
 		document.getElementById('items').style.height=window.innerHeight - 45 + 'px';
 		document.getElementById('memo').style.width=window.innerWidth - 24 + 'px';
@@ -429,13 +424,13 @@ textarea:focus{outline:none;}
 	document.addEventListener('DOMContentLoaded', function(){
 		
 		//База данных записей
-		NotesDB = openDatabase('NotesDB', '0.0.1', 'Notes', 2 * 1024 * 1024);
+		NotesDB = openDatabase('NotesDB', '0.8', 'Notes', 2 * 1024 * 1024);
 		NotesDB.transaction(function (tx) {
 			tx.executeSql('CREATE TABLE IF NOT EXISTS Notes (ID, Note, DateTime)');
 		});
 		
 		//База данных действий пользователя
-		ActionsDB = openDatabase('NotesDB', '0.0.1', 'Actions', 2 * 1024 * 1024);
+		ActionsDB = openDatabase('NotesDB', '0.8', 'Actions', 2 * 1024 * 1024);
 		ActionsDB.transaction(function (tx) {
 			tx.executeSql('CREATE TABLE IF NOT EXISTS Actions (Action, ID, Note, DateTime)');
 		});
