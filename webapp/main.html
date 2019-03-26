@@ -239,8 +239,6 @@ textarea:focus{outline:none;}
 	
 	function GetNote(e)
 	{
-		document.getElementById('list').style.display='none';
-		document.getElementById('editor').style.display='block';
 		NotesDB.transaction(function (tx) {
 			tx.executeSql('SELECT * FROM Notes WHERE id=' + e, [], function (tx, results) {
 				document.getElementById('memo').value = CharCodesToStr(results.rows.item(0).Note);
@@ -249,6 +247,8 @@ textarea:focus{outline:none;}
 				document.getElementById('DaysAgo').innerHTML = NoteDateAgo(results.rows.item(0).DateTime);
 				document.getElementById('DateNote').innerHTML = NoteDate(results.rows.item(0).DateTime); 
 				CurNoteID = results.rows.item(0).ID;
+				document.getElementById('list').style.display='none';
+				document.getElementById('editor').style.display='block';
 			}, null);
 			
 		});
