@@ -2,7 +2,7 @@ unit Unit1;
 
 interface
 
-{eNotes 0.8.1, последнее обновление 24.03.2019
+{eNotes 0.8.1, последнее обновление 26.03.2019
 https://github.com/r57zone/eNotes}
 
 uses
@@ -30,6 +30,7 @@ type
   private
     procedure LoadNotes;
     procedure NewNote(MemoFocus: boolean);
+    procedure NoteDone(e: integer);
     procedure MessageHandler(var Msg: TMsg; var Handled: Boolean);
     { Private declarations }
   public
@@ -40,7 +41,7 @@ var
   Main: TMain;
   CloseDuplicate: boolean;
   SQLDB: TSQLiteDatabase;
-  NoteIndex, LatestNote: string;
+  NoteIndex:int64; LatestNote: string;
   FOleInPlaceActiveObject: IOleInPlaceActiveObject;
   SaveMessageHandler: TMessageEvent;
   ID_NEW_NOTE, ID_NOTES, ID_TODAY, ID_YESTERDAY, ID_DAYSAGO, ID_SYNC: string;
@@ -260,6 +261,30 @@ begin
   end;
 end;
 
+procedure TMain.NoteDone(e: integer);
+var
+  CurTimeStamp: int64;
+begin
+  //Add
+  if (NoteIndex = -1) and (Trim(WebView.OleObject.Document.getElementById('memo').innerHTML) <> '') then begin
+	  CurTimeStamp:=GetTimeStamp;
+	  SQLDB.ExecSQL('INSERT INTO Notes (ID, Note, DateTime) values("' + IntToStr(CurTimeStamp) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML)+'", "' + IntToStr(DateTimeToUnix(Now)) + '")');
+	  NoteIndex:=CurTimeStamp; //Для того, чтобы последняя запись не создавалась снова и снова
+	  if e = 0 then begin
+      LoadNotes;
+      NewNote(true); //Новая заметка
+    end;
+  end;
+
+  //Update
+  if (NoteIndex <> -1) and (Trim(LatestNote) <> Trim(WebView.OleObject.Document.getElementById('memo').innerHTML)) then
+	  SQLDB.ExecSQL('UPDATE Notes SET Note="' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", DateTime="' + IntToStr(DateTimeToUnix(Now)) + '" WHERE ID=' + IntToStr(NoteIndex));
+	  if e = 0 then begin
+      LoadNotes;
+      NewNote(true);
+    end;
+end;
+
 procedure TMain.WebViewBeforeNavigate2(Sender: TObject;
   const pDisp: IDispatch; var URL, Flags, TargetFrameName, PostData,
   Headers: OleVariant; var Cancel: WordBool);
@@ -268,7 +293,6 @@ var
   i, DaysAgo: integer;
   NoteDate, sDate: string;
   SQLTB: TSQLiteTable;
-  CurTimeStamp: int64;
 begin
   sUrl:=ExtractFileName(StringReplace(Url, '/', '\', [rfReplaceAll]));
 
@@ -276,7 +300,7 @@ begin
 
   if Pos('main.html#note', sUrl) > 0 then begin
     Delete(sUrl, 1, Pos('#note', sUrl) + 4);
-    NoteIndex:=sUrl;
+    NoteIndex:=StrToIntDef(sUrl, 0);
     SQLTB:=SQLDB.GetTable('SELECT ID, Note, DateTime FROM NOTES WHERE ID=' + sURL);
 
     WebView.OleObject.Document.getElementById('NoteTitle').innerHTML:=ExtractTitle(CharCodesToStr(SQLTB.FieldAsString(1)));
@@ -306,7 +330,7 @@ begin
     if DaysAgo = 0 then NoteDate:=ID_TODAY;
     if DaysAgo = 1 then NoteDate:=ID_YESTERDAY;
 
-    WebView.OleObject.Document.getElementById('DayAgo').innerHTML:=NoteDate;
+    WebView.OleObject.Document.getElementById('DaysAgo').innerHTML:=NoteDate;
     WebView.OleObject.Document.getElementById('DateNote').innerHTML:=NoteDateTime(SQLTB.FieldAsString(2));
     WebView.OleObject.Document.getElementById('memo').innerHTML:=CharCodesToStr(SQLTB.FieldAsString(1));
 
@@ -315,32 +339,17 @@ begin
     if sUrl = 'main.html#new' then
       NewNote(true);
 
-    if sUrl = 'main.html#done' then begin
+    if sUrl = 'main.html#done' then
+      NoteDone(0); //Добавляем, обновляем, статус "0" обновляет список заметок в интерфейсе
 
-      //Add
-      if (NoteIndex = '-1') and (Trim(WebView.OleObject.Document.getElementById('memo').innerHTML) <> '') then begin
-        CurTimeStamp:=GetTimeStamp;
-        SQLDB.ExecSQL('INSERT INTO Notes (ID, Note, DateTime) values("' + IntToStr(CurTimeStamp) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML)+'", "' + IntToStr(DateTimeToUnix(Now)) + '")');
-        NoteIndex:=IntToStr(CurTimeStamp); //Для того, чтобы последняя запись не создавалась снова и снова
-        //LatestNote:=WebView.OleObject.Document.getElementById('memo').innerHTML; //Оставлять старую заметку
-        LoadNotes;
-        NewNote(true); //Новая заметка
-      end;
-
-      //Update
-      if (NoteIndex <> '-1') and (Trim(LatestNote) <> Trim(WebView.OleObject.Document.getElementById('memo').innerHTML)) then
-        SQLDB.ExecSQL('UPDATE Notes SET Note="' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", DateTime="' + IntToStr(DateTimeToUnix(Now)) + '" WHERE ID=' + NoteIndex);
-      LoadNotes;
-    end;
-
-    //Delete
-    if (sUrl = 'main.html#rem') and (NoteIndex <> '-1') then begin
+    //Удаляем
+    if (sUrl = 'main.html#rem') and (NoteIndex <> -1) then begin
       WebView.OleObject.Document.getElementById('memo').innerHTML:='';
-      SQLDB.ExecSQL('DELETE FROM Notes WHERE ID=' + NoteIndex);
+      SQLDB.ExecSQL('DELETE FROM Notes WHERE ID=' + IntToStr(NoteIndex));
       LoadNotes;
       NewNote(false);
     end;
-
+    
   end;
 end;
 
@@ -370,13 +379,8 @@ begin
   end;
   IdHTTPServer.Active:=false;
 
-  //Add
-  if (NoteIndex = '-1') and (Trim(WebView.OleObject.Document.getElementById('memo').innerHTML) <> '') then
-    SQLDB.ExecSQL('INSERT INTO Notes (ID, Note, DateTime) values("' + IntToStr(GetTimeStamp) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML)+'", "'+ IntToStr(DateTimeToUnix(Now)) + '")');
-
-  //Update
-  if (NoteIndex <> '-1') and (Trim(LatestNote) <> Trim(WebView.OleObject.Document.getElementById('memo').innerHTML)) then
-    SQLDB.ExecSQL('UPDATE Notes SET Note="' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", DateTime="' + IntToStr(DateTimeToUnix(Now)) + '" WHERE ID=' + NoteIndex);
+  //Добавляем, обновляем, статус "-1" не обновляет список заметок в интерфейсе
+  NoteDone(-1);
 
   SQLDB.Free;
   Application.OnMessage:=SaveMessageHandler;
@@ -428,12 +432,12 @@ end;
 procedure TMain.NewNote(MemoFocus: boolean);
 begin
   WebView.OleObject.Document.getElementById('NoteTitle').innerHTML:=ID_NEW_NOTE;
-  WebView.OleObject.Document.getElementById('DayAgo').innerHTML:=ID_TODAY;
+  WebView.OleObject.Document.getElementById('DaysAgo').innerHTML:=ID_TODAY;
   WebView.OleObject.Document.getElementById('DateNote').innerHTML:=FormatDateTime('d mmm. h:nn', Now);
   WebView.OleObject.Document.getElementById('memo').innerHTML:='';
   if MemoFocus then
     WebView.OleObject.Document.getElementById('memo').focus;
-  NoteIndex:='-1';
+  NoteIndex:=-1;
   LatestNote:='';
 end;
 

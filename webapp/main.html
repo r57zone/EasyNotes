@@ -34,7 +34,7 @@ body{font-family:Segoe UI; font-size:16px; color: #333; background-color:#f8f8f8
 
 #editor{display:none; width:100%; height:100%;}
 #meta{color:#ac5942; height:32px; width:100%; cursor:default; overflow:hidden; white-space:nowrap;}
-#meta #DayAgo{float:left; margin:8px 0 0 12px; }
+#meta #DaysAgo{float:left; margin:8px 0 0 12px; }
 #meta #DateNote{float:right; margin:8px 12px 0 0;}
 
 #editor #memo{display:block; padding:4px 12px 4px 12px; background-color:transparent; border:none;}
@@ -223,7 +223,7 @@ textarea:focus{outline:none;}
 		document.getElementById('memo').value = '';
 		document.getElementById('NoteTitle').innerHTML = IDS_NEW_NOTE;
 		
-		document.getElementById('DayAgo').innerHTML = NoteDateAgo(GetUTCTimeStamp());
+		document.getElementById('DaysAgo').innerHTML = NoteDateAgo(GetUTCTimeStamp());
 		document.getElementById('DateNote').innerHTML = NoteDate(GetUTCTimeStamp());
 	}
 	
@@ -246,7 +246,7 @@ textarea:focus{outline:none;}
 				document.getElementById('memo').value = CharCodesToStr(results.rows.item(0).Note);
 				LatestNote = document.getElementById('memo').value;
 				document.getElementById('NoteTitle').innerHTML = ExtractTitle(CharCodesToStr(results.rows.item(0).Note));
-				document.getElementById('DayAgo').innerHTML = NoteDateAgo(results.rows.item(0).DateTime);
+				document.getElementById('DaysAgo').innerHTML = NoteDateAgo(results.rows.item(0).DateTime);
 				document.getElementById('DateNote').innerHTML = NoteDate(results.rows.item(0).DateTime); 
 				CurNoteID = results.rows.item(0).ID;
 			}, null);
@@ -405,19 +405,50 @@ textarea:focus{outline:none;}
 		document.getElementById('items').style.height=window.innerHeight - 45 + 'px';
 		document.getElementById('memo').style.width=window.innerWidth - 24 + 'px';
 		document.getElementById('memo').style.height=window.innerHeight - 134 + 'px';
-		
+	}
+	
+	function iOSBlockOffsetAppScrolling(){
 		document.ontouchmove = function(e){
 			e.preventDefault();
 		}
-
-		document.getElementById('items').ontouchmove = function (e) {
-			e.stopPropagation();
-		}
 		
-		document.getElementById('memo').ontouchmove = function (e) {
-			e.stopPropagation();
-		}
-	
+		var ItemsElem = document.getElementById('items');
+		ItemsElem.addEventListener('touchstart', function(event) {
+			this.allowUp = (this.scrollTop > 0);
+			this.allowDown = (this.scrollTop < this.scrollHeight - this.clientHeight);
+			this.slideBeginY = event.pageY;
+		});
+		
+		ItemsElem.addEventListener('touchmove', function(event) {
+			var up = (event.pageY > this.slideBeginY);
+			var down = (event.pageY < this.slideBeginY);
+			this.slideBeginY = event.pageY;
+			if ((up && this.allowUp) || (down && this.allowDown)) {
+				event.stopPropagation();
+			}
+			else {
+				event.preventDefault();
+			}
+		});
+		
+		var MemoElem = document.getElementById('memo');
+		MemoElem.addEventListener('touchstart', function(event) {
+			this.allowUp = (this.scrollTop > 0);
+			this.allowDown = (this.scrollTop < this.scrollHeight - this.clientHeight);
+			this.slideBeginY = event.pageY;
+		});
+		
+		MemoElem.addEventListener('touchmove', function(event) {
+			var up = (event.pageY > this.slideBeginY);
+			var down = (event.pageY < this.slideBeginY);
+			this.slideBeginY = event.pageY;
+			if ((up && this.allowUp) || (down && this.allowDown)) {
+				event.stopPropagation();
+			}
+			else {
+				event.preventDefault();
+			}
+		});
 	}
 	
 	//Инициализация
@@ -439,6 +470,9 @@ textarea:focus{outline:none;}
 		
 		//Старые устройства не поддерживают css calc
 		UpdateSizes(); 
+		
+		//Блокируем скролинг вне приложения
+		iOSBlockOffsetAppScrolling();
 	});
 </script>
 </head>
@@ -465,7 +499,7 @@ textarea:focus{outline:none;}
 			<div id="btn" style="float:right;" onclick="NoteDone()"><img src="images/done.png" /></div>
 		</div>
 		<div id="meta" onselectstart="return false">
-			<div id="DayAgo">3 дня назад</div>
+			<div id="DaysAgo">3 дня назад</div>
 			<div id="DateNote">25 сент. 2:29</div>
 		</div>
 		<div id="clear"></div>
