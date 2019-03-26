@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>EasyNotes</title>
+<!--<link rel="stylesheet" href="all.css">-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+<style type="text/css">
+html,body{padding:0;margin:0; }
+body{font-family:Segoe UI; font-size:16px; color: #333; background-color:#f8f8f8; font-family:"HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; -webkit-user-select: none;}
+
+#clear{clear:both;float:none; height:0;}
+
+#wrapper{position:fixed; width:100%;height:100%; overflow:hidden;}
+
+#panel{width:100%; height:45px; overflow:hidden; background-color:#017d93; color:white; text-align:center; cursor:default;}
+#btn{width:45px; height:45px; cursor:pointer;}
+#btn:hover{opacity:0.7;}
+
+#panel .title{display:inline-block; max-width:60%; margin-top:11px; font-weight:500px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+
+#list{float:left; width:100%; height:100%; color:black;}
+#list #items{height:calc(100% - 40px); overflow-y:auto; -webkit-overflow-scrolling:touch; border-right: 1px solid #d5d5d5;}
+#list #items #note{cursor:pointer; height:45px; border-bottom:1px solid #ededed; overflow:hidden;}
+#list #items #note:hover{background-color:#ededed;}
+#list #items #note #title{float:left; width:65%; margin:12px 0 0 8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+#list #items #note #date{float:right; font-size:14px; width:90px; margin:12px 10px 0 0; color:#454545; text-align:right;}
+
+#editor{display:none; width:100%; height:100%;}
+#meta{color:#ac5942; height:32px; width:100%; cursor:default; overflow:hidden; white-space:nowrap;}
+#meta #DaysAgo{float:left; margin:8px 0 0 12px; }
+#meta #DateNote{float:right; margin:8px 12px 0 0;}
+
+#editor #memo{display:block; padding:4px 12px 4px 12px; background-color:transparent; border:none;}
+textarea{font-weight:normal; font-size:17px; font-family:"HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;  color:#333; overflow-y:auto; -webkit-overflow-scrolling:touch; border-radius:0; -webkit-tap-highlight-color: rgba(0,0,0,0);}
+textarea:focus{outline:none;}
+#sub-panel{position:absolute; bottom:0; width:100%; height:45px; overflow:hidden; background-color:#e7e7e7; text-align:center; cursor:default;}
+
+#notification {position:absolute; bottom:0; width:100%; padding: 15px 0; visibility:hidden; font-size:14px; background-color:#e7e7e7; text-align:center; border-top:1px solid #bdbdbd;}
+#notification.show {visibility: visible; -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s; animation: fadein 0.5s, fadeout 0.5s 2.5s;}
+@-webkit-keyframes fadein {from {opacity: 0;} to {opacity: 1;}}
+@keyframes fadein {from {opacity: 0;} to {opacity: 1;}}
+@-webkit-keyframes fadeout {from {opacity: 1;} to {opacity: 0;}}
+@keyframes fadeout {from {opacity: 1;} to {opacity: 0;}}
+</style>
+<script type="text/javascript">
+	var CurNoteID;
+	var NotesDB;
+	var ActionsDB;
+	var SettingsDB;
+	var ServerIP;
+	
+	//Перевод, по умолчанию English
+	var months=['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+	var dayofweek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+	var IDS_TODAY = 'Today';
+	var IDS_YESTERDAY = 'Yesterday';
+	var IDS_DAYSAGO = 'days ago';
+	var IDS_NEW_NOTE = 'New note';
+	var IDS_NOTES = 'Notes';
+	var IDS_SYNC_ADDRESS = 'Enter IP Address';
+	var IDS_SYNC_SUCCESSFUL = 'Sync successful';
+	var IDS_SYNC_ERROR = 'Sync error';
+	var IDS_SYNC_NEED_CONNECT = 'Need connect to the network for sync';
+	
+	//Русский
+	//console.log(navigator.language.toLowerCase());
+	//в iOS языки прописными буквами
+	if (navigator.language.toLowerCase() == 'ru-ru') {
+		months=['янв.', 'фев.', 'мар.', 'апр.', 'май', 'июн.', 'июл.', 'авг.', 'сен.', 'окт.', 'ноя.', 'дек.'];
+		dayofweek = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'];
+		IDS_TODAY = 'Сегодня';
+		IDS_YESTERDAY = 'Вчера';
+		IDS_DAYSAGO = 'дн. назад';
+		IDS_NEW_NOTE = 'Новая заметка';
+		IDS_NOTES = 'Заметки';
+		IDS_SYNC_ADDRESS = 'Введите IP адрес';
+		IDS_SYNC_SUCCESSFUL = 'Синхронизация успешно завершена';
+		IDS_SYNC_ERROR = 'Ошибка синхронизации';
+		IDS_SYNC_NEED_CONNECT = "Для синхронизации нужно<br>подключиться к сети";
+	}
+
+	function GetUTCTimeStamp() //со смещением UTC зоны
+	{
+		var CurDate = new Date;
+		return Math.floor(Date.UTC(CurDate.getFullYear(), CurDate.getMonth(), CurDate.getDate(), CurDate.getHours(), CurDate.getMinutes(), CurDate.getSeconds(), CurDate.getMilliseconds()) / 1000);
+	}
+
+	function GetTimeStamp() //UTC+0
+	{
+		return Math.floor(new Date() / 1000);
+	}
+	
+	function StrToCharCodes(Str){
+		var NewStr = '';
+		var CharCode = 0;
+		for (var i = 0; i < Str.length; i++)
+			NewStr += 'x' + Str.charCodeAt(i);
+			
+		return NewStr;
+	}
+	
+	function CharCodesToStr(Str){
+		var NewStr = '';
+		if (Str.length = 0) return '';
+		if (Str[0] != 'x') return '';
+		Str = Str.substring(1, Str.length);
+		Str += 'x';
+		while (Str.indexOf('x') > 0) {
+			NewStr += String.fromCharCode(parseInt(Str.substring(0, Str.indexOf('x')), 0));
+			Str = Str.substring(Str.indexOf('x') + 1, Str.length);
+		}	
+		return NewStr;
+	}
+	
+	function DropBDs()
+	{
+		NotesDB.transaction(function (tx) {
+			tx.executeSql('DROP TABLE IF EXISTS Notes');
+		});
+		ActionsDB.transaction(function (tx) {
+			tx.executeSql('DROP TABLE IF EXISTS Actions');
+		});
+		//console.log('DropBDs');
+	}
+	
+	function NoteDateAgo(e)
+	{
+		var date = new Date();
+		date.setTime(e * 1000 + date.getTimezoneOffset() * 60000 ); //После присвоения времени добавляется смещение UTC, поэтому вычитаем его.
+
+		var CurDate = new Date(); //Текущее время для сравнения
+		var mTime = '' + date.getHours();
+		if (date.getMinutes() < 10) {mTime += ':0' + date.getMinutes();} else {mTime += ':' + date.getMinutes();}
+		
+		//Даты без времени для точного определения пройденных дней
+		var DCurDate = new Date(CurDate.getFullYear(), CurDate.getMonth(), CurDate.getDate(), 0, 0, 0, 0);
+		var DDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
+		
+		var DaysAgo = Math.floor((DCurDate - DDate) / (1000 * 60 * 60 * 24));
+		
+		if (DaysAgo == 0) MyDate = IDS_TODAY;
+		if (DaysAgo == 1) MyDate = IDS_YESTERDAY;
+		if (DaysAgo > 1) MyDate = DaysAgo + ' ' + IDS_DAYSAGO;
+
+		return MyDate;
+	}
+	
+	function NoteDate(e)
+	{
+		var date = new Date();
+		date.setTime(e * 1000 + date.getTimezoneOffset() * 60000 ); //После присвоения времени добавляется смещение UTC, поэтому вычитаем его.
+
+		var CurDate = new Date(); //Текущее время для сравнения
+		var mTime = '' + date.getHours();
+		if (date.getMinutes() < 10) {mTime += ':0' + date.getMinutes();} else {mTime += ':' + date.getMinutes();}
+		
+		var MyDate = date.getDate() + ' ' + months[date.getMonth()];
+		if (CurDate.getFullYear() != date.getFullYear()) MyDate += ' ' + date.getFullYear();
+		MyDate += ' ' + mTime;
+		
+		return MyDate;
+	}
+	
+	function ListDate(e)
+	{
+		var date = new Date();
+		date.setTime(e * 1000 + date.getTimezoneOffset() * 60000 ); //После присвоения времени добавляется смещение UTC, поэтому вычитаем его.
+
+		var CurDate = new Date(); //Текущее время для сравнения
+		var mTime = '' + date.getHours();
+		if (date.getMinutes() < 10) {mTime += ':0' + date.getMinutes();} else {mTime += ':' + date.getMinutes();}
+		
+		var MyDate = date.getDate() + ' ' + months[date.getMonth()];
+		if (CurDate.getFullYear() != date.getFullYear()) MyDate += ' ' + date.getFullYear();
+		
+		//Даты без времени для точного определения пройденных дней
+		var DCurDate = new Date(CurDate.getFullYear(), CurDate.getMonth(), CurDate.getDate(), 0, 0, 0, 0);
+		var DDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
+		
+		var DaysAgo = Math.floor((DCurDate - DDate) / (1000 * 60 * 60 * 24));
+		
+		var GetCurDay = CurDate.getDay(); 
+		if (GetCurDay == 0) GetCurDay = 7;
+		
+		if (DaysAgo < GetCurDay) MyDate = dayofweek[GetCurDay - 1];
+
+		if (DaysAgo == 0) MyDate = mTime;
+		if (DaysAgo == 1) MyDate = IDS_YESTERDAY;
+
+		return MyDate;
+	}
+	
+	function ShowNotes()
+	{
+		document.getElementById('editor').style.display='none';
+		document.getElementById('list').style.display='block';
+		var Notes = '';
+		
+		NotesDB.transaction(function (tx) {
+			tx.executeSql('SELECT * FROM Notes ORDER BY DateTime DESC', [], function (tx, results) {
+
+				for (var i = 0; i < results.rows.length; i++) 
+					Notes += '<div onclick="GetNote(' + results.rows.item(i).ID  + ')" id="note"><div id="title">' + CharCodesToStr(results.rows.item(i).Note) + '</div><div id="date">' + ListDate(results.rows.item(i).DateTime) + '</div></div>';
+
+				document.getElementById('NotesCount').innerHTML = IDS_NOTES + ' (' + results.rows.length + ')';
+				document.getElementById('items').innerHTML = Notes; //Заменяем, чтобы не мерцала пустота
+				Notes = '';
+			
+			}, null);
+		});
+		//console.log('ShowNotes');
+	}
+	
+	function NewNote()
+	{
+		CurNoteID = '-1';
+		document.getElementById('list').style.display='none';
+		document.getElementById('editor').style.display='block';
+		
+		document.getElementById('memo').value = '';
+		document.getElementById('NoteTitle').innerHTML = IDS_NEW_NOTE;
+		
+		document.getElementById('DaysAgo').innerHTML = NoteDateAgo(GetUTCTimeStamp());
+		document.getElementById('DateNote').innerHTML = NoteDate(GetUTCTimeStamp());
+	}
+	
+	function ExtractTitle(str)
+	{
+		if (str.length > 20)
+			str.substring(0, 20);
+		
+		return str;
+	}
+	
+	var LatestNote;
+	
+	function GetNote(e)
+	{
+		NotesDB.transaction(function (tx) {
+			tx.executeSql('SELECT * FROM Notes WHERE id=' + e, [], function (tx, results) {
+				document.getElementById('memo').value = CharCodesToStr(results.rows.item(0).Note);
+				LatestNote = document.getElementById('memo').value;
+				document.getElementById('NoteTitle').innerHTML = ExtractTitle(CharCodesToStr(results.rows.item(0).Note));
+				document.getElementById('DaysAgo').innerHTML = NoteDateAgo(results.rows.item(0).DateTime);
+				document.getElementById('DateNote').innerHTML = NoteDate(results.rows.item(0).DateTime); 
+				CurNoteID = results.rows.item(0).ID;
+				document.getElementById('list').style.display='none';
+				document.getElementById('editor').style.display='block';
+			}, null);
+			
+		});
+		//console.log('GetNote ' + e);
+	}
+	
+	function NoteDone()
+	{
+		var TimeStamp = GetTimeStamp();
+		var UTCTimeStamp = GetUTCTimeStamp();
+		
+		if (CurNoteID == '-1') {
+		
+			if (document.getElementById('memo').value.trim() != '') { 
+				NotesDB.transaction(function (tx) {
+					tx.executeSql('INSERT INTO Notes (ID, Note, DateTime) VALUES (' + TimeStamp + ', "' + StrToCharCodes(document.getElementById('memo').value) + '", ' + UTCTimeStamp + ')');
+				});
+				
+				ActionsDB.transaction(function (tx) {
+					tx.executeSql('INSERT INTO Actions (Action, ID, Note, DateTime) VALUES ("insert", ' + TimeStamp + ', "' + StrToCharCodes(document.getElementById('memo').value) + '",' + UTCTimeStamp + ')');
+				});
+			}
+			//console.log('Inserted done');
+		} else if (LatestNote.trim() != document.getElementById('memo').value.trim()) { //Добавлять только при наличии изменений
+
+			NotesDB.transaction(function (tx) {
+				tx.executeSql('UPDATE Notes SET Note="' + StrToCharCodes(document.getElementById('memo').value) + '", DateTime=' + UTCTimeStamp + ' WHERE ID=' + CurNoteID);
+			});
+		
+			ActionsDB.transaction(function (tx) {
+				tx.executeSql('INSERT INTO Actions (Action, ID, Note, DateTime) VALUES ("update", ' + CurNoteID + ', "' + StrToCharCodes(document.getElementById('memo').value) + '",' + UTCTimeStamp + ')');
+			});
+			//console.log('Updated done');
+		}
+		ShowNotes();
+	}
+	
+	function RemNote()
+	{
+		if (CurNoteID == '-1') return;
+		NotesDB.transaction(function (tx) {
+			tx.executeSql('DELETE FROM Notes WHERE id=' + CurNoteID, [], function (tx, results) {
+				ShowNotes();
+			}, null);
+		});
+		ActionsDB.transaction(function (tx) {
+			tx.executeSql('INSERT INTO Actions (Action, ID, Note, DateTime) VALUES ("delete", ' + CurNoteID + ', "", 0)');
+		});
+		//console.log('Deleted ' + CurNoteID);*/
+	}
+	
+	function GetData(URL){
+		var xhr = new XMLHttpRequest();
+		xhr.open('GET', URL, false);
+		xhr.send();
+		if (xhr.status === 200) {
+			return xhr.responseText;
+		} else {
+			return '';
+		}
+	}
+	
+	function SendData(URL, Data){
+		var xhr = new XMLHttpRequest();
+		xhr.open('POST', URL, false);
+		xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+		xhr.send(Data);
+		if (xhr.status === 200) {
+			return xhr.responseText;
+		} else {
+			return '';
+		}
+	}
+	
+	function InsertNote(ID, Note, DateTime){
+		NotesDB.transaction(function (tx) {
+			tx.executeSql('INSERT INTO Notes (ID, Note, DateTime) VALUES (' + ID + ', "' + Note + '", ' + DateTime + ')');
+		});
+	}
+	
+	function Notification(e){
+		var notifyBlock = document.getElementById("notification");
+		notifyBlock.innerHTML = e;
+		notifyBlock.className = "show";
+
+		setTimeout(function(){ notifyBlock.className = notifyBlock.className.replace("show", ""); }, 3000);
+	}
+	
+	function Sync(){
+	
+		if (window.navigator.onLine) {
+		
+
+			//Генерирация XML действий пользователя и отправка на сервер
+			ActionsDB.transaction(function (tx) {
+				tx.executeSql('SELECT * FROM Actions', [], function (tx, results) {
+					var XMLAPI = '<actions>\n';
+					for (var i = 0; i < results.rows.length; i++) {
+						if (results.rows.item(i).Action == 'insert')
+							XMLAPI += '\t<insert id="' + results.rows.item(i).ID + '" datetime="' + results.rows.item(i).DateTime + '">' + results.rows.item(i).Note + '</insert>\n';
+						if (results.rows.item(i).Action == 'update')
+							XMLAPI += '\t<update id="' + results.rows.item(i).ID + '" datetime="' + results.rows.item(i).DateTime + '">' + results.rows.item(i).Note + '</update>\n';
+						if (results.rows.item(i).Action == 'delete')
+							XMLAPI += '\t<delete id="' + results.rows.item(i).ID + '"></delete>\n';
+					}
+					XMLAPI += '</actions>';
+
+					//Отправка XML на сервер
+					if (SendData('http://' + ServerIP + '/syncnotes', XMLAPI) == 'ok') {
+						ActionsDB.transaction(function (tx) {
+							tx.executeSql('DELETE FROM Actions');
+						});
+					} else {
+						Notification(IDS_SYNC_ERROR);
+					}
+					
+				}, null);
+			}); //Завершение генераци и отправки XMLAPI.
+			
+
+			//"Синхронизация" БД
+			//Оптимизация, чтобы загружались недостающие записи, обновлялись и удалялись, в будущем. API - GetData('/getnotes') и GetData('/getnote=' + ID);
+
+			NotesDB.transaction(function (tx) {
+				tx.executeSql('DELETE FROM Notes', [], function (tx, results) {
+					
+					var XMLDoc = document.createElement('div');
+					XMLDoc.innerHTML = GetData('http://' + ServerIP + '/getfullnotes'); 
+			
+					for (var i = 0; i < XMLDoc.getElementsByTagName('note').length; i++) { 
+
+						var ServerNoteID = XMLDoc.getElementsByTagName('note')[i].getAttribute('id');
+						var ServerNote = XMLDoc.getElementsByTagName('note')[i].innerHTML;
+						var ServerNoteDateTime = XMLDoc.getElementsByTagName('note')[i].getAttribute('datetime');
+						
+						InsertNote(ServerNoteID, ServerNote, ServerNoteDateTime);
+					}
+			
+					XMLDoc.innerHTML = '';
+					
+					ShowNotes();
+					
+					Notification(IDS_SYNC_SUCCESSFUL);
+					
+				}, null);
+			});
+		
+		} else {
+			Notification(IDS_SYNC_NEED_CONNECT);
+		}
+	}
+	
+	function UpdateSizes(){
+		document.getElementById('items').style.height = window.innerHeight - 45 + 'px';
+		document.getElementById('memo').style.width = window.innerWidth - 24 + 'px';
+		document.getElementById('memo').style.height = window.innerHeight - 134 + 'px';
+	}
+	
+	//Инициализация
+	document.addEventListener('DOMContentLoaded', function(){
+		
+		//База данных записей
+		NotesDB = openDatabase('NotesDB', '0.8', 'Notes', 2 * 1024 * 1024);
+		NotesDB.transaction(function (tx) {
+			tx.executeSql('CREATE TABLE IF NOT EXISTS Notes (ID, Note, DateTime)');
+		});
+		
+		//База данных действий пользователя
+		ActionsDB = openDatabase('NotesDB', '0.8', 'Actions', 2 * 1024 * 1024);
+		ActionsDB.transaction(function (tx) {
+			tx.executeSql('CREATE TABLE IF NOT EXISTS Actions (Action, ID, Note, DateTime)');
+		});
+		
+		//База данных настроек
+		SettingsDB = openDatabase('NotesDB', '0.8', 'Settings', 2 * 1024 * 1024);
+		SettingsDB.transaction(function (tx) {
+			tx.executeSql('CREATE TABLE IF NOT EXISTS Settings (Parameter, Value)');
+		});
+		
+		SettingsDB.transaction(function (tx) {
+				tx.executeSql('SELECT * FROM Settings WHERE Parameter="ServerIP"', [], function (tx, results) {
+					
+					if (results.rows.length == 0) {
+						ServerIP = prompt(IDS_SYNC_ADDRESS, '192.168.0.1');
+						tx.executeSql('INSERT INTO Settings (Parameter, Value) VALUES ("ServerIP", "' + ServerIP + '")');
+					} else {
+						ServerIP = 'http://' + results.rows.item(0).Value;
+					}
+				}, null);
+			}); 
+		
+		ShowNotes();
+		
+		//Старые устройства не поддерживают css calc
+		UpdateSizes();
+	});
+</script>
+</head>
+<body>
+<div id="wrapper">
+	<div id="list">
+		<div id="panel">
+			<div id="btn" style="float:left;" onclick="Sync()"><img src="images/sync.png" /></div>
+			<div class="title" id="NotesCount">Заметки (0)</div>
+			<div id="btn" style="float:right;" onclick="NewNote()"><img src="images/new.png" /></div>
+		</div>
+		<div id="items">
+			<!--<div id="note">
+				<div id="title">Заголовок</div>
+				<div id="date">28 сен. 2018</div>
+			</div>-->
+		</div>
+	</div>
+	
+	<div id="editor">
+		<div id="panel">
+			<div id="btn" style="float:left;" onclick="ShowNotes()"><img src="images/back.png" /></div>
+			<div class="title" id="NoteTitle">Заметка</div>
+			<div id="btn" style="float:right;" onclick="NoteDone()"><img src="images/done.png" /></div>
+		</div>
+		<div id="meta" onselectstart="return false">
+			<div id="DaysAgo">3 дня назад</div>
+			<div id="DateNote">25 сент. 2:29</div>
+		</div>
+		<div id="clear"></div>
+		<textarea id="memo" value="Текст"></textarea>
+		<div id="sub-panel">
+			<div id="btn" style="float:left;" onclick="RemNote()"><img src="images/rm.png" /></div>
+		</div>
+	</div>
+	<div id="notification"></div>
+</div>
+
+</body>
+</html>

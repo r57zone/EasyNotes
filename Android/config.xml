@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<widget xmlns   = "http://www.w3.org/ns/widgets"
+    xmlns:gap   = "http://phonegap.com/ns/1.0"
+    id          = "com.r57zone.easynotes"
+    versionCode = "10"
+    version     = "0.8" >
+
+	<!-- versionCode is optional and Android only -->
+	<name>EasyNotes</name>
+	<description>App for notes.</description>
+	<platform name="android" />
+	<author href="https://r57zone.github.io" email="r57zone@gmail.com">r57zone</author>
+	<icon src="icon.png" />
+  
+	<allow-intent href="*" />
+	<allow-intent href="*" />
+	<allow-intent href="*" />
+	<access origin="*" />
+	
+	<plugin name="cordova-plugin-whitelist" source="npm" spec="1.1.0" />
+
+</widget>
