@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
 <style type="text/css">
 html,body{padding:0;margin:0; }
-body{font-family:Segoe UI; font-size:16px; color: #333; background-color:#f8f8f8; font-family:"HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; -webkit-user-select: none;}
+body{font-family:Segoe UI; font-size:16px; color: #333; background-color:#f8f8f8; font-family: Arial, sans-serif; -webkit-user-select: none;}
 
 #clear{clear:both;float:none; height:0;}
 
@@ -20,19 +20,19 @@ body{font-family:Segoe UI; font-size:16px; color: #333; background-color:#f8f8f8
 #panel .title{display:inline-block; max-width:60%; margin-top:11px; font-weight:500px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
 
 #list{float:left; width:100%; height:100%; color:black;}
-#list #items{height:calc(100% - 40px); overflow-y:auto; -webkit-overflow-scrolling:touch; border-right: 1px solid #d5d5d5;}
+#list #items{height:calc(100% - 45px); overflow-y:auto; -webkit-overflow-scrolling:touch; border-right: 1px solid #d5d5d5;}
 #list #items #note{cursor:pointer; height:45px; border-bottom:1px solid #ededed; overflow:hidden;}
 #list #items #note:hover{background-color:#ededed;}
-#list #items #note #title{float:left; width:65%; margin:12px 0 0 8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-#list #items #note #date{float:right; font-size:14px; width:90px; margin:12px 10px 0 0; color:#454545; text-align:right;}
+#list #items #note #title{float:left; width:calc(100% - 138px); margin:12px 0 0 8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+#list #items #note #date{float:right; font-size:14px; width:94px; margin:12px 10px 0 0; color:#454545; font-size:10pt; text-align:right;}
 
 #editor{display:none; width:100%; height:100%;}
 #meta{color:#ac5942; height:32px; width:100%; cursor:default; overflow:hidden; white-space:nowrap;}
 #meta #DaysAgo{float:left; margin:8px 0 0 12px; }
 #meta #DateNote{float:right; margin:8px 12px 0 0;}
 
-#editor #memo{display:block; padding:4px 12px 4px 12px; background-color:transparent; border:none;}
-textarea{font-weight:normal; font-size:17px; font-family:"HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;  color:#333; overflow-y:auto; -webkit-overflow-scrolling:touch; border-radius:0; -webkit-tap-highlight-color: rgba(0,0,0,0);}
+#editor #memo{display:block; width:calc(100% - 24px); height:calc(100% - 142px); padding:4px 12px 4px 12px; background-color:transparent; border:none;}
+textarea{font-weight:normal; font-size:17px; font-family: Arial, sans-serif; color:#333; overflow-y:auto; -webkit-overflow-scrolling:touch; border-radius:0; -webkit-tap-highlight-color: rgba(0,0,0,0);}
 textarea:focus{outline:none;}
 #sub-panel{position:absolute; bottom:0; width:100%; height:45px; overflow:hidden; background-color:#e7e7e7; text-align:center; cursor:default;}
 
@@ -399,11 +399,11 @@ textarea:focus{outline:none;}
 		}
 	}
 	
-	function UpdateSizes(){
+	/*function UpdateSizes(){
 		document.getElementById('items').style.height = window.innerHeight - 45 + 'px';
 		document.getElementById('memo').style.width = window.innerWidth - 24 + 'px';
 		document.getElementById('memo').style.height = window.innerHeight - 134 + 'px';
-	}
+	}*/
 	
 	//Инициализация
 	document.addEventListener('DOMContentLoaded', function(){
@@ -433,7 +433,7 @@ textarea:focus{outline:none;}
 						ServerIP = prompt(IDS_SYNC_ADDRESS, '192.168.0.1');
 						tx.executeSql('INSERT INTO Settings (Parameter, Value) VALUES ("ServerIP", "' + ServerIP + '")');
 					} else {
-						ServerIP = 'http://' + results.rows.item(0).Value;
+						ServerIP = results.rows.item(0).Value;
 					}
 				}, null);
 			}); 
@@ -441,7 +441,7 @@ textarea:focus{outline:none;}
 		ShowNotes();
 		
 		//Старые устройства не поддерживают css calc
-		UpdateSizes();
+		//UpdateSizes();
 	});
 </script>
 </head>

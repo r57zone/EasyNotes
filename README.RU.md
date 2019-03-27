@@ -13,7 +13,7 @@
 Зайдите в Safari на iOS устройстве и введите там "IP/webapp", где IP это зарезервированный постоянный IP вашего компьютера. Далее нужно нажать "Поделиться" -> "На экран Домой". На рабочем столе появится ярлык для EasyNotes.
 
 ### Android
-Установите "EasyNotes.apk" и введите зарезервированный постоянный IP вашего компьютера. Если введенный IP адрес был ошибочным, то удалите приложение и установите его снова.
+Установите "EasyNotes.apk" и введите зарезервированный постоянный IP вашего компьютера. Если введенный IP адрес был ошибочным, то переустановите приложение.
 
 ## Скриншоты
 ### Windows
@@ -25,8 +25,8 @@
 ![Setup](https://user-images.githubusercontent.com/9499881/54852962-d2e76280-4d07-11e9-841a-06d50fafb3c4.gif)
 
 ### Android
-![](https://user-images.githubusercontent.com/9499881/55007947-b42fe700-4ff9-11e9-9df1-98d5f84e6793.png)
-![](https://user-images.githubusercontent.com/9499881/55008063-e3deef00-4ff9-11e9-9bc3-ab1de999d2e8.png)
+![](https://user-images.githubusercontent.com/9499881/55101537-bff4d980-50dd-11e9-857e-3b8c94b0efbb.png)
+![](https://user-images.githubusercontent.com/9499881/55101573-d3a04000-50dd-11e9-8432-ccdedb55f0d0.png)
 
 ## Загрузка
 >Версии для Windows 7, 8.1, 10, с установленным Internet Explorer 11 и Android.

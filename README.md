@@ -13,7 +13,7 @@ Apps notes for Windows, iOS and Android, with sync. The server is a Windows appl
 Go to Safari on your iOS device and enter there "IP/webapp", where IP is the reserved permanent IP of your computer. Next you need to click "Share" -> "On the Home Screen". A shortcut to EasyNotes appears on the desktop.
 
 ### Android
-Install "EasyNotes.apk" and enter the reserved permanent IP of your computer. If the entered IP address was wrong, delete the app and install it again.
+Install "EasyNotes.apk" and enter the reserved permanent IP of your computer. If the entered IP address was wrong then reinstall app.
 
 ## Screenshot
 ### Windows
@@ -25,8 +25,8 @@ Install "EasyNotes.apk" and enter the reserved permanent IP of your computer. If
 ![Setup](https://user-images.githubusercontent.com/9499881/54852962-d2e76280-4d07-11e9-841a-06d50fafb3c4.gif)
 
 ### Android
-![](https://user-images.githubusercontent.com/9499881/55007947-b42fe700-4ff9-11e9-9df1-98d5f84e6793.png)
-![](https://user-images.githubusercontent.com/9499881/55008063-e3deef00-4ff9-11e9-9bc3-ab1de999d2e8.png)
+![](https://user-images.githubusercontent.com/9499881/55101219-0dbd1200-50dd-11e9-9ceb-cbe1af2465c7.png)
+![](https://user-images.githubusercontent.com/9499881/55101247-20374b80-50dd-11e9-8d78-8fdc04bb24e3.png)
 
 ## Download
 >Versions for Windows 7, 8.1, 10 with Internet Explorer 11 installed and Android.
