@@ -183,7 +183,7 @@ textarea:focus{outline:none;}
 		var GetCurDay = CurDate.getDay(); 
 		if (GetCurDay == 0) GetCurDay = 7;
 		
-		if (DaysAgo < GetCurDay) MyDate = dayofweek[GetCurDay - 1];
+		if (DaysAgo < GetCurDay) MyDate = dayofweek[date.getDay() - 1];
 
 		if (DaysAgo == 0) MyDate = mTime;
 		if (DaysAgo == 1) MyDate = IDS_YESTERDAY;
