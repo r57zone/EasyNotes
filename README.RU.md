@@ -29,7 +29,7 @@
 ![](https://user-images.githubusercontent.com/9499881/55101573-d3a04000-50dd-11e9-8432-ccdedb55f0d0.png)
 
 ## Загрузка
->Версии для Windows 7, 8.1, 10, с установленным Internet Explorer 11 и Android.
+>Версии для Windows 7, 8.1, 10, с установленным Internet Explorer 11, iOS 6+ и Android 6.1+.
 
 **[Загрузить](https://github.com/r57zone/eNotes/releases)**
 ## Обратная связь
