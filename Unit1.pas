@@ -2,7 +2,7 @@ unit Unit1;
 
 interface
 
-{eNotes 0.8.1, последнее обновление 26.03.2019
+{eNotes 0.8.2, последнее обновление 29.03.2019
 https://github.com/r57zone/eNotes}
 
 uses
@@ -509,12 +509,12 @@ begin
     RequestDocument:='none';
   end;
 
-  if (ARequestInfo.Document = '/syncnotes') and (ARequestInfo.Command = 'POST') and (Trim(ARequestInfo.Params.Text) <> '') then begin
+  if (ARequestInfo.Document = '/syncnotes') and (ARequestInfo.Command = 'POST') and (Trim(ARequestInfo.FormParams) <> '') then begin
     Caption:='EasyNotes - ' + ID_SYNC;
     Application.Title:=Caption;
     XMLDoc:=TXMLDocument.Create(nil);
     try
-      XMLDoc:=LoadXMLData(ARequestInfo.Params.Text);
+      XMLDoc:=LoadXMLData(ARequestInfo.FormParams);
       XMLDoc.Active:=true;
       AResponseInfo.ContentText:='ok';
     except;

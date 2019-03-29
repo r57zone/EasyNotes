@@ -3,7 +3,7 @@
     xmlns:gap   = "http://phonegap.com/ns/1.0"
     id          = "com.r57zone.easynotes"
     versionCode = "10"
-    version     = "0.8.1" >
+    version     = "0.8.2" >
 
 	<!-- versionCode is optional and Android only -->
 	<name>EasyNotes</name>
