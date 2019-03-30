@@ -17,8 +17,7 @@ scrollbar-3dlight-color: #dedede;
 scrollbar-highlight-color: #dedede;
 scrollbar-face-color: #dedede; 
 scrollbar-shadow-color: #dedede;
-scrollbar-darkshadow-color: #dedede;
-}
+scrollbar-darkshadow-color: #dedede;}
 
 #clear{clear:both;float:none; height:0;}
 
@@ -50,7 +49,7 @@ scrollbar-darkshadow-color: #dedede;
 	<div id="list" onselectstart="return false">
 		<div id="panel">
 			<div id="btn" class="add" style="float:left;" onclick="document.location='#new';"><img src="style/images/new.png" /></div>
-			<div class="title" id="NotesCount">Заметки (3)</div>
+			<div class="title" id="NotesCount" onclick="document.location='#about';">Заметки (3)</div>
 			<div id="btn" style="float:right;cursor:default;"></div>
 		</div>
 		<div id="items">
@@ -72,7 +71,7 @@ scrollbar-darkshadow-color: #dedede;
 			<div id="DateNote">25 сент. 2:29</div>
 		</div>
 		<div id="clear"></div>
-		<textarea id="memo">Текст</textarea>
+		<textarea id="memo" oncontextmenu="document.location='#memo-menu';">Текст</textarea>
 	</div>
 </div>
 </body>

@@ -45,4 +45,20 @@ object Main: TMain
     Left = 8
     Top = 8
   end
+  object PopupMenu: TPopupMenu
+    Left = 184
+    Top = 48
+    object CutBtn: TMenuItem
+      Caption = #1042#1099#1088#1077#1079#1072#1090#1100
+      OnClick = CutBtnClick
+    end
+    object CopyBtn: TMenuItem
+      Caption = #1050#1086#1087#1080#1088#1086#1074#1072#1090#1100
+      OnClick = CopyBtnClick
+    end
+    object PasteBtn: TMenuItem
+      Caption = #1042#1089#1090#1072#1074#1080#1090#1100
+      OnClick = PasteBtnClick
+    end
+  end
 end

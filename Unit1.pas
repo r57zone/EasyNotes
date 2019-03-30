@@ -2,19 +2,22 @@ unit Unit1;
 
 interface
 
-{eNotes 0.8.2, последнее обновление 29.03.2019
-https://github.com/r57zone/eNotes}
+{EasyNotes https://github.com/r57zone/EasyNotes}
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, OleCtrls, ExtCtrls, StdCtrls, SQLite3, SQLiteTable3, SHDocVw, ActiveX,
   DateUtils, IniFiles, IdBaseComponent, IdComponent, IdTCPServer,
-  IdCustomHTTPServer, IdHTTPServer, XMLDoc, XMLIntf, Registry;
+  IdCustomHTTPServer, IdHTTPServer, XMLDoc, XMLIntf, Registry, Menus, ClipBrd;
 
 type
   TMain = class(TForm)
     WebView: TWebBrowser;
     IdHTTPServer: TIdHTTPServer;
+    PopupMenu: TPopupMenu;
+    PasteBtn: TMenuItem;
+    CutBtn: TMenuItem;
+    CopyBtn: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure WebViewBeforeNavigate2(Sender: TObject;
       const pDisp: IDispatch; var URL, Flags, TargetFrameName, PostData,
@@ -27,6 +30,9 @@ type
     procedure IdHTTPServerCommandGet(AThread: TIdPeerThread;
       ARequestInfo: TIdHTTPRequestInfo;
       AResponseInfo: TIdHTTPResponseInfo);
+    procedure PasteBtnClick(Sender: TObject);
+    procedure CopyBtnClick(Sender: TObject);
+    procedure CutBtnClick(Sender: TObject);
   private
     procedure LoadNotes;
     procedure NewNote(MemoFocus: boolean);
@@ -45,6 +51,7 @@ var
   FOleInPlaceActiveObject: IOleInPlaceActiveObject;
   SaveMessageHandler: TMessageEvent;
   ID_NEW_NOTE, ID_NOTES, ID_TODAY, ID_YESTERDAY, ID_DAYSAGO, ID_SYNC: string;
+  ID_CUT, ID_COPY, ID_PASTE, IDS_LAST_UPDATE: string;
   AllowIPs: TStringList;
 
 implementation
@@ -171,15 +178,26 @@ begin
     ID_TODAY:='Сегодня';
     ID_YESTERDAY:='Вчера';
     ID_DAYSAGO:='дн. назад';
-    ID_SYNC:='Синхронизация'
+    ID_SYNC:='Синхронизация';
+    ID_CUT:='Вырезать';
+    ID_COPY:='Копировать';
+    ID_PASTE:='Вставить';
+    IDS_LAST_UPDATE:='Последнее обновление:';
   end else begin
     ID_NEW_NOTE:='New note';
     ID_NOTES:='Notes';
     ID_TODAY:='Today';
     ID_YESTERDAY:='Yesterday';
     ID_DAYSAGO:='days ago';
-    ID_SYNC:='Sync'
+    ID_SYNC:='Sync';
+    ID_CUT:='Cut';
+    ID_COPY:='Copy';
+    ID_PASTE:='Paste';
+    IDS_LAST_UPDATE:='Last update:';
   end;
+  CutBtn.Caption:=ID_CUT;
+  CopyBtn.Caption:=ID_COPY;
+  PasteBtn.Caption:=ID_PASTE;
   Application.Title:=Caption;
   Main.Visible:=false;
   WebView.Silent:=true;
@@ -334,23 +352,35 @@ begin
     WebView.OleObject.Document.getElementById('DateNote').innerHTML:=NoteDateTime(SQLTB.FieldAsString(2));
     WebView.OleObject.Document.getElementById('memo').innerHTML:=CharCodesToStr(SQLTB.FieldAsString(1));
 
-  end else begin
-
-    if sUrl = 'main.html#new' then
-      NewNote(true);
-
-    if sUrl = 'main.html#done' then
-      NoteDone(0); //Добавляем, обновляем, статус "0" обновляет список заметок в интерфейсе
-
-    //Удаляем
-    if (sUrl = 'main.html#rem') and (NoteIndex <> -1) then begin
-      WebView.OleObject.Document.getElementById('memo').innerHTML:='';
-      SQLDB.ExecSQL('DELETE FROM Notes WHERE ID=' + IntToStr(NoteIndex));
-      LoadNotes;
-      NewNote(false);
-    end;
-    
   end;
+
+  if sUrl = 'main.html#new' then
+    NewNote(true);
+
+  if sUrl = 'main.html#done' then
+    NoteDone(0); //Добавляем, обновляем, статус "0" обновляет список заметок в интерфейсе
+
+  //Удаляем
+  if (sUrl = 'main.html#rem') and (NoteIndex <> -1) then begin
+    WebView.OleObject.Document.getElementById('memo').innerHTML:='';
+    SQLDB.ExecSQL('DELETE FROM Notes WHERE ID=' + IntToStr(NoteIndex));
+    LoadNotes;
+    NewNote(false);
+  end;
+
+  if (sUrl = 'main.html#memo-menu') then begin
+    PasteBtn.Enabled:=Clipboard.AsText <> '';
+    PasteBtn.Enabled:=Clipboard.AsText <> '';
+    CutBtn.Enabled:=WebView.OleObject.Document.getElementById('memo').selectionStart <> WebView.OleObject.Document.getElementById('memo').selectionEnd;
+    CopyBtn.Enabled:=CutBtn.Enabled;
+    PopupMenu.Popup(Mouse.CursorPos.X, Mouse.CursorPos.Y);
+  end;
+
+  if (sUrl = 'main.html#about') then
+    Application.MessageBox(PChar(Caption + ' 0.8.2' + #13#10 +
+    IDS_LAST_UPDATE + ' 30.03.2019' + #13#10 +
+    'https://r57zone.github.io' + #13#10 +
+    'r57zone@gmail.com'), PChar(Caption), MB_ICONINFORMATION);
 end;
 
 procedure TMain.WebViewDocumentComplete(Sender: TObject;
@@ -563,6 +593,30 @@ begin
   end;
 
   CoUninitialize;
+end;
+
+procedure TMain.PasteBtnClick(Sender: TObject);
+begin
+  keybd_event(VK_CONTROL, MapVirtualKey(VK_CONTROL, 0), 0, 0);
+  keybd_event(Ord('V'), MapVirtualKey(Ord('V'), 0), 0, 0);
+  keybd_event(Ord('V'), MapVirtualKey(Ord('V'), 0), KEYEVENTF_KEYUP, 0);
+  keybd_event(VK_CONTROL, MapVirtualKey(VK_CONTROL, 0), KEYEVENTF_KEYUP, 0)
+end;
+
+procedure TMain.CopyBtnClick(Sender: TObject);
+begin
+  keybd_event(VK_CONTROL, MapVirtualKey(VK_CONTROL, 0), 0, 0);
+  keybd_event(Ord('C'), MapVirtualKey(Ord('C'), 0), 0, 0);
+  keybd_event(Ord('C'), MapVirtualKey(Ord('C'), 0), KEYEVENTF_KEYUP, 0);
+  keybd_event(VK_CONTROL, MapVirtualKey(VK_CONTROL, 0), KEYEVENTF_KEYUP, 0)
+end;
+
+procedure TMain.CutBtnClick(Sender: TObject);
+begin
+  keybd_event(VK_CONTROL, MapVirtualKey(VK_CONTROL, 0), 0, 0);
+  keybd_event(Ord('X'), MapVirtualKey(Ord('X'), 0), 0, 0);
+  keybd_event(Ord('X'), MapVirtualKey(Ord('X'), 0), KEYEVENTF_KEYUP, 0);
+  keybd_event(VK_CONTROL, MapVirtualKey(VK_CONTROL, 0), KEYEVENTF_KEYUP, 0)
 end;
 
 initialization
