@@ -214,9 +214,10 @@ end;
 function ExtractTitle(Str: string): string;
 begin
   if Pos(#10, Str) > 0 then
-    Result:=Copy(Str, 1, Pos(#10, Str) - 1)
-  else
-    Result:=Copy(Str, 1, 150);
+    Str:=Copy(Str, 1, Pos(#10, Str) - 1);
+  if Length(Str) > 150 then
+    Str:=Copy(Str, 1, 150);
+  Result:=Str;
 end;
 
 function NoteDateTime(sDate: string): string; //Без "вчера" и "сегодня"
@@ -370,7 +371,6 @@ begin
 
   if (sUrl = 'main.html#memo-menu') then begin
     PasteBtn.Enabled:=Clipboard.AsText <> '';
-    PasteBtn.Enabled:=Clipboard.AsText <> '';
     CutBtn.Enabled:=WebView.OleObject.Document.getElementById('memo').selectionStart <> WebView.OleObject.Document.getElementById('memo').selectionEnd;
     CopyBtn.Enabled:=CutBtn.Enabled;
     PopupMenu.Popup(Mouse.CursorPos.X, Mouse.CursorPos.Y);
@@ -378,7 +378,7 @@ begin
 
   if (sUrl = 'main.html#about') then
     Application.MessageBox(PChar(Caption + ' 0.8.2' + #13#10 +
-    IDS_LAST_UPDATE + ' 30.03.2019' + #13#10 +
+    IDS_LAST_UPDATE + ' 31.03.2019' + #13#10 +
     'https://r57zone.github.io' + #13#10 +
     'r57zone@gmail.com'), PChar(Caption), MB_ICONINFORMATION);
 end;

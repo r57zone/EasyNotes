@@ -192,6 +192,14 @@ textarea{font-weight:normal; font-size:17px; font-family:Helvetica, Arial, "Luci
 		return MyDate;
 	}
 	
+	function ExtractTitle(Str){
+		if (Str.indexOf('\n') > 0)
+			Str = Str.substring(0, Str.indexOf('\n'));
+		if (Str.length > 50)
+			Str = Str.substring(0, 50);
+		return Str;
+	}
+	
 	function ShowNotes()
 	{
 		document.getElementById('editor').style.display='none';
@@ -202,7 +210,7 @@ textarea{font-weight:normal; font-size:17px; font-family:Helvetica, Arial, "Luci
 			tx.executeSql('SELECT * FROM Notes ORDER BY DateTime DESC', [], function (tx, results) {
 
 				for (var i = 0; i < results.rows.length; i++) 
-					Notes += '<div onclick="GetNote(' + results.rows.item(i).ID  + ')" id="note"><div id="title">' + CharCodesToStr(results.rows.item(i).Note) + '</div><div id="date">' + ListDate(results.rows.item(i).DateTime) + '</div></div>';
+					Notes += '<div onclick="GetNote(' + results.rows.item(i).ID  + ')" id="note"><div id="title">' + ExtractTitle(CharCodesToStr(results.rows.item(i).Note)) + '</div><div id="date">' + ListDate(results.rows.item(i).DateTime) + '</div></div>';
 
 				document.getElementById('NotesCount').innerHTML = IDS_NOTES + ' (' + results.rows.length + ')';
 				document.getElementById('items').innerHTML = Notes; //Заменяем, чтобы не мерцала пустота
@@ -224,14 +232,6 @@ textarea{font-weight:normal; font-size:17px; font-family:Helvetica, Arial, "Luci
 		
 		document.getElementById('DaysAgo').innerHTML = NoteDateAgo(GetUTCTimeStamp());
 		document.getElementById('DateNote').innerHTML = NoteDate(GetUTCTimeStamp());
-	}
-	
-	function ExtractTitle(str)
-	{
-		if (str.length > 20)
-			str.substring(0, 20);
-		
-		return str;
 	}
 	
 	var LatestNote;
