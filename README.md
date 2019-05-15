@@ -1,7 +1,7 @@
 [![EN](https://user-images.githubusercontent.com/9499881/33184537-7be87e86-d096-11e7-89bb-f3286f752bc6.png)](https://github.com/r57zone/eNotes/) 
 [![RU](https://user-images.githubusercontent.com/9499881/27683795-5b0fbac6-5cd8-11e7-929c-057833e01fb1.png)](https://github.com/r57zone/eNotes/blob/master/README.RU.md) 
 # EasyNotes
-Apps notes for Windows, iOS and Android, with sync. The server is a Windows application so you need to run it for sync. Android application may appear later. View API can be [here](https://github.com/r57zone/eNotes/blob/master/API.md).
+Apps notes for Windows, iOS and Android, with sync. The server is a Windows application so you need to run it for sync. View API can be [here](https://github.com/r57zone/eNotes/blob/master/API.md).
 
 ## Setup
 ### Sync of the mobile clients
