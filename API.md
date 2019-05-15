@@ -1,6 +1,6 @@
 ## Easy Notes API
 ### In English
-Data is received and sending in XML markdown. Notes are converted to a sequence of x values + character number. For example, the word "Hello" is converted to "x72x101x108x108x111".
+Data is received and sending in XML markdown. Notes are converted to a sequence values of "x" + character number. For example, the word "Hello" is converted to "x72x101x108x108x111".
 
 | Request | Request type | Description | Example |
 | ------------- | ------------- | ------------- | ------------- |
