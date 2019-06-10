@@ -29,7 +29,7 @@ Install "EasyNotes.apk" and enter the reserved permanent IP of your computer. If
 ![](https://user-images.githubusercontent.com/9499881/55101247-20374b80-50dd-11e9-8d78-8fdc04bb24e3.png)
 
 ## Download
->Versions for Windows 7, 8.1, 10 with Internet Explorer 11 installed, iOS 6+ and Android 6.1+.
+>Versions for Windows 7, 8.1, 10 with Internet Explorer 11 installed, iOS 6+ and Android 5+.
 
 **[Download](https://github.com/r57zone/eNotes/releases)**
 ## Feedback

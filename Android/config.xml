@@ -17,6 +17,9 @@
 	<allow-intent href="*" />
 	<access origin="*" />
 	
+	<preference name="android-minSdkVersion" value="21" />
+	<preference name="android-targetSdkVersion"  value="26" />
+	
 	<plugin name="cordova-plugin-whitelist" source="npm" spec="1.1.0" />
 
 </widget>
