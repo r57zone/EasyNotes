@@ -7,26 +7,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
 <style type="text/css">
 html,body{padding:0;margin:0; }
-body{font-family: Arial, sans-serif; font-size:16px; color: #333; background-color:#f8f8f8; -webkit-user-select: none;}
-
+body{font-family: Arial, sans-serif; font-size:16px; color: #333; background-color:#f8f8f8; -webkit-user-select:none;}
 #clear{clear:both;float:none; height:0;}
 
-#wrapper{position:fixed; width:100%;height:100%; overflow:hidden;}
+#wrapper{position:fixed; width:100%; height:100%; overflow:hidden;}
 
+/* Action bar */
 #panel{width:100%; height:45px; overflow:hidden; background-color:#017d93; color:white; text-align:center; cursor:default;}
 #btn{width:45px; height:45px; cursor:pointer;}
 #btn:hover{opacity:0.7;}
-
 #panel .title{display:inline-block; max-width:60%; margin-top:11px; font-weight:500px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
 
-#list{float:left; width:100%; height:100%; color:black;}
+/* List */
+#list{width:100%; height:100%; color:black;}
 #list #items{height:calc(100% - 45px); overflow-y:auto; -webkit-overflow-scrolling:touch;}
 #list #items #note{cursor:pointer; height:45px; border-bottom:1px solid #ededed; overflow:hidden;}
 #list #items #note:hover{background-color:#ededed;}
 #list #items #note #title{float:left; width:calc(100% - 138px); margin:12px 0 0 8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
 #list #items #note #date{float:right; width:94px; margin:12px 10px 0 0; color:#454545; font-size:10pt; text-align:right;}
 
-#editor{display:none; width:100%; height:100%;}
+/* Editor */
+#editor{width:100%; height:100%;}
 #meta{color:#ac5942; height:32px; width:100%; cursor:default; overflow:hidden; white-space:nowrap;}
 #meta #DaysAgo{float:left; margin:8px 0 0 12px; }
 #meta #DateNote{float:right; margin:8px 12px 0 0;}
@@ -36,19 +37,38 @@ textarea{font-weight:normal; font-size:17px; font-family: Arial, sans-serif; col
 textarea:focus{outline:none;}
 #sub-panel{position:absolute; bottom:0; width:100%; height:45px; overflow:hidden; background-color:#e7e7e7; text-align:center; cursor:default;}
 
-#notification {position:absolute; bottom:0; width:100%; padding: 15px 0; visibility:hidden; font-size:14px; background-color:#e7e7e7; text-align:center; border-top:1px solid #bdbdbd;}
-#notification.show {visibility: visible; -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s; animation: fadein 0.5s, fadeout 0.5s 2.5s;}
-@-webkit-keyframes fadein {from {opacity: 0;} to {opacity: 1;}}
-@keyframes fadein {from {opacity: 0;} to {opacity: 1;}}
-@-webkit-keyframes fadeout {from {opacity: 1;} to {opacity: 0;}}
-@keyframes fadeout {from {opacity: 1;} to {opacity: 0;}}
+/* Settings */
+#settings #items{margin:15px auto; width:92%; overflow:hidden; font-size:14px;}
+#settings #items #item{border:1px solid #dbdbdb; padding:15px 10px; height:15px; background-color:#fff; border-top:none; color:black;}
+#settings #items #item:first-child{border-top-left-radius:15px; border-top-right-radius:15px; border:1px solid #dbdbdb;}
+#settings #items #item:last-child{border-bottom-left-radius:15px; border-bottom-right-radius:15px;}
+#settings #items #item .title{float:left; width:60%; overflow:hidden;}
+#settings #items #item .control{float:left; width:35%; overflow:hidden;}
+#settings .aboutbox{margin:0 auto; width:86%; font-size:14px;}
+#settings input[type="text"],#settings input[type="number"]{border:none; padding:0; width:35%; outline:none; font-size:14px; -webkit-tap-highlight-color: rgba(0,0,0,0);}
+
+/* Notification */
+#notification{position:absolute; bottom:0; width:100%; padding: 15px 0; visibility:hidden; font-size:14px; background-color:#e7e7e7; text-align:center; border-top:1px solid #bdbdbd;}
+#notification.show{visibility: visible; -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s; animation: fadein 0.5s, fadeout 0.5s 2.5s;}
+@-webkit-keyframes fadein{from {opacity: 0;} to {opacity: 1;}}
+@keyframes fadein{from {opacity: 0;} to {opacity: 1;}}
+@-webkit-keyframes fadeout{from {opacity: 1;} to {opacity: 0;}}
+@keyframes fadeout{from {opacity: 1;} to {opacity: 0;}}
+
+/* Sliding pages */
+.page{position:absolute; top:0; left:0; width:100%; height:100%}
+.page.left{-webkit-transform:translate3d(-100%,0,0); transform:translate3d(-100%,0,0);}
+.page.center{-webkit-transform:translate3d(0,0,0); transform:translate3d(0,0,0);}
+.page.right{-webkit-transform:translate3d(100%,0,0); transform:translate3d(100%,0,0);}
+.page.transition{-webkit-transition-duration:.25s; transition-duration:.25s;}
 </style>
 <script type="text/javascript">
-	var CurNoteID;
+	var CurNoteID = -1; //По умолчанию, для возврата настроек
 	var NotesDB;
 	var ActionsDB;
 	var SettingsDB;
 	var ServerIP;
+	var ServerPort;
 	
 	//Перевод, по умолчанию English
 	var months=['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -58,7 +78,10 @@ textarea:focus{outline:none;}
 	var IDS_DAYSAGO = 'days ago';
 	var IDS_NEW_NOTE = 'New note';
 	var IDS_NOTES = 'Notes';
-	var IDS_SYNC_ADDRESS = 'Enter IP Address';
+	var IDS_SETTINGS = 'Settings';
+	var IDS_SYNC_IP = 'IP address';
+	var IDS_SYNC_PORT = 'Port';
+	var IDS_ABOUT_SYNC = 'IP address and port to sync notes with your PC.';
 	var IDS_SYNC_SUCCESSFUL = 'Sync successful';
 	var IDS_SYNC_ERROR = 'Sync error';
 	var IDS_SYNC_NEED_CONNECT = 'Need connect to the network for sync';
@@ -74,7 +97,10 @@ textarea:focus{outline:none;}
 		IDS_DAYSAGO = 'дн. назад';
 		IDS_NEW_NOTE = 'Новая заметка';
 		IDS_NOTES = 'Заметки';
-		IDS_SYNC_ADDRESS = 'Введите IP адрес';
+		IDS_SETTINGS = 'Настройки';
+		IDS_SYNC_IP = 'IP адрес';
+		IDS_SYNC_PORT = 'Порт';
+		IDS_ABOUT_SYNC = 'IP адрес и порт для синхронизации заметок с вашим ПК.';
 		IDS_SYNC_SUCCESSFUL = 'Синхронизация успешно завершена';
 		IDS_SYNC_ERROR = 'Ошибка синхронизации';
 		IDS_SYNC_NEED_CONNECT = "Для синхронизации нужно<br>подключиться к сети";
@@ -201,8 +227,10 @@ textarea:focus{outline:none;}
 	
 	function ShowNotes()
 	{
-		document.getElementById('editor').style.display='none';
-		document.getElementById('list').style.display='block';
+		document.getElementById('list').className = 'page transition center';
+		document.getElementById('editor').className = 'page transition right';
+		//document.getElementById('editor').style.display = 'none';
+		//document.getElementById('list').style.display = 'block';
 		var Notes = '';
 		
 		NotesDB.transaction(function (tx) {
@@ -223,8 +251,11 @@ textarea:focus{outline:none;}
 	function NewNote()
 	{
 		CurNoteID = '-1';
-		document.getElementById('list').style.display='none';
-		document.getElementById('editor').style.display='block';
+		document.getElementById('list').className = 'page transition left';
+		document.getElementById('editor').className = 'page transition center';
+		document.getElementById('settings').className = 'page transition right';
+		//document.getElementById('list').style.display = 'none';
+		//document.getElementById('editor').style.display = 'block';
 		
 		document.getElementById('memo').value = '';
 		document.getElementById('NoteTitle').innerHTML = IDS_NEW_NOTE;
@@ -233,10 +264,65 @@ textarea:focus{outline:none;}
 		document.getElementById('DateNote').innerHTML = NoteDate(GetUTCTimeStamp());
 	}
 	
+	function ShowSettings()
+	{
+		//document.getElementById('list').className = 'page transition left';
+		document.getElementById('editor').className = 'page transition left';
+		document.getElementById('settings').className = 'page transition center';
+		//document.getElementById('list').style.display = 'none';
+		//document.getElementById('editor').style.display = 'none';
+		//document.getElementById('settings').style.display = 'none';
+
+		document.getElementById('memo').value = '';
+		document.getElementById('NoteTitle').innerHTML = IDS_NEW_NOTE;
+		
+		document.getElementById('DaysAgo').innerHTML = NoteDateAgo(GetUTCTimeStamp());
+		document.getElementById('DateNote').innerHTML = NoteDate(GetUTCTimeStamp());
+	}
+	
+	function SettingsDone()
+	{
+		var NewIP = document.getElementById('ServerIP').value;
+		var NewPort = document.getElementById('ServerPort').value;
+		
+		SettingsDB.transaction(function (tx) {
+			tx.executeSql('SELECT * FROM Settings WHERE Parameter="ServerIP"', [], function (tx, results) {
+				
+				if (results.rows.length == 0) {
+					tx.executeSql('INSERT INTO Settings (Parameter, Value) VALUES ("ServerIP", "' + NewIP + '")');
+					ServerIP = NewIP;
+				} else {
+					tx.executeSql('UPDATE Settings SET ServerIP="' + NewIP + '" WHERE ServerIP="' + ServerIP + '"');
+					ServerIP = NewIP;
+				}
+			}, null);
+		}); 
+		
+		SettingsDB.transaction(function (tx) {
+			tx.executeSql('SELECT * FROM Settings WHERE Parameter="ServerPort"', [], function (tx, results) {
+				
+				if (results.rows.length == 0) {
+					tx.executeSql('INSERT INTO Settings (Parameter, Value) VALUES ("ServerPort", "' + NewPort + '")');
+					ServerPort = NewPort;
+				} else {
+					tx.executeSql('UPDATE Settings SET ServerPort="' + NewPort + '" WHERE ServerPort="' + ServerPort + '"');
+					ServerPort = NewPort;
+				}
+			}, null);
+		}); 
+		
+		GetNote(CurNoteID);
+	}
+	
 	var LatestNote;
 	
 	function GetNote(e)
-	{
+	{	
+		if (e == -1)
+		{
+			NewNote()
+			return;
+		}
 		NotesDB.transaction(function (tx) {
 			tx.executeSql('SELECT * FROM Notes WHERE id=' + e, [], function (tx, results) {
 				document.getElementById('memo').value = CharCodesToStr(results.rows.item(0).Note);
@@ -245,8 +331,12 @@ textarea:focus{outline:none;}
 				document.getElementById('DaysAgo').innerHTML = NoteDateAgo(results.rows.item(0).DateTime);
 				document.getElementById('DateNote').innerHTML = NoteDate(results.rows.item(0).DateTime); 
 				CurNoteID = results.rows.item(0).ID;
-				document.getElementById('list').style.display='none';
-				document.getElementById('editor').style.display='block';
+				document.getElementById('list').className = 'page transition left';
+				document.getElementById('editor').className = 'page transition center';
+				document.getElementById('settings').className = 'page transition right';
+				//document.getElementById('list').style.display = 'none';
+				//document.getElementById('settings').style.display = 'none';
+				//document.getElementById('editor').style.display = 'block';
 			}, null);
 			
 		});
@@ -298,6 +388,14 @@ textarea:focus{outline:none;}
 		//console.log('Deleted ' + CurNoteID);*/
 	}
 	
+	function Notification(e){
+		var notifyBlock = document.getElementById("notification");
+		notifyBlock.innerHTML = e;
+		notifyBlock.className = "show";
+
+		setTimeout(function(){ notifyBlock.className = notifyBlock.className.replace("show", ""); }, 3000);
+	}
+	
 	function GetData(URL){
 		var xhr = new XMLHttpRequest();
 		xhr.open('GET', URL, false);
@@ -310,36 +408,60 @@ textarea:focus{outline:none;}
 	}
 	
 	function SendData(URL, Data){
-		var xhr = new XMLHttpRequest();
-		xhr.open('POST', URL, false);
-		xhr.setRequestHeader('Content-type', 'text/plain');
-		xhr.send(Data);
-		if (xhr.status === 200) {
-			return xhr.responseText;
-		} else {
+		try {
+			var xhr = new XMLHttpRequest();
+			xhr.open('POST', URL, false);
+			xhr.setRequestHeader('Content-type', 'text/plain');
+			xhr.send(Data);
+			if (xhr.status === 200) {
+				return xhr.responseText;
+			} else {
+				return '';
+			}
+		} catch (e) {
+			Notification(IDS_CONNECTION_FAILED);
 			return '';
 		}
-	}
-	
-	function InsertNote(ID, Note, DateTime){
-		NotesDB.transaction(function (tx) {
-			tx.executeSql('INSERT INTO Notes (ID, Note, DateTime) VALUES (' + ID + ', "' + Note + '", ' + DateTime + ')');
-		});
-	}
-	
-	function Notification(e){
-		var notifyBlock = document.getElementById("notification");
-		notifyBlock.innerHTML = e;
-		notifyBlock.className = "show";
-
-		setTimeout(function(){ notifyBlock.className = notifyBlock.className.replace("show", ""); }, 3000);
 	}
 	
 	function Sync(){
 	
 		if (window.navigator.onLine) {
 		
+			function InsertNote(ID, Note, DateTime){
+				NotesDB.transaction(function (tx) {
+					tx.executeSql('INSERT INTO Notes (ID, Note, DateTime) VALUES (' + ID + ', "' + Note + '", ' + DateTime + ')');
+				});
+			}
+			
+			function SyncNotes(){
+				//"Синхронизация" БД
+				//Оптимизация, чтобы загружались недостающие записи, обновлялись и удалялись, возможно в будущем. API - GetData('/api/getnotes') и GetData('/api/getnote=' + ID);
+				NotesDB.transaction(function (tx) {
+					tx.executeSql('DELETE FROM Notes', [], function (tx, results) {
+						
+						var XMLDoc = document.createElement('div');
+						XMLDoc.innerHTML = GetData('http://' + ServerIP + ':' + ServerPort + '/api/getfullnotes');
+						
+						for (var i = 0; i < XMLDoc.getElementsByTagName('note').length; i++) { 
 
+							var ServerNoteID = XMLDoc.getElementsByTagName('note')[i].getAttribute('id');
+							var ServerNote = XMLDoc.getElementsByTagName('note')[i].innerHTML;
+							var ServerNoteDateTime = XMLDoc.getElementsByTagName('note')[i].getAttribute('datetime');
+							
+							InsertNote(ServerNoteID, ServerNote, ServerNoteDateTime);
+						}
+				
+						XMLDoc.innerHTML = '';
+						
+						ShowNotes();
+						
+						Notification(IDS_SYNC_SUCCESSFUL);
+						
+					}, null);
+				});
+			}
+			
 			//Генерирация XML действий пользователя и отправка на сервер
 			ActionsDB.transaction(function (tx) {
 				tx.executeSql('SELECT * FROM Actions', [], function (tx, results) {
@@ -355,44 +477,18 @@ textarea:focus{outline:none;}
 					XMLAPI += '</actions>';
 
 					//Отправка XML на сервер
-					if (SendData('http://' + ServerIP + '/syncnotes', XMLAPI) == 'ok') {
+					if (SendData('http://' + ServerIP + ':' + ServerPort + '/api/syncnotes', XMLAPI) == 'ok') {
 						ActionsDB.transaction(function (tx) {
 							tx.executeSql('DELETE FROM Actions');
 						});
+						
+						SyncNotes();
 					} else {
 						Notification(IDS_SYNC_ERROR);
 					}
 					
 				}, null);
 			}); //Завершение генераци и отправки XMLAPI.
-			
-
-			//"Синхронизация" БД
-			//Оптимизация, чтобы загружались недостающие записи, обновлялись и удалялись, в будущем. API - GetData('/getnotes') и GetData('/getnote=' + ID);
-
-			NotesDB.transaction(function (tx) {
-				tx.executeSql('DELETE FROM Notes', [], function (tx, results) {
-					
-					var XMLDoc = document.createElement('div');
-					XMLDoc.innerHTML = GetData('http://' + ServerIP + '/getfullnotes'); 
-			
-					for (var i = 0; i < XMLDoc.getElementsByTagName('note').length; i++) { 
-
-						var ServerNoteID = XMLDoc.getElementsByTagName('note')[i].getAttribute('id');
-						var ServerNote = XMLDoc.getElementsByTagName('note')[i].innerHTML;
-						var ServerNoteDateTime = XMLDoc.getElementsByTagName('note')[i].getAttribute('datetime');
-						
-						InsertNote(ServerNoteID, ServerNote, ServerNoteDateTime);
-					}
-			
-					XMLDoc.innerHTML = '';
-					
-					ShowNotes();
-					
-					Notification(IDS_SYNC_SUCCESSFUL);
-					
-				}, null);
-			});
 		
 		} else {
 			Notification(IDS_SYNC_NEED_CONNECT);
@@ -408,37 +504,54 @@ textarea:focus{outline:none;}
 	//Инициализация
 	document.addEventListener('DOMContentLoaded', function(){
 		
+		//Перевод
+		document.getElementById('NotesCount').innerHTML = IDS_NOTES + ' (0)';
+		document.getElementById('SettingsTitle').innerText = IDS_SETTINGS;
+		document.getElementById('SyncIP').innerText = IDS_SYNC_IP;
+		document.getElementById('SyncPort').innerText = IDS_SYNC_PORT;
+		document.getElementById('AboutSync').innerText = IDS_ABOUT_SYNC;
+		
 		//База данных записей
-		NotesDB = openDatabase('NotesDB', '0.8', 'Notes', 2 * 1024 * 1024);
+		NotesDB = openDatabase('NotesDB', '1.0', 'Notes', 2 * 1024 * 1024);
 		NotesDB.transaction(function (tx) {
 			tx.executeSql('CREATE TABLE IF NOT EXISTS Notes (ID, Note, DateTime)');
 		});
 		
 		//База данных действий пользователя
-		ActionsDB = openDatabase('NotesDB', '0.8', 'Actions', 2 * 1024 * 1024);
+		ActionsDB = openDatabase('NotesDB', '1.0', 'Actions', 2 * 1024 * 1024);
 		ActionsDB.transaction(function (tx) {
 			tx.executeSql('CREATE TABLE IF NOT EXISTS Actions (Action, ID, Note, DateTime)');
 		});
 		
 		//База данных настроек
-		SettingsDB = openDatabase('NotesDB', '0.8', 'Settings', 2 * 1024 * 1024);
+		SettingsDB = openDatabase('NotesDB', '1.0', 'Settings', 2 * 1024 * 1024);
 		SettingsDB.transaction(function (tx) {
 			tx.executeSql('CREATE TABLE IF NOT EXISTS Settings (Parameter, Value)');
 		});
+		
+		ShowNotes();
 		
 		SettingsDB.transaction(function (tx) {
 				tx.executeSql('SELECT * FROM Settings WHERE Parameter="ServerIP"', [], function (tx, results) {
 					
 					if (results.rows.length == 0) {
-						ServerIP = prompt(IDS_SYNC_ADDRESS, '192.168.0.1');
-						tx.executeSql('INSERT INTO Settings (Parameter, Value) VALUES ("ServerIP", "' + ServerIP + '")');
+						ShowSettings();
 					} else {
 						ServerIP = results.rows.item(0).Value;
+						document.getElementById('ServerIP').value = ServerIP;
 					}
 				}, null);
-			}); 
-		
-		ShowNotes();
+			});
+			
+		SettingsDB.transaction(function (tx) {
+				tx.executeSql('SELECT * FROM Settings WHERE Parameter="ServerPort"', [], function (tx, results) {
+					
+					if (results.rows.length != 0) {
+						ServerPort = results.rows.item(0).Value;
+						document.getElementById('ServerPort').value = ServerPort;
+					}
+				}, null);
+			});
 		
 		//Старые устройства не поддерживают css calc
 		//UpdateSizes();
@@ -447,7 +560,7 @@ textarea:focus{outline:none;}
 </head>
 <body>
 <div id="wrapper">
-	<div id="list">
+	<div id="list" class="page">
 		<div id="panel">
 			<div id="btn" style="float:left;" onclick="Sync()"><img src="images/sync.png" /></div>
 			<div class="title" id="NotesCount">Заметки (0)</div>
@@ -461,7 +574,7 @@ textarea:focus{outline:none;}
 		</div>
 	</div>
 	
-	<div id="editor">
+	<div id="editor" class="page right">
 		<div id="panel">
 			<div id="btn" style="float:left;" onclick="ShowNotes()"><img src="images/back.png" /></div>
 			<div class="title" id="NoteTitle">Заметка</div>
@@ -475,8 +588,29 @@ textarea:focus{outline:none;}
 		<textarea id="memo" value="Текст"></textarea>
 		<div id="sub-panel">
 			<div id="btn" style="float:left;" onclick="RemNote()"><img src="images/rm.png" /></div>
+			<div id="btn" style="float:right;" onclick="ShowSettings()"><img src="images/settings.png" /></div>
 		</div>
 	</div>
+	
+	<div id="settings" class="page right">
+		<div id="panel">
+			<div id="btn" style="float:left;" onclick="GetNote(CurNoteID)"><img src="images/back.png" /></div>
+			<div class="title" id="SettingsTitle">Настройки</div>
+			<div id="btn" style="float:right;" onclick="SettingsDone()"><img src="images/done.png" /></div>
+		</div>
+		<div id="items">
+			<div id="item">
+				<div class="title" id="SyncIP">IP адрес</div>
+				<div id="control"><input type="text" id="ServerIP" value="192.168.0.1" placeholder="192.168.0.1"></div>
+			</div>
+			<div id="item">
+				<div class="title" id="SyncPort">Порт</div>
+				<div id="control"><input type="number" id="ServerPort" value="735" placeholder="735"></div>
+			</div>
+		</div>
+		<div id="AboutSync" class="aboutbox"></div>
+	</div>
+	
 	<div id="notification"></div>
 </div>
 

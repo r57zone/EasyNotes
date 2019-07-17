@@ -157,9 +157,11 @@ begin
   Caption:='EasyNotes';
 
   Ini:=TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Config.ini');
+  IdHTTPServer.DefaultPort:=Ini.ReadInteger('Main', 'Port', 735);
   Width:=Ini.ReadInteger('Main', 'Width', Width);
   Height:=Ini.ReadInteger('Main', 'Height', Height);
   if Ini.ReadBool('Main', 'FirstRun', true) then begin
+    Ini.WriteInteger('Main', 'Port', 735);
     Ini.WriteBool('Main', 'FirstRun', false);
     Reg:=TRegistry.Create;
     Reg.RootKey:=HKEY_CURRENT_USER;
@@ -377,8 +379,8 @@ begin
   end;
 
   if (sUrl = 'main.html#about') then
-    Application.MessageBox(PChar(Caption + ' 0.8.2' + #13#10 +
-    IDS_LAST_UPDATE + ' 31.03.2019' + #13#10 +
+    Application.MessageBox(PChar(Caption + ' 0.8.3' + #13#10 +
+    IDS_LAST_UPDATE + ' 18.07.19' + #13#10 +
     'https://r57zone.github.io' + #13#10 +
     'r57zone@gmail.com'), PChar(Caption), MB_ICONINFORMATION);
 end;
@@ -484,7 +486,7 @@ begin
   if (AllowIPs.Count > 0) and (Trim(AnsiUpperCase(AllowIPs.Strings[0])) <> 'ALL') then
     if Pos(AThread.Connection.Socket.Binding.PeerIP, AllowIPs.Text) = 0 then Exit;
 
-  if ARequestInfo.Document = '/getnotes' then begin
+  if ARequestInfo.Document = '/api/getnotes' then begin
 
     SQLTB:=SQLDB.GetTable('SELECT * FROM Notes ORDER BY DateTime DESC');
     try
@@ -501,7 +503,7 @@ begin
     RequestDocument:='none';
   end;
 
-  if ARequestInfo.Document = '/getfullnotes' then begin
+  if ARequestInfo.Document = '/api/getfullnotes' then begin
 
     SQLTB:=SQLDB.GetTable('SELECT * FROM Notes ORDER BY DateTime DESC');
     try
@@ -518,7 +520,7 @@ begin
     RequestDocument:='none';
   end;
 
-  if Copy(ARequestInfo.Document, 1, 9)= '/getnote=' then begin
+  if Copy(ARequestInfo.Document, 1, 9)= '/api/getnote=' then begin
     NotesIDs:=TStringList.Create;
     NotesIDs.Text:=Copy(ARequestInfo.Document, 10, Length(ARequestInfo.Document));
     NotesIDs.Text:=StringReplace(NotesIDs.Text, ',', #13#10, [rfReplaceAll]);
@@ -539,7 +541,8 @@ begin
     RequestDocument:='none';
   end;
 
-  if (ARequestInfo.Document = '/syncnotes') and (ARequestInfo.Command = 'POST') and (Trim(ARequestInfo.FormParams) <> '') then begin
+  if (ARequestInfo.Document = '/api/syncnotes') and (ARequestInfo.Command = 'POST') and (Trim(ARequestInfo.FormParams) <> '') then begin
+    //NoteDone(1); //—охранение текущий заметки, без обновлени€ списка
     Caption:='EasyNotes - ' + ID_SYNC;
     Application.Title:=Caption;
     XMLDoc:=TXMLDocument.Create(nil);
@@ -548,7 +551,7 @@ begin
       XMLDoc.Active:=true;
       AResponseInfo.ContentText:='ok';
     except;
-       AResponseInfo.ContentText:='error';
+      AResponseInfo.ContentText:='error';
     end;
 
     XMLNode:=XMLDoc.DocumentElement;
@@ -584,7 +587,7 @@ begin
     if FileExists(RequestDocument) then begin
       AResponseInfo.ContentType:=IdHTTPServer.MIMETable.GetDefaultFileExt(RequestDocument);
 
-    if ARequestInfo.Document = '/app.manifest' then
+    if (ARequestInfo.Document = '/app.manifest') then
       AResponseInfo.ContentType:='text/cache-manifest';
 
       IdHTTPServer.ServeFile(AThread, AResponseinfo, RequestDocument);

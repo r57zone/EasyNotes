@@ -36,6 +36,7 @@ object Main: TMain
   object IdHTTPServer: TIdHTTPServer
     Bindings = <>
     CommandHandlers = <>
+    DefaultPort = 735
     Greeting.NumericCode = 0
     MaxConnectionReply.NumericCode = 0
     ReplyExceptionCode = 0
