@@ -587,7 +587,7 @@ begin
     if FileExists(RequestDocument) then begin
       AResponseInfo.ContentType:=IdHTTPServer.MIMETable.GetDefaultFileExt(RequestDocument);
 
-    if (ARequestInfo.Document = '/app.manifest') then
+    if ARequestInfo.Document = '/app.manifest' then
       AResponseInfo.ContentType:='text/cache-manifest';
 
       IdHTTPServer.ServeFile(AThread, AResponseinfo, RequestDocument);
