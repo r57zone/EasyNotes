@@ -4,16 +4,15 @@
 Apps notes for Windows, iOS and Android, with sync. The server is a Windows application so you need to run it for sync. View API can be [here](https://github.com/r57zone/eNotes/blob/master/API.md).
 
 ## Setup
-### Sync of the mobile clients
-1. Reserve a fixed IP address for a computer with a Windows application. This is done in the settings of the Wi-Fi router in the DHCP section.
+### Sync of the mobile apps
+1. Reserve a permanent IP address for a computer with a Windows application. This is done in the settings of the Wi-Fi router in the "DHCP" section.
 2. Reserve the permanent IP address of the mobile device and paste its IP address into the "Allow.txt" file to block access to other devices or insert the word "ALL" to open access for all IP addresses. Remove unnecessary IP addresses.
-3. Find out the local IP address of your Windows computer. This can be done, for example, on the command line, by entering the "ipconfig" command or in the Windows settings.
 
 ### iOS
 Go to Safari on your iOS device and enter there "IP/webapp", where IP is the reserved permanent IP of your computer. Next you need to click "Share" -> "On the Home Screen". A shortcut to EasyNotes appears on the desktop.
 
 ### Android
-Install "EasyNotes.apk" and enter the reserved permanent IP of your computer. If the entered IP address was wrong then reinstall app.
+Install "EasyNotes.apk" and enter the reserved permanent IP of your computer.
 
 ## Screenshot
 ### Windows
