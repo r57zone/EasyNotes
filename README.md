@@ -9,7 +9,7 @@ Apps notes for Windows, iOS and Android, with sync. The server is a Windows appl
 2. Reserve the permanent IP address of the mobile device and paste its IP address into the "Allow.txt" file to block access to other devices or insert the word "ALL" to open access for all IP addresses. Remove unnecessary IP addresses.
 
 ### iOS
-Go to Safari on your iOS device and enter there "IP/webapp", where IP is the reserved permanent IP of your computer. Next you need to click "Share" -> "On the Home Screen". A shortcut to EasyNotes appears on the desktop.
+Go to Safari on your iOS device and enter there "http://IP:735/webapp", where IP is the reserved permanent IP of your computer. Next you need to click "Share" -> "On the Home Screen". A shortcut to EasyNotes appears on the desktop.
 
 ### Android
 Install "EasyNotes.apk" and enter the reserved permanent IP of your computer.
