@@ -14,7 +14,7 @@ Go to Safari on your iOS device and enter there "http://IP:735/webapp", where IP
 ### Android
 Install "EasyNotes.apk" and enter the reserved permanent IP of your computer.
 
-## Screenshot
+## Screenshots
 ### Windows
 ![](https://user-images.githubusercontent.com/9499881/54879005-a89fbd00-4e4d-11e9-8278-62a3f7b52955.PNG)
 
