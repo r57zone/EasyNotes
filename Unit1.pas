@@ -92,18 +92,18 @@ begin
   end;
 end;
 
-function StringToWideString(const s: AnsiString; codePage: Word): WideString;
+function StringToWideString(const Str: AnsiString; CodePage: Word): WideString;
 var
   l: integer;
 begin
-  if s = '' then
+  if Str = '' then
     Result:=''
   else
   begin
-    l:=MultiByteToWideChar(codePage, MB_PRECOMPOSED, PChar(@s[1]), -1, nil, 0);
+    l:=MultiByteToWideChar(CodePage, MB_PRECOMPOSED, PChar(@Str[1]), -1, nil, 0);
     SetLength(Result, l - 1);
     if l > 1 then
-      MultiByteToWideChar(CodePage, MB_PRECOMPOSED, PChar(@s[1]), -1, PWideChar(@Result[1]), l - 1);
+      MultiByteToWideChar(CodePage, MB_PRECOMPOSED, PChar(@Str[1]), -1, PWideChar(@Result[1]), l - 1);
   end;
 end;
 
@@ -492,7 +492,7 @@ begin
     try
       AResponseInfo.ContentText:='<notes>' + #13#10;
       for i:=0 to SQLTB.Count - 1 do begin
-        AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<note id="' + SQLTB.FieldAsString(0) + '" datetime="' + AnsiToUTF8(SQLTB.FieldAsString(2)) + '"></note>' + #13#10;
+        AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<note id="' + SQLTB.FieldAsString(0) + '" datetime="' + SQLTB.FieldAsString(2) + '"></note>' + #13#10;
         SQLTB.Next;
       end;
     finally
