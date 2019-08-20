@@ -36,7 +36,7 @@ type
   private
     procedure LoadNotes;
     procedure NewNote(MemoFocus: boolean);
-    procedure NoteDone(e: integer);
+    procedure NoteDone(UpdateList: integer);
     procedure MessageHandler(var Msg: TMsg; var Handled: Boolean);
     { Private declarations }
   public
@@ -282,7 +282,7 @@ begin
   end;
 end;
 
-procedure TMain.NoteDone(e: integer);
+procedure TMain.NoteDone(UpdateList: integer);
 var
   CurTimeStamp: int64;
 begin
@@ -291,19 +291,17 @@ begin
 	  CurTimeStamp:=GetTimeStamp;
 	  SQLDB.ExecSQL('INSERT INTO Notes (ID, Note, DateTime) values("' + IntToStr(CurTimeStamp) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML)+'", "' + IntToStr(DateTimeToUnix(Now)) + '")');
 	  NoteIndex:=CurTimeStamp; //Для того, чтобы последняя запись не создавалась снова и снова
-	  if e = 0 then begin
-      LoadNotes;
-      NewNote(true); //Новая заметка
-    end;
   end;
 
   //Update
-  if (NoteIndex <> -1) and (Trim(LatestNote) <> Trim(WebView.OleObject.Document.getElementById('memo').innerHTML)) then
+  if (NoteIndex <> -1) and (Trim(LatestNote) <> Trim(WebView.OleObject.Document.getElementById('memo').innerHTML)) then begin
 	  SQLDB.ExecSQL('UPDATE Notes SET Note="' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", DateTime="' + IntToStr(DateTimeToUnix(Now)) + '" WHERE ID=' + IntToStr(NoteIndex));
-	  if e = 0 then begin
-      LoadNotes;
-      NewNote(true);
-    end;
+  end;
+
+  if UpdateList = 0 then begin
+    LoadNotes;
+    NewNote(true); //Новая заметка
+  end;
 end;
 
 procedure TMain.WebViewBeforeNavigate2(Sender: TObject;
@@ -380,7 +378,7 @@ begin
 
   if (sUrl = 'main.html#about') then
     Application.MessageBox(PChar(Caption + ' 0.8.3' + #13#10 +
-    IDS_LAST_UPDATE + ' 18.07.19' + #13#10 +
+    IDS_LAST_UPDATE + ' 20.08.19' + #13#10 +
     'https://r57zone.github.io' + #13#10 +
     'r57zone@gmail.com'), PChar(Caption), MB_ICONINFORMATION);
 end;
