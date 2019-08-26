@@ -7,6 +7,7 @@ Apps notes for Windows, iOS and Android, with sync. The server is a Windows appl
 ### Sync of the mobile apps
 1. Reserve a permanent IP address for a computer with a Windows application. This is done in the settings of the Wi-Fi router in the "DHCP" section.
 2. Reserve the permanent IP address of the mobile device and paste its IP address into the "Allow.txt" file to block access to other devices or insert the word "ALL" to open access for all IP addresses. Remove unnecessary IP addresses.
+3. Check Windows Firewall for incoming connections.
 
 ### iOS
 Go to Safari on your iOS device and enter there "http://IP:735/webapp", where IP is the reserved permanent IP of your computer. Next you need to click "Share" -> "On the Home Screen". A shortcut to EasyNotes appears on the desktop.
