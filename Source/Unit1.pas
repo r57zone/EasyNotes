@@ -378,7 +378,7 @@ begin
 
   if (sUrl = 'main.html#about') then
     Application.MessageBox(PChar(Caption + ' 0.8.3' + #13#10 +
-    IDS_LAST_UPDATE + ' 20.08.19' + #13#10 +
+    IDS_LAST_UPDATE + ' 26.08.19' + #13#10 +
     'https://r57zone.github.io' + #13#10 +
     'r57zone@gmail.com'), PChar(Caption), MB_ICONINFORMATION);
 end;
@@ -484,6 +484,8 @@ begin
   if (AllowIPs.Count > 0) and (Trim(AnsiUpperCase(AllowIPs.Strings[0])) <> 'ALL') then
     if Pos(AThread.Connection.Socket.Binding.PeerIP, AllowIPs.Text) = 0 then Exit;
 
+  AResponseInfo.CustomHeaders.Add('Access-Control-Allow-Origin: *'); //Политика безопасности браузеров
+
   if ARequestInfo.Document = '/api/getnotes' then begin
 
     SQLTB:=SQLDB.GetTable('SELECT * FROM Notes ORDER BY DateTime DESC');
@@ -502,7 +504,6 @@ begin
   end;
 
   if ARequestInfo.Document = '/api/getfullnotes' then begin
-
     SQLTB:=SQLDB.GetTable('SELECT * FROM Notes ORDER BY DateTime DESC');
     try
       AResponseInfo.ContentText:='<notes>' + #13#10;
