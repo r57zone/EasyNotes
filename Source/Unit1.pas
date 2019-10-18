@@ -147,6 +147,7 @@ var
   Ini: TIniFile;
   Reg: TRegistry;
   WND: HWND;
+  i: integer;
 begin
   //Предотвращение повторого запуска
   WND:=FindWindow('TMain', 'EasyNotes');
@@ -295,7 +296,10 @@ begin
 
   //Update
   if (NoteIndex <> -1) and (Trim(LatestNote) <> Trim(WebView.OleObject.Document.getElementById('memo').innerHTML)) then begin
-	  SQLDB.ExecSQL('UPDATE Notes SET Note="' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", DateTime="' + IntToStr(DateTimeToUnix(Now)) + '" WHERE ID=' + IntToStr(NoteIndex));
+    if (GetAsyncKeyState(VK_LSHIFT) <> 0) or (GetAsyncKeyState(VK_RSHIFT) <> 0) then //Если нажат Shift, то не обновляем дату
+      SQLDB.ExecSQL('UPDATE Notes SET Note="' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '" WHERE ID=' + IntToStr(NoteIndex))
+    else //По умолчанию (обновление текста и даты)
+	    SQLDB.ExecSQL('UPDATE Notes SET Note="' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", DateTime="' + IntToStr(DateTimeToUnix(Now)) + '" WHERE ID=' + IntToStr(NoteIndex));
   end;
 
   if UpdateList = 0 then begin
@@ -487,7 +491,6 @@ begin
   AResponseInfo.CustomHeaders.Add('Access-Control-Allow-Origin: *'); //Политика безопасности браузеров
 
   if ARequestInfo.Document = '/api/getnotes' then begin
-
     SQLTB:=SQLDB.GetTable('SELECT * FROM Notes ORDER BY DateTime DESC');
     try
       AResponseInfo.ContentText:='<notes>' + #13#10;

@@ -47,8 +47,8 @@ object Main: TMain
     Top = 8
   end
   object PopupMenu: TPopupMenu
-    Left = 184
-    Top = 48
+    Left = 40
+    Top = 8
     object CutBtn: TMenuItem
       Caption = #1042#1099#1088#1077#1079#1072#1090#1100
       OnClick = CutBtnClick

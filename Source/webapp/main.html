@@ -80,21 +80,30 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 </style>
 <script type="text/javascript">
 	var CurNoteID;
+	var LatestNote;
+	var CurNoteDateTime;
 	var NotesDB;
 	var ActionsDB;
+	var UpdateDateTime = true;
 	
 	//Перевод, по умолчанию English
-	var months=['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-	var dayofweek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+	var IDS_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+	var IDS_DAYOFWEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 	var IDS_TODAY = 'Today';
 	var IDS_YESTERDAY = 'Yesterday';
 	var IDS_DAYSAGO = 'days ago';
 	var IDS_NEW_NOTE = 'New note';
 	var IDS_NOTES = 'Notes';
+	
+	//Настройки
 	var IDS_SETTINGS = 'Settings';
 	var IDS_SYNC_IP = 'IP address';
 	var IDS_SYNC_PORT = 'Port';
 	var IDS_ABOUT_SYNC = 'IP address and port to sync notes with your PC.';
+	
+	//Уведомления
+	var IDS_DATE_UPDATE = 'Date will be update';
+	var IDS_DATE_NOT_UPDATE = 'Date will not be update';
 	var IDS_SYNC_SUCCESSFUL = 'Sync successful';
 	var IDS_SYNC_ERROR = 'Sync error';
 	var IDS_SYNC_NEED_CONNECT = 'Need connect to the network for sync';
@@ -104,17 +113,23 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 	//console.log(navigator.language.toLowerCase());
 	//в iOS языки прописными буквами
 	if (navigator.language.toLowerCase() == 'ru-ru') {
-		months=['янв.', 'фев.', 'мар.', 'апр.', 'май', 'июн.', 'июл.', 'авг.', 'сен.', 'окт.', 'ноя.', 'дек.'];
-		dayofweek = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'];
+		IDS_MONTHS = ['янв.', 'фев.', 'мар.', 'апр.', 'май', 'июн.', 'июл.', 'авг.', 'сен.', 'окт.', 'ноя.', 'дек.'];
+		IDS_DAYOFWEEK = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'];
 		IDS_TODAY = 'Сегодня';
 		IDS_YESTERDAY = 'Вчера';
 		IDS_DAYSAGO = 'дн. назад';
 		IDS_NEW_NOTE = 'Новая заметка';
 		IDS_NOTES = 'Заметки';
+		
+		//Настройки
 		IDS_SETTINGS = 'Настройки';
 		IDS_SYNC_IP = 'IP адрес';
 		IDS_SYNC_PORT = 'Порт';
 		IDS_ABOUT_SYNC = 'IP адрес и порт для синхронизации заметок с вашим ПК.';
+		
+		//Уведомления
+		IDS_DATE_UPDATE = 'Дата обновится';
+		IDS_DATE_NOT_UPDATE = 'Дата не обновится';
 		IDS_SYNC_SUCCESSFUL = 'Синхронизация успешно завершена';
 		IDS_SYNC_ERROR = 'Ошибка синхронизации';
 		IDS_SYNC_NEED_CONNECT = 'Для синхронизации нужно<br>подключиться к сети';
@@ -127,7 +142,7 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 		return Math.floor(Date.UTC(CurDate.getFullYear(), CurDate.getMonth(), CurDate.getDate(), CurDate.getHours(), CurDate.getMinutes(), CurDate.getSeconds(), CurDate.getMilliseconds()) / 1000);
 	}
 
-	function GetTimeStamp() //UTC+0
+	function GetTimeStamp() //UTC +0
 	{
 		return Math.floor(new Date() / 1000);
 	}
@@ -154,7 +169,7 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 		return NewStr;
 	}
 	
-	function DropBDs()
+	/*function DropBDs()
 	{
 		NotesDB.transaction(function (tx) {
 			tx.executeSql('DROP TABLE IF EXISTS Notes');
@@ -163,7 +178,7 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 			tx.executeSql('DROP TABLE IF EXISTS Actions');
 		});
 		//console.log('DropBDs');
-	}
+	}*/
 	
 	function NoteDateAgo(e)
 	{
@@ -196,7 +211,7 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 		var mTime = '' + date.getHours();
 		if (date.getMinutes() < 10) {mTime += ':0' + date.getMinutes();} else {mTime += ':' + date.getMinutes();}
 		
-		var MyDate = date.getDate() + ' ' + months[date.getMonth()];
+		var MyDate = date.getDate() + ' ' + IDS_MONTHS[date.getMonth()];
 		if (CurDate.getFullYear() != date.getFullYear())
 			MyDate += ' ' + date.getFullYear();
 		MyDate += ' ' + mTime;
@@ -213,7 +228,7 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 		var mTime = '' + date.getHours();
 		if (date.getMinutes() < 10) {mTime += ':0' + date.getMinutes();} else {mTime += ':' + date.getMinutes();}
 		
-		var MyDate = date.getDate() + ' ' + months[date.getMonth()];
+		var MyDate = date.getDate() + ' ' + IDS_MONTHS[date.getMonth()];
 		if (CurDate.getFullYear() != date.getFullYear()) MyDate += ' ' + date.getFullYear();
 		
 		//Даты без времени для точного определения пройденных дней
@@ -225,7 +240,7 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 		var GetCurDay = CurDate.getDay(); 
 		if (GetCurDay == 0) GetCurDay = 7;
 		
-		if (DaysAgo < GetCurDay) MyDate = dayofweek[date.getDay() - 1];
+		if (DaysAgo < GetCurDay) MyDate = IDS_DAYOFWEEK[date.getDay() - 1];
 
 		if (DaysAgo == 0) MyDate = mTime;
 		if (DaysAgo == 1) MyDate = IDS_YESTERDAY;
@@ -239,6 +254,21 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 		if (Str.length > 50)
 			Str = Str.substring(0, 50);
 		return Str;
+	}
+	
+	function ChangeDateTimeStatus()
+	{
+		if (CurNoteID == '-1')
+			return;
+		if (UpdateDateTime == false)
+		{
+			UpdateDateTime = true;
+			Notification(IDS_DATE_UPDATE);
+			
+		} else {
+			UpdateDateTime = false;
+			Notification(IDS_DATE_NOT_UPDATE);
+		}
 	}
 	
 	function ShowNotes()
@@ -301,8 +331,6 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 		GetNote(CurNoteID);
 	}
 	
-	var LatestNote;
-	
 	function GetNote(e)
 	{	
 		if (e == -1)
@@ -310,6 +338,7 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 			NewNote()
 			return;
 		}
+		UpdateDateTime = true;
 		NotesDB.transaction(function (tx) {
 			tx.executeSql('SELECT * FROM Notes WHERE id=' + e, [], function (tx, results) {
 				document.getElementById('memo').value = CharCodesToStr(results.rows.item(0).Note);
@@ -318,6 +347,7 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 				document.getElementById('DaysAgo').innerHTML = NoteDateAgo(results.rows.item(0).DateTime);
 				document.getElementById('DateNote').innerHTML = NoteDate(results.rows.item(0).DateTime); 
 				CurNoteID = results.rows.item(0).ID;
+				CurNoteDateTime = results.rows.item(0).DateTime;
 				document.getElementById('list').className = 'page transition left';
 				document.getElementById('editor').className = 'page transition center';
 				//document.getElementById('settings').className = 'page transition right';
@@ -349,13 +379,23 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 			//console.log('Inserted done');
 		} else if (LatestNote.trim() != document.getElementById('memo').value.trim()) { //Добавлять только при наличии изменений
 
-			NotesDB.transaction(function (tx) {
-				tx.executeSql('UPDATE Notes SET Note="' + StrToCharCodes(document.getElementById('memo').value) + '", DateTime=' + UTCTimeStamp + ' WHERE ID=' + CurNoteID);
-			});
-		
-			ActionsDB.transaction(function (tx) {
-				tx.executeSql('INSERT INTO Actions (Action, ID, Note, DateTime) VALUES ("update", ' + CurNoteID + ', "' + StrToCharCodes(document.getElementById('memo').value) + '",' + UTCTimeStamp + ')');
-			});
+			if (UpdateDateTime) {
+				NotesDB.transaction(function (tx) {
+					tx.executeSql('UPDATE Notes SET Note="' + StrToCharCodes(document.getElementById('memo').value) + '", DateTime=' + UTCTimeStamp + ' WHERE ID=' + CurNoteID);
+				});
+			
+				ActionsDB.transaction(function (tx) {
+					tx.executeSql('INSERT INTO Actions (Action, ID, Note, DateTime) VALUES ("update", ' + CurNoteID + ', "' + StrToCharCodes(document.getElementById('memo').value) + '",' + UTCTimeStamp + ')');
+				});
+			} else {
+				NotesDB.transaction(function (tx) {
+					tx.executeSql('UPDATE Notes SET Note="' + StrToCharCodes(document.getElementById('memo').value) + '" WHERE ID=' + CurNoteID);
+				});
+			
+				ActionsDB.transaction(function (tx) {
+					tx.executeSql('INSERT INTO Actions (Action, ID, Note, DateTime) VALUES ("update", ' + CurNoteID + ', "' + StrToCharCodes(document.getElementById('memo').value) + '",' + CurNoteDateTime + ')');
+				});
+			}
 			//console.log('Updated done');
 		}
 		ShowNotes();
@@ -375,9 +415,9 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 		//console.log('Deleted ' + CurNoteID);*/
 	}
 	
-	function Notification(e){
+	function Notification(Str){
 		var notifyBlock = document.getElementById("notification");
-		notifyBlock.innerHTML = e;
+		notifyBlock.innerHTML = Str;
 		notifyBlock.className = "show";
 
 		setTimeout(function(){ notifyBlock.className = notifyBlock.className.replace("show", ""); }, 3000);
@@ -589,7 +629,7 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 		</div>
 		<div id="meta" onselectstart="return false">
 			<div id="DaysAgo">3 дня назад</div>
-			<div id="DateNote">25 сент. 2:29</div>
+			<div id="DateNote" onclick="ChangeDateTimeStatus()">25 сент. 2:29</div>
 		</div>
 		<div id="clear"></div>
 		<textarea id="memo" value="Текст"></textarea>
