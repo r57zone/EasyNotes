@@ -79,11 +79,13 @@ body{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 </style>
 <script type="text/javascript">
+	var NotesDB;
+	var ActionsDB;
+	
 	var CurNoteID;
 	var LatestNote;
 	var CurNoteDateTime;
-	var NotesDB;
-	var ActionsDB;
+	
 	var UpdateDateTime = true;
 	
 	//Перевод, по умолчанию English
@@ -95,7 +97,7 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 	var IDS_NEW_NOTE = 'New note';
 	var IDS_NOTES = 'Notes';
 	
-	//Настройки
+	//Настройки для Android
 	var IDS_SETTINGS = 'Settings';
 	var IDS_SYNC_IP = 'IP address';
 	var IDS_SYNC_PORT = 'Port';
@@ -121,7 +123,7 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 		IDS_NEW_NOTE = 'Новая заметка';
 		IDS_NOTES = 'Заметки';
 		
-		//Настройки
+		//Настройки для Android
 		IDS_SETTINGS = 'Настройки';
 		IDS_SYNC_IP = 'IP адрес';
 		IDS_SYNC_PORT = 'Порт';

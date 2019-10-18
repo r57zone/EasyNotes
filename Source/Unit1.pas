@@ -147,7 +147,6 @@ var
   Ini: TIniFile;
   Reg: TRegistry;
   WND: HWND;
-  i: integer;
 begin
   //Предотвращение повторого запуска
   WND:=FindWindow('TMain', 'EasyNotes');
@@ -382,7 +381,7 @@ begin
 
   if (sUrl = 'main.html#about') then
     Application.MessageBox(PChar(Caption + ' 0.8.3' + #13#10 +
-    IDS_LAST_UPDATE + ' 26.08.19' + #13#10 +
+    IDS_LAST_UPDATE + ' 18.10.19' + #13#10 +
     'https://r57zone.github.io' + #13#10 +
     'r57zone@gmail.com'), PChar(Caption), MB_ICONINFORMATION);
 end;
