@@ -328,7 +328,7 @@ textarea:focus{outline:none;}
 					tx.executeSql('INSERT INTO Settings (Parameter, Value) VALUES ("ServerIP", "' + NewIP + '")');
 					ServerIP = NewIP;
 				} else {
-					tx.executeSql('UPDATE Settings SET ServerIP="' + NewIP + '" WHERE ServerIP="' + ServerIP + '"');
+					tx.executeSql('UPDATE Settings SET Value="' + NewIP + '" WHERE Parameter="ServerIP"');
 					ServerIP = NewIP;
 				}
 			}, null);
@@ -341,7 +341,7 @@ textarea:focus{outline:none;}
 					tx.executeSql('INSERT INTO Settings (Parameter, Value) VALUES ("ServerPort", "' + NewPort + '")');
 					ServerPort = NewPort;
 				} else {
-					tx.executeSql('UPDATE Settings SET ServerPort="' + NewPort + '" WHERE ServerPort="' + ServerPort + '"');
+					tx.executeSql('UPDATE Settings SET Value="' + NewPort + '" WHERE Parameter="ServerPort"');
 					ServerPort = NewPort;
 				}
 			}, null);
