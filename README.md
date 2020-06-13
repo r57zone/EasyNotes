@@ -6,6 +6,8 @@ Apps notes for Windows, iOS and Android, with sync. The server is a Windows appl
 ## Features
 If you want to leave the old date when editing a note then on mobile phones you need to click on the date and on the PC hold down the "Shift" key when you click on the done button.
 
+
+Dark theme is available for Android and iOS apps.
 ## Setup
 ### Sync of the mobile apps
 1. Reserve a permanent IP address for a computer with a Windows application. This is done in the settings of the Wi-Fi router in the "DHCP" section.
