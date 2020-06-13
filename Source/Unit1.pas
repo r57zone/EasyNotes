@@ -47,6 +47,7 @@ var
   Main: TMain;
   CloseDuplicate: boolean;
   SQLDB: TSQLiteDatabase;
+  OldWidth, OldHeight: integer;
   NoteIndex:int64; LatestNote: string;
   FOleInPlaceActiveObject: IOleInPlaceActiveObject;
   SaveMessageHandler: TMessageEvent;
@@ -160,6 +161,8 @@ begin
   IdHTTPServer.DefaultPort:=Ini.ReadInteger('Main', 'Port', 735);
   Width:=Ini.ReadInteger('Main', 'Width', Width);
   Height:=Ini.ReadInteger('Main', 'Height', Height);
+  OldWidth:=Width;
+  OldHeight:=Height;
   if Ini.ReadBool('Main', 'FirstRun', true) then begin
     Ini.WriteInteger('Main', 'Port', 735);
     Ini.WriteBool('Main', 'FirstRun', false);
@@ -203,7 +206,7 @@ begin
   Application.Title:=Caption;
   Main.Visible:=false;
   WebView.Silent:=true;
-  WebView.Navigate(ExtractFilePath(ParamStr(0)) + 'main.html');
+  WebView.Navigate(ExtractFilePath(ParamStr(0)) + 'style\main.html');
   SQLDB:=TSQLiteDatabase.Create('Notes.db');
   if not SQLDB.TableExists('notes') then
     SQLDB.ExecSQL('CREATE TABLE Notes (ID TIMESTAMP, Note TEXT, DateTime TIMESTAMP)');
@@ -380,8 +383,8 @@ begin
   end;
 
   if (sUrl = 'main.html#about') then
-    Application.MessageBox(PChar(Caption + ' 0.8.3' + #13#10 +
-    IDS_LAST_UPDATE + ' 18.10.19' + #13#10 +
+    Application.MessageBox(PChar(Caption + ' 0.8.4' + #13#10 +
+    IDS_LAST_UPDATE + ' 13.06.20' + #13#10 +
     'https://r57zone.github.io' + #13#10 +
     'r57zone@gmail.com'), PChar(Caption), MB_ICONINFORMATION);
 end;
@@ -404,12 +407,13 @@ procedure TMain.FormClose(Sender: TObject; var Action: TCloseAction);
 var
   Ini: TIniFile;
 begin
-  if Main.WindowState <> wsMaximized then begin
-    Ini:=TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Config.ini');
-    Ini.WriteInteger('Main', 'Width', Width);
-    Ini.WriteInteger('Main', 'Height', Height);
-    Ini.Free;
-  end;
+  if (Main.WindowState <> wsMaximized) then
+    if (OldWidth <> Width) or (OldHeight <> Height) then begin
+      Ini:=TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Config.ini');
+      Ini.WriteInteger('Main', 'Width', Width);
+      Ini.WriteInteger('Main', 'Height', Height);
+      Ini.Free;
+    end;
   IdHTTPServer.Active:=false;
 
   //Добавляем, обновляем, статус "-1" не обновляет список заметок в интерфейсе
@@ -570,7 +574,7 @@ begin
       end;
 
     //Проблема с мгновенным выводом, поэтому просто обновляем страницу и LoadNotes загружается снова.
-    WebView.Navigate(ExtractFilePath(ParamStr(0)) + 'main.html');
+    WebView.Navigate(ExtractFilePath(ParamStr(0)) + 'style\main.html');
 
     Caption:='EasyNotes';
     Application.Title:=Caption;

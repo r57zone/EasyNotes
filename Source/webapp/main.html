@@ -13,16 +13,16 @@
 <link rel="apple-touch-startup-image" href="images/launch.png">
 <style type="text/css">
 html,body{padding:0;margin:0; }
-body{font-family: Arial, sans-serif; font-size:16px; color: #333; background-color:#f8f8f8; -webkit-user-select:none;}
+body{font-family: Arial, sans-serif; font-size:16px; color: #333; background-color:#f8f8f8; -webkit-user-select:none; -webkit-tap-highlight-color:transparent;}
+a{text-decoration:none;font-weight:bold; color:gray;}
 #clear{clear:both;float:none; height:0;}
-
 #wrapper{position:fixed; width:100%; height:100%; overflow:hidden;}
 
 /* Action bar */
 #panel{width:100%; height:45px; overflow:hidden; background-color:#017d93; color:white; text-align:center; cursor:default;}
 #btn{width:45px; height:45px; cursor:pointer;}
 #btn:hover{opacity:0.7;}
-#panel .title{display:inline-block; max-width:60%; margin-top:11px; font-weight:500px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+#panel .title{display:inline-block; max-width:60%; margin-top:12px; font-weight:500px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
 
 /* List */
 #list{width:100%; height:100%; color:black;}
@@ -49,9 +49,14 @@ textarea:focus{outline:none;}
 #settings #items #item:first-child{border-top-left-radius:15px; border-top-right-radius:15px; border:1px solid #dbdbdb;}
 #settings #items #item:last-child{border-bottom-left-radius:15px; border-bottom-right-radius:15px;}
 #settings #items #item .title{float:left; width:60%; overflow:hidden;}
-#settings #items #item .control{float:left; width:35%; overflow:hidden;}
+#settings #items #item #control{float:left; width:40%; overflow:hidden; text-align:right;}
 #settings .aboutbox{margin:0 auto; width:86%; font-size:14px;}
-#settings input[type="text"],#settings input[type="number"]{border:none; padding:0; width:35%; outline:none; font-size:14px; -webkit-tap-highlight-color: rgba(0,0,0,0);}
+#settings input[type="text"],#settings input[type="number"]{border:none; padding:0 10px; width:80%; outline:none; font-size:14px; -webkit-tap-highlight-color:rgba(0,0,0,0); text-align:right;}
+.switch{position:relative; display:inline-block; width:40px; height:20px; background-color:#7e7e7e; border-radius:20px;}
+.switch::after{content:''; position:absolute; width:18px; height:18px; border-radius:50%; background-color:white; top:1px; left:1px;}
+.checkbox:checked + .switch::after{left:20px;}
+.checkbox:checked + .switch{background-color:#3498db;}
+.checkbox{display:none;}
 
 /* Notification */
 #notification{position:absolute; bottom:0; width:100%; padding: 15px 0; visibility:hidden; font-size:14px; background-color:#e7e7e7; text-align:center; border-top:1px solid #bdbdbd;}
@@ -81,6 +86,7 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 <script type="text/javascript">
 	var NotesDB;
 	var ActionsDB;
+	var SettingsDB;
 	
 	var CurNoteID;
 	var LatestNote;
@@ -102,6 +108,9 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 	var IDS_SYNC_IP = 'IP address';
 	var IDS_SYNC_PORT = 'Port';
 	var IDS_ABOUT_SYNC = 'IP address and port to sync notes with your PC.';
+	//Для всех
+	var IDS_DARK_THEME = 'Dark theme';
+	var IDS_LAST_UPDATE = 'Last update: ';
 	
 	//Уведомления
 	var IDS_DATE_UPDATE = 'Date will be update';
@@ -128,6 +137,9 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 		IDS_SYNC_IP = 'IP адрес';
 		IDS_SYNC_PORT = 'Порт';
 		IDS_ABOUT_SYNC = 'IP адрес и порт для синхронизации заметок с вашим ПК.';
+		//Для всех
+		IDS_DARK_THEME = 'Темная тема';
+		IDS_LAST_UPDATE = 'Последнее обновление: ';
 		
 		//Уведомления
 		IDS_DATE_UPDATE = 'Дата обновится';
@@ -182,10 +194,10 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 		//console.log('DropBDs');
 	}*/
 	
-	function NoteDateAgo(e)
+	function NoteDateAgo(TimeStampSec)
 	{
 		var date = new Date();
-		date.setTime(e * 1000 + date.getTimezoneOffset() * 60000 ); //После присвоения времени добавляется смещение UTC, поэтому вычитаем его.
+		date.setTime(TimeStampSec * 1000 + date.getTimezoneOffset() * 60000 ); //После присвоения времени добавляется смещение UTC, поэтому вычитаем его.
 
 		var CurDate = new Date(); //Текущее время для сравнения
 		var mTime = '' + date.getHours();
@@ -204,27 +216,26 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 		return MyDate;
 	}
 	
-	function NoteDate(e)
+	function NoteDate(TimeStampSec)
 	{
 		var date = new Date();
-		date.setTime(e * 1000 + date.getTimezoneOffset() * 60000 ); //После присвоения времени добавляется смещение UTC, поэтому вычитаем его.
+		date.setTime(TimeStampSec * 1000 + date.getTimezoneOffset() * 60000 ); //После присвоения времени добавляется смещение UTC, поэтому вычитаем его.
 
 		var CurDate = new Date(); //Текущее время для сравнения
 		var mTime = '' + date.getHours();
 		if (date.getMinutes() < 10) {mTime += ':0' + date.getMinutes();} else {mTime += ':' + date.getMinutes();}
 		
 		var MyDate = date.getDate() + ' ' + IDS_MONTHS[date.getMonth()];
-		if (CurDate.getFullYear() != date.getFullYear())
-			MyDate += ' ' + date.getFullYear();
+		if (CurDate.getFullYear() != date.getFullYear()) MyDate += ' ' + date.getFullYear();
 		MyDate += ' ' + mTime;
 		
 		return MyDate;
 	}
 	
-	function ListDate(e)
+	function ListDate(TimeStampSec)
 	{
 		var date = new Date();
-		date.setTime(e * 1000 + date.getTimezoneOffset() * 60000 ); //После присвоения времени добавляется смещение UTC, поэтому вычитаем его.
+		date.setTime(TimeStampSec * 1000 + date.getTimezoneOffset() * 60000 ); //После присвоения времени добавляется смещение UTC, поэтому вычитаем его.
 
 		var CurDate = new Date(); //Текущее время для сравнения
 		var mTime = '' + date.getHours();
@@ -301,11 +312,12 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 		CurNoteID = '-1';
 		document.getElementById('list').className = 'page transition left';
 		document.getElementById('editor').className = 'page transition center';
-		//document.getElementById('settings').className = 'page transition right';
+		document.getElementById('settings').className = 'page transition right';
 		//document.getElementById('list').style.display = 'none';
 		//document.getElementById('editor').style.display = 'block';
 
 		document.getElementById('memo').value = '';
+		//document.getElementById('memo').select(); для iOS после исправления бага с увеличением textarea, при клике
 		document.getElementById('NoteTitle').innerHTML = IDS_NEW_NOTE;
 		
 		document.getElementById('DaysAgo').innerHTML = NoteDateAgo(GetUTCTimeStamp());
@@ -328,21 +340,71 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 		document.getElementById('DateNote').innerHTML = NoteDate(GetUTCTimeStamp());
 	}
 	
+	function BackTheme(){
+		var CurrentStyle = document.getElementsByTagName('style')[0].innerHTML;
+		var DarkThemePos = document.getElementsByTagName('style')[0].innerHTML.indexOf('/*DarkTheme*/');
+		if (DarkThemePos !== -1)
+			document.getElementsByTagName('style')[0].innerHTML = CurrentStyle.substring(0, DarkThemePos);//document.getElementsByTagName('style')[0].innerHTML
+	}
+	
+	function DarkTheme(){
+		document.getElementsByTagName('style')[0].innerHTML +=
+			'/*DarkTheme*/' +
+			'body{background-color:#2a3035;}' +
+
+			'#panel{background-color:#202329;}' +
+			'#btn{background-color:#202329;}' +
+			'#meta{color:#787c81;}' +
+			'#sub-panel{background-color:#202329;}' +
+
+			'#list{color:#ededef;}' +
+			'#list #items #note{border-bottom:1px solid #3a404a;}' +
+			'#list #items #note:hover{background-color:#202329;}' +
+			'#list #items #note #date{color:#787c81;}' +
+
+			'textarea{color:white;}' +
+
+			'#settings #items #item{background-color:#202329; color:white;}' +
+			'#settings #items #item{border:1px solid #3a404a; border-top:none;}' +
+			'#settings #items #item:first-child{border:1px solid #3a404a;}' +
+			'#settings input[type="text"],#settings input[type="number"]{background-color:#202329;color:white;}' +
+			'#settings .aboutbox{color:#787c81;}' +
+
+			'#notification{background-color:#202329; border-top:1px solid black; color:white;}';
+	}
+	
 	function SettingsDone()
 	{
+		//Theme
+		var UsingDarkTheme = document.getElementById('DarkThemeCB').checked;
+		if (UsingDarkTheme)
+			DarkTheme();
+		else
+			BackTheme();
+			
+		SettingsDB.transaction(function (tx) {
+			tx.executeSql('SELECT * FROM Settings WHERE Parameter="DarkTheme"', [], function (tx, results) {
+				
+				if (results.rows.length == 0)
+					tx.executeSql('INSERT INTO Settings (Parameter, Value) VALUES ("DarkTheme", "' + UsingDarkTheme + '")');
+				else
+					tx.executeSql('UPDATE Settings SET Value="' + UsingDarkTheme + '" WHERE Parameter="DarkTheme"');
+			}, null);
+		});
+		
 		GetNote(CurNoteID);
 	}
 	
-	function GetNote(e)
+	function GetNote(NoteID)
 	{	
-		if (e == -1)
+		if (NoteID == -1)
 		{
 			NewNote()
 			return;
 		}
 		UpdateDateTime = true;
 		NotesDB.transaction(function (tx) {
-			tx.executeSql('SELECT * FROM Notes WHERE id=' + e, [], function (tx, results) {
+			tx.executeSql('SELECT * FROM Notes WHERE id=' + NoteID, [], function (tx, results) {
 				document.getElementById('memo').value = CharCodesToStr(results.rows.item(0).Note);
 				LatestNote = document.getElementById('memo').value;
 				document.getElementById('NoteTitle').innerHTML = ExtractTitle(CharCodesToStr(results.rows.item(0).Note));
@@ -352,30 +414,30 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 				CurNoteDateTime = results.rows.item(0).DateTime;
 				document.getElementById('list').className = 'page transition left';
 				document.getElementById('editor').className = 'page transition center';
-				//document.getElementById('settings').className = 'page transition right';
+				document.getElementById('settings').className = 'page transition right';
 				//document.getElementById('list').style.display = 'none';
 				//document.getElementById('settings').style.display = 'none';
 				//document.getElementById('editor').style.display = 'block';
 			}, null);
 			
 		});
-		//console.log('GetNote ' + e);
+		//console.log('GetNote ' + NoteID);
 	}
 	
 	function NoteDone()
 	{
-		var TimeStamp = GetTimeStamp();
+		var CurTimeStamp = GetTimeStamp();
 		var UTCTimeStamp = GetUTCTimeStamp();
 		
 		if (CurNoteID == '-1') {
 		
 			if (document.getElementById('memo').value.trim() != '') { 
 				NotesDB.transaction(function (tx) {
-					tx.executeSql('INSERT INTO Notes (ID, Note, DateTime) VALUES (' + TimeStamp + ', "' + StrToCharCodes(document.getElementById('memo').value) + '", ' + UTCTimeStamp + ')');
+					tx.executeSql('INSERT INTO Notes (ID, Note, DateTime) VALUES (' + CurTimeStamp + ', "' + StrToCharCodes(document.getElementById('memo').value) + '", ' + UTCTimeStamp + ')');
 				});
 				
 				ActionsDB.transaction(function (tx) {
-					tx.executeSql('INSERT INTO Actions (Action, ID, Note, DateTime) VALUES ("insert", ' + TimeStamp + ', "' + StrToCharCodes(document.getElementById('memo').value) + '",' + UTCTimeStamp + ')');
+					tx.executeSql('INSERT INTO Actions (Action, ID, Note, DateTime) VALUES ("insert", ' + CurTimeStamp + ', "' + StrToCharCodes(document.getElementById('memo').value) + '",' + UTCTimeStamp + ')');
 				});
 			}
 			//console.log('Inserted done');
@@ -414,7 +476,7 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 		ActionsDB.transaction(function (tx) {
 			tx.executeSql('INSERT INTO Actions (Action, ID, Note, DateTime) VALUES ("delete", ' + CurNoteID + ', "", 0)');
 		});
-		//console.log('Deleted ' + CurNoteID);*/
+		//console.log('Deleted ' + CurNoteID);
 	}
 	
 	function Notification(Str){
@@ -584,6 +646,24 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 		//document.getElementById('SyncIP').innerText = IDS_SYNC_IP;
 		//document.getElementById('SyncPort').innerText = IDS_SYNC_PORT;
 		//document.getElementById('AboutSync').innerText = IDS_ABOUT_SYNC;
+		document.getElementById('DarkTheme').innerText = IDS_DARK_THEME;
+		document.getElementById('LastUpdate').innerText = IDS_LAST_UPDATE;
+		
+		//База данных настроек
+		SettingsDB = openDatabase('NotesDB', '1.0', 'Settings', 2 * 1024 * 1024);
+		SettingsDB.transaction(function (tx) {
+			tx.executeSql('CREATE TABLE IF NOT EXISTS Settings (Parameter, Value)');
+		});
+		
+		//Настройки, Dark theme
+		SettingsDB.transaction(function (tx) {
+			tx.executeSql('SELECT * FROM Settings WHERE Parameter="DarkTheme"', [], function (tx, results) {
+				if (results.rows.length != 0 && results.rows.item(0).Value == 'true') {
+					document.getElementById('DarkThemeCB').checked = true;
+					DarkTheme();
+				}
+			}, null);
+		});
 		
 		//База данных записей
 		NotesDB = openDatabase('NotesDB', '1.0', 'Notes', 2 * 1024 * 1024);
@@ -637,11 +717,11 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 		<textarea id="memo" value="Текст"></textarea>
 		<div id="sub-panel">
 			<div id="btn" style="float:left;" onclick="RemNote()"><img src="images/rm.png" /></div>
-			<!--<div id="btn" style="float:right;" onclick="ShowSettings()"><img src="images/settings.png" /></div>-->
+			<div id="btn" style="float:right;" onclick="ShowSettings()"><img src="images/settings.png" /></div>
 		</div>
 	</div>
 	
-	<!--<div id="settings" class="page right">
+	<div id="settings" class="page right">
 		<div id="panel">
 			<div id="btn" style="float:left;" onclick="GetNote(CurNoteID)"><img src="images/back.png" /></div>
 			<div class="title" id="SettingsTitle">Настройки</div>
@@ -649,16 +729,14 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 		</div>
 		<div id="items">
 			<div id="item">
-				<div class="title" id="SyncIP">IP адрес</div>
-				<div id="control"><input type="text" id="ServerIP" placeholder="192.168.0.1"></div>
-			</div>
-			<div id="item">
-				<div class="title" id="SyncPort">Порт</div>
-				<div id="control"><input type="number" id="ServerPort" placeholder="735"></div>
+				<div class="title" id="DarkTheme">Темная тема</div>
+				<div id="control" style="margin-top:-3px;">
+					<input type="checkbox" id="DarkThemeCB" class="checkbox" /><label for="DarkThemeCB" class="switch"></label>
+				</div>
 			</div>
 		</div>
-		<div id="AboutSync" class="aboutbox"></div>
-	</div>-->
+		<div class="aboutbox" style="text-align:center;"><br>EasyNotes<br><span id="LastUpdate"></span> 13.06.20<br>https://r57zone.github.io</div>
+	</div>
 	
 	<div id="notification"></div>
 </div>
