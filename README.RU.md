@@ -7,12 +7,12 @@
 Если необходимо оставить старую дату, при редактировани заметки, то на мобильных телефонах нужно нажать на дату, а на ПК зажать клавишу "Shift", при нажатии на кнопку готово.
 
 
-Для Android и iOS приложений доступна темная тема.
+Приложения имеют темную тему.
 ## Настройка
 ### Синхронизация мобильных приложений
 1. Зарезервируйте постоянный IP адрес компьютеру, с Windows приложением. Это делается в настройках Wi-Fi роутера, в разделе "DHCP".
-2. Зарезервируйте постоянный IP адрес мобильного устройства и вставьте его IP адрес в файл "Allow.txt", чтобы заблокировать доступ другим устройствам или вставьте слово "ALL", чтобы открыть доступ для всех IP адресов. Удалите ненужные IP адреса.
-3. Проверьте брандмауэр Windows, разрешены ли входящие подключения.
+2. Зарезервируйте постоянный IP адрес мобильного устройства и добавьте его, если он отсуствует, в настройках приложения для Windows. Также можно открыть доступ для всех IP адресов (небезопасно). При необходимости удалите ненужные IP адреса.
+3. Проверьте брандмауэр Windows, разрешены ли входящие подключения у вашего типа сети (частной) и включите их. 
 
 ### iOS
 Зайдите в Safari на iOS устройстве и введите там "http://IP:735/webapp", где IP это зарезервированный постоянный IP вашего компьютера. Далее нужно нажать "Поделиться" -> "На экран Домой". На рабочем столе появится ярлык для EasyNotes.
@@ -22,7 +22,8 @@
 
 ## Скриншоты
 ### Windows
-![](https://user-images.githubusercontent.com/9499881/54879010-b3f2e880-4e4d-11e9-8d46-3d983cb8495e.PNG)
+[![](https://user-images.githubusercontent.com/9499881/93083891-520eea00-f6a4-11ea-9f57-f7e6f85311fd.PNG)](https://user-images.githubusercontent.com/9499881/54879010-b3f2e880-4e4d-11e9-8d46-3d983cb8495e.PNG)
+[![](https://user-images.githubusercontent.com/9499881/93085377-8b485980-f6a6-11ea-924f-df8dbbfd6bb4.PNG)](https://user-images.githubusercontent.com/9499881/93085355-7ec40100-f6a6-11ea-8a65-2cae4a206e33.PNG)
 
 ### iOS
 ![](https://user-images.githubusercontent.com/9499881/54878998-87d76780-4e4d-11e9-89ae-bd15ea494f73.PNG)
@@ -30,8 +31,10 @@
 ![Setup](https://user-images.githubusercontent.com/9499881/54852962-d2e76280-4d07-11e9-841a-06d50fafb3c4.gif)
 
 ### Android
-![](https://user-images.githubusercontent.com/9499881/55101537-bff4d980-50dd-11e9-857e-3b8c94b0efbb.png)
-![](https://user-images.githubusercontent.com/9499881/55101573-d3a04000-50dd-11e9-8432-ccdedb55f0d0.png)
+[![](https://user-images.githubusercontent.com/9499881/93085644-eaa66980-f6a6-11ea-98f2-024ae3bb97ac.png)](https://user-images.githubusercontent.com/9499881/93085454-a74bfb00-f6a6-11ea-9825-ebbdd163cb92.png)
+[![](https://user-images.githubusercontent.com/9499881/93085646-eb3f0000-f6a6-11ea-8323-a06e6f06fa65.png)](https://user-images.githubusercontent.com/9499881/93085457-a7e49180-f6a6-11ea-9b18-d87e9c7671ec.png)
+[![](https://user-images.githubusercontent.com/9499881/93085761-1b869e80-f6a7-11ea-9b36-7620790c43ab.png)](https://user-images.githubusercontent.com/9499881/93085547-c5b1f680-f6a6-11ea-8465-99fd70bb31b9.png)
+[![](https://user-images.githubusercontent.com/9499881/93085759-1b869e80-f6a7-11ea-9868-07929effdac8.png)](https://user-images.githubusercontent.com/9499881/93085569-cea2c800-f6a6-11ea-96f9-2425c14b7aa7.png)
 
 ## Загрузка
 >Версии для Windows 7, 8.1, 10, с установленным Internet Explorer 11, iOS 6+ и Android 5+.

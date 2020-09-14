@@ -7,12 +7,12 @@ Apps notes for Windows, iOS and Android, with sync. The server is a Windows appl
 If you want to leave the old date when editing a note then on mobile phones you need to click on the date and on the PC hold down the "Shift" key when you click on the done button.
 
 
-Dark theme is available for Android and iOS apps.
+Apps have a dark theme.
 ## Setup
 ### Sync of the mobile apps
 1. Reserve a permanent IP address for a computer with a Windows application. This is done in the settings of the Wi-Fi router in the "DHCP" section.
-2. Reserve the permanent IP address of the mobile device and paste its IP address into the "Allow.txt" file to block access to other devices or insert the word "ALL" to open access for all IP addresses. Remove unnecessary IP addresses.
-3. Check Windows Firewall for incoming connections.
+2. Reserve the permanent IP address of the mobile device and add it, if it is missing, in the Windows application settings. You can also open access to all IP addresses (not secure). Delete unnecessary IP addresses if necessary.
+3. Check Windows Firewall to see if incoming connections are allowed on your network type (private) and enable them.
 
 ### iOS
 Go to Safari on your iOS device and enter there "http://IP:735/webapp", where IP is the reserved permanent IP of your computer. Next you need to click "Share" -> "On the Home Screen". A shortcut to EasyNotes appears on the desktop.
@@ -22,7 +22,8 @@ Install "EasyNotes.apk" and enter the reserved permanent IP of your computer.
 
 ## Screenshots
 ### Windows
-![](https://user-images.githubusercontent.com/9499881/54879005-a89fbd00-4e4d-11e9-8278-62a3f7b52955.PNG)
+[![](https://user-images.githubusercontent.com/9499881/93083666-fd6b6f00-f6a3-11ea-9c34-e7ed90d8daae.PNG)](https://user-images.githubusercontent.com/9499881/54879005-a89fbd00-4e4d-11e9-8278-62a3f7b52955.PNG)
+[![](https://user-images.githubusercontent.com/9499881/93085278-68b64080-f6a6-11ea-8c19-8b79687850eb.PNG)](https://user-images.githubusercontent.com/9499881/93085231-4de3cc00-f6a6-11ea-824c-0496d8e7f4de.PNG)
 
 ### iOS
 ![](https://user-images.githubusercontent.com/9499881/54878988-66767b80-4e4d-11e9-941b-696836b3cb46.PNG)
@@ -30,8 +31,10 @@ Install "EasyNotes.apk" and enter the reserved permanent IP of your computer.
 ![Setup](https://user-images.githubusercontent.com/9499881/54852962-d2e76280-4d07-11e9-841a-06d50fafb3c4.gif)
 
 ### Android
-![](https://user-images.githubusercontent.com/9499881/55101219-0dbd1200-50dd-11e9-9ceb-cbe1af2465c7.png)
-![](https://user-images.githubusercontent.com/9499881/55101247-20374b80-50dd-11e9-8d78-8fdc04bb24e3.png)
+[![](https://user-images.githubusercontent.com/9499881/93084927-ddd54600-f6a5-11ea-8e49-126cbf637e5e.png)](https://user-images.githubusercontent.com/9499881/93084733-8f27ac00-f6a5-11ea-8695-a38333d8e1b2.png)
+[![](https://user-images.githubusercontent.com/9499881/93084929-de6ddc80-f6a5-11ea-9590-7ff4943664f6.png)](https://user-images.githubusercontent.com/9499881/93084738-8fc04280-f6a5-11ea-8c73-7f2ddee691b0.png)
+[![](https://user-images.githubusercontent.com/9499881/93085075-1412c580-f6a6-11ea-91bd-e710b9cfa36a.png)](https://user-images.githubusercontent.com/9499881/93085001-f80f2400-f6a5-11ea-8f15-c05503f6b70a.png)
+[![](https://user-images.githubusercontent.com/9499881/93085078-14ab5c00-f6a6-11ea-9657-239175a85f24.png)](https://user-images.githubusercontent.com/9499881/93084998-f7768d80-f6a5-11ea-8ed3-b75c1404bc77.png)
 
 ## Download
 >Versions for Windows 7, 8.1, 10 with Internet Explorer 11 installed, iOS 6+ and Android 5+.

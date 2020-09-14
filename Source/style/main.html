@@ -41,16 +41,18 @@ scrollbar-darkshadow-color: #dedede;}
 #meta #DaysAgo{float:left; font-weight:bold; margin:8px 0 0 12px;}
 #meta #DateNote{float:right; margin:8px 12px 0 0;}
 
-#editor #memo{display:block; width:calc(100% - 24px); height:calc(100% - 78px); padding:0 12px; background-color:transparent; font-family:Segoe UI; font-size: 14px; border:none; overflow:auto; }
+#editor #memo{display:block; width:calc(100% - 24px); height:calc(100% - 78px); padding:0 12px; background-color:transparent; font-family:Segoe UI; font-size: 14px; border:none; overflow:auto;}
 </style>
+<!--<link rel="stylesheet" href="darktheme.css">-->
 </head>
 <body oncontextmenu="return false">
 <div id="wrapper">
 	<div id="list" onselectstart="return false">
 		<div id="panel">
-			<div id="btn" class="add" style="float:left;" onclick="document.location='#new';"><img src="images/new.png" /></div>
+			<div id="btn" style="float:left;" onclick="document.location='#new';"><img src="images/new.png" /></div>
 			<div class="title" id="NotesCount" onclick="document.location='#about';">Заметки (3)</div>
-			<div id="btn" style="float:right;cursor:default;"></div>
+			<div id="btn" style="float:right;" onclick="document.location='#settings';"><img src="images/settings.png" /></div>
+			<!--<div id="btn" style="float:right;cursor:default;"></div>-->
 		</div>
 		<div id="items">
 			<div onclick="document.location='#note1';" id="note">

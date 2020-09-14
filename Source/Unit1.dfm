@@ -43,11 +43,11 @@ object Main: TMain
     ReplyTexts = <>
     ReplyUnknownCommand.NumericCode = 0
     OnCommandGet = IdHTTPServerCommandGet
-    Left = 8
+    Left = 40
     Top = 8
   end
   object PopupMenu: TPopupMenu
-    Left = 40
+    Left = 72
     Top = 8
     object CutBtn: TMenuItem
       Caption = #1042#1099#1088#1077#1079#1072#1090#1100
@@ -61,5 +61,9 @@ object Main: TMain
       Caption = #1042#1089#1090#1072#1074#1080#1090#1100
       OnClick = PasteBtnClick
     end
+  end
+  object XPManifest: TXPManifest
+    Left = 8
+    Top = 8
   end
 end

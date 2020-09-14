@@ -7,8 +7,8 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, OleCtrls, ExtCtrls, StdCtrls, SQLite3, SQLiteTable3, SHDocVw, ActiveX,
-  DateUtils, IniFiles, IdBaseComponent, IdComponent, IdTCPServer,
-  IdCustomHTTPServer, IdHTTPServer, XMLDoc, XMLIntf, Registry, Menus, ClipBrd;
+  DateUtils, IniFiles, IdBaseComponent, IdComponent, IdTCPServer, IdCustomHTTPServer,
+  IdHTTPServer, XMLDoc, XMLIntf, Registry, Menus, ClipBrd, MSHTML, XPMan;
 
 type
   TMain = class(TForm)
@@ -18,6 +18,7 @@ type
     PasteBtn: TMenuItem;
     CutBtn: TMenuItem;
     CopyBtn: TMenuItem;
+    XPManifest: TXPManifest;
     procedure FormCreate(Sender: TObject);
     procedure WebViewBeforeNavigate2(Sender: TObject;
       const pDisp: IDispatch; var URL, Flags, TargetFrameName, PostData,
@@ -33,6 +34,7 @@ type
     procedure PasteBtnClick(Sender: TObject);
     procedure CopyBtnClick(Sender: TObject);
     procedure CutBtnClick(Sender: TObject);
+    procedure AddStyle(FileName: string);
   private
     procedure LoadNotes;
     procedure NewNote(MemoFocus: boolean);
@@ -47,19 +49,31 @@ var
   Main: TMain;
   CloseDuplicate: boolean;
   SQLDB: TSQLiteDatabase;
+  DBFileName: string;
+
   OldWidth, OldHeight: integer;
   NoteIndex:int64; LatestNote: string;
+
   FOleInPlaceActiveObject: IOleInPlaceActiveObject;
   SaveMessageHandler: TMessageEvent;
+
   ID_NEW_NOTE, ID_NOTES, ID_TODAY, ID_YESTERDAY, ID_DAYSAGO, ID_SYNC: string;
   ID_CUT, ID_COPY, ID_PASTE, IDS_LAST_UPDATE: string;
+
+  ID_SETTINGS, ID_INTERFACE, ID_USE_DARK_THEME, ID_SYNCHRONIZATION,
+  ID_SYNC_PORT, ID_SYNC_WITH_ANY_IPS, ID_ALLOW_IPS, ID_OK, ID_CANCEL: string;
+
   AllowIPs: TStringList;
+  AllowAnyIPs: boolean;
+  UseDarkTheme: boolean;
 
 implementation
 
+uses Unit2;
+
 {$R *.dfm}
 
-//TimeStamp по Гринвичу GMT или UTC+0
+//TimeStamp по Гринвичу GMT или UTC +0
 function GetTimeStamp: int64;
 var
  SystemTime: TSystemTime;
@@ -151,7 +165,7 @@ var
 begin
   //Предотвращение повторого запуска
   WND:=FindWindow('TMain', 'EasyNotes');
-  if WND <> 0 then begin
+  if (WND <> 0) and (ParamStr(1) <> '-show') then begin
     SetForegroundWindow(WND);
     Halt;
   end;
@@ -159,6 +173,8 @@ begin
 
   Ini:=TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Config.ini');
   IdHTTPServer.DefaultPort:=Ini.ReadInteger('Main', 'Port', 735);
+  AllowAnyIPs:=Ini.ReadBool('Main', 'AllowAnyIPs', false);
+  UseDarkTheme:=Ini.ReadBool('Main', 'DarkTheme', false);
   Width:=Ini.ReadInteger('Main', 'Width', Width);
   Height:=Ini.ReadInteger('Main', 'Height', Height);
   OldWidth:=Width;
@@ -188,6 +204,16 @@ begin
     ID_COPY:='Копировать';
     ID_PASTE:='Вставить';
     IDS_LAST_UPDATE:='Последнее обновление:';
+
+    ID_SETTINGS:='Настройки';
+    ID_INTERFACE:='Интерфейс';
+    ID_USE_DARK_THEME:='Использовать тёмную тему';
+    ID_SYNCHRONIZATION:='Синхронизация';
+    ID_SYNC_PORT:='Порт';
+    ID_SYNC_WITH_ANY_IPS:='Синхронизация с любыми IP (небезопасно)';
+    ID_ALLOW_IPS:='Разрешённые IP адреса';
+    ID_OK:='Ок';
+    ID_CANCEL:='Отмена';
   end else begin
     ID_NEW_NOTE:='New note';
     ID_NOTES:='Notes';
@@ -199,6 +225,16 @@ begin
     ID_COPY:='Copy';
     ID_PASTE:='Paste';
     IDS_LAST_UPDATE:='Last update:';
+
+    ID_SETTINGS:='Settings';
+    ID_INTERFACE:='Interface';
+    ID_USE_DARK_THEME:='Use a dark theme';
+    ID_SYNCHRONIZATION:='Synchronization';
+    ID_SYNC_PORT:='Port';
+    ID_SYNC_WITH_ANY_IPS:='Synchronization with any IP (not secure)';
+    ID_ALLOW_IPS:='Allowed IP addresses';
+    ID_OK:='Ok';
+    ID_CANCEL:='Cancel';
   end;
   CutBtn.Caption:=ID_CUT;
   CopyBtn.Caption:=ID_COPY;
@@ -207,13 +243,18 @@ begin
   Main.Visible:=false;
   WebView.Silent:=true;
   WebView.Navigate(ExtractFilePath(ParamStr(0)) + 'style\main.html');
-  SQLDB:=TSQLiteDatabase.Create('Notes.db');
+
+  DBFileName:='Notes.db';
+  if (LowerCase(ParamStr(1)) = '-db') and (Trim(ParamStr(2)) <> '') and (FileExists(ParamStr(2))) then
+    DBFileName:=ParamStr(2);
+
+  SQLDB:=TSQLiteDatabase.Create(DBFileName);
   if not SQLDB.TableExists('notes') then
     SQLDB.ExecSQL('CREATE TABLE Notes (ID TIMESTAMP, Note TEXT, DateTime TIMESTAMP)');
 
-  //Ограничение IP адресов доступа
+  //Ограничение IP адресов для синхронизации
   AllowIPs:=TStringList.Create;
-  AllowIPs.LoadFromFile(ExtractFilePath(ParamStr(0)) + 'Allow.txt');
+  AllowIPs.LoadFromFile(ExtractFilePath(ParamStr(0)) + 'AllowIPs.txt');
 end;
 
 function ExtractTitle(Str: string): string;
@@ -364,6 +405,9 @@ begin
   if sUrl = 'main.html#new' then
     NewNote(true);
 
+  if sUrl = 'main.html#settings' then
+    Settings.ShowModal;
+
   if sUrl = 'main.html#done' then
     NoteDone(0); //Добавляем, обновляем, статус "0" обновляет список заметок в интерфейсе
 
@@ -381,12 +425,6 @@ begin
     CopyBtn.Enabled:=CutBtn.Enabled;
     PopupMenu.Popup(Mouse.CursorPos.X, Mouse.CursorPos.Y);
   end;
-
-  if (sUrl = 'main.html#about') then
-    Application.MessageBox(PChar(Caption + ' 0.8.4' + #13#10 +
-    IDS_LAST_UPDATE + ' 13.06.20' + #13#10 +
-    'https://r57zone.github.io' + #13#10 +
-    'r57zone@gmail.com'), PChar(Caption), MB_ICONINFORMATION);
 end;
 
 procedure TMain.WebViewDocumentComplete(Sender: TObject;
@@ -400,6 +438,8 @@ begin
       Main.Visible:=true;
       LoadNotes;
       NewNote(true);
+      if UseDarkTheme then
+        AddStyle(ExtractFilePath(ParamStr(0)) + 'style\darktheme.css');
     end;
 end;
 
@@ -488,7 +528,7 @@ var
 begin
   CoInitialize(nil);
 
-  if (AllowIPs.Count > 0) and (Trim(AnsiUpperCase(AllowIPs.Strings[0])) <> 'ALL') then
+  if (AllowIPs.Count > 0) and (AllowAnyIPs = false) then
     if Pos(AThread.Connection.Socket.Binding.PeerIP, AllowIPs.Text) = 0 then Exit;
 
   AResponseInfo.CustomHeaders.Add('Access-Control-Allow-Origin: *'); //Политика безопасности браузеров
@@ -625,6 +665,25 @@ begin
   keybd_event(Ord('X'), MapVirtualKey(Ord('X'), 0), 0, 0);
   keybd_event(Ord('X'), MapVirtualKey(Ord('X'), 0), KEYEVENTF_KEYUP, 0);
   keybd_event(VK_CONTROL, MapVirtualKey(VK_CONTROL, 0), KEYEVENTF_KEYUP, 0)
+end;
+
+procedure TMain.AddStyle(FileName: string);
+var
+  HTMLDocument: IHTMLDocument2;
+  StyleSheet: IHTMLStyleSheet;
+  StyleSheetIndex: integer;
+  StyleFile: TStringList;
+begin
+  if not FileExists(FileName) then Exit;
+  StyleFile:=TStringList.Create;
+  StyleFile.LoadFromFile(FileName);
+  HTMLDocument:=WebView.Document as IHTMLDocument2;
+  StyleSheetIndex:=HTMLDocument.styleSheets.length;
+  if StyleSheetIndex > 31 then
+    raise Exception.Create('Already have the maximum amount of CSS stylesheets');
+  StyleSheet:=HTMLDocument.createStyleSheet('', StyleSheetIndex);
+  StyleSheet.cssText:=StyleFile.Text;
+  StyleFile.Free;
 end;
 
 initialization
