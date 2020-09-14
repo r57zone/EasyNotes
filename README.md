@@ -12,7 +12,7 @@ Apps have a dark theme.
 ### Sync of the mobile apps
 1. Reserve a permanent IP address for a computer with a Windows application. This is done in the settings of the Wi-Fi router in the "DHCP" section.
 2. Reserve the permanent IP address of the mobile device and add it, if it is missing, in the Windows application settings. You can also open access to all IP addresses (not secure). Delete unnecessary IP addresses if necessary.
-3. Check Windows Firewall to see if incoming connections are allowed on your network type (private) and enable them.
+3. Check Windows Firewall to see if incoming connections are allowed on your network type (private) and allow if disabled.
 
 ### iOS
 Go to Safari on your iOS device and enter there "http://IP:735/webapp", where IP is the reserved permanent IP of your computer. Next you need to click "Share" -> "On the Home Screen". A shortcut to EasyNotes appears on the desktop.
@@ -22,8 +22,8 @@ Install "EasyNotes.apk" and enter the reserved permanent IP of your computer.
 
 ## Screenshots
 ### Windows
-[![](https://user-images.githubusercontent.com/9499881/93083666-fd6b6f00-f6a3-11ea-9c34-e7ed90d8daae.PNG)](https://user-images.githubusercontent.com/9499881/54879005-a89fbd00-4e4d-11e9-8278-62a3f7b52955.PNG)
-[![](https://user-images.githubusercontent.com/9499881/93085278-68b64080-f6a6-11ea-8c19-8b79687850eb.PNG)](https://user-images.githubusercontent.com/9499881/93085231-4de3cc00-f6a6-11ea-824c-0496d8e7f4de.PNG)
+[![](https://user-images.githubusercontent.com/9499881/93087169-4114a780-f6a9-11ea-8711-cf8e0f828fcc.PNG)](https://user-images.githubusercontent.com/9499881/54879005-a89fbd00-4e4d-11e9-8278-62a3f7b52955.PNG)
+[![](https://user-images.githubusercontent.com/9499881/93087166-407c1100-f6a9-11ea-953f-cebb36dd0198.PNG)](https://user-images.githubusercontent.com/9499881/93085231-4de3cc00-f6a6-11ea-824c-0496d8e7f4de.PNG)
 
 ### iOS
 ![](https://user-images.githubusercontent.com/9499881/54878988-66767b80-4e4d-11e9-941b-696836b3cb46.PNG)
@@ -31,8 +31,8 @@ Install "EasyNotes.apk" and enter the reserved permanent IP of your computer.
 ![Setup](https://user-images.githubusercontent.com/9499881/54852962-d2e76280-4d07-11e9-841a-06d50fafb3c4.gif)
 
 ### Android
-[![](https://user-images.githubusercontent.com/9499881/93084927-ddd54600-f6a5-11ea-8e49-126cbf637e5e.png)](https://user-images.githubusercontent.com/9499881/93084733-8f27ac00-f6a5-11ea-8695-a38333d8e1b2.png)
 [![](https://user-images.githubusercontent.com/9499881/93084929-de6ddc80-f6a5-11ea-9590-7ff4943664f6.png)](https://user-images.githubusercontent.com/9499881/93084738-8fc04280-f6a5-11ea-8c73-7f2ddee691b0.png)
+[![](https://user-images.githubusercontent.com/9499881/93084927-ddd54600-f6a5-11ea-8e49-126cbf637e5e.png)](https://user-images.githubusercontent.com/9499881/93084733-8f27ac00-f6a5-11ea-8695-a38333d8e1b2.png)
 [![](https://user-images.githubusercontent.com/9499881/93085075-1412c580-f6a6-11ea-91bd-e710b9cfa36a.png)](https://user-images.githubusercontent.com/9499881/93085001-f80f2400-f6a5-11ea-8f15-c05503f6b70a.png)
 [![](https://user-images.githubusercontent.com/9499881/93085078-14ab5c00-f6a6-11ea-9657-239175a85f24.png)](https://user-images.githubusercontent.com/9499881/93084998-f7768d80-f6a5-11ea-8ed3-b75c1404bc77.png)
 
