@@ -173,14 +173,14 @@ begin
 
   Ini:=TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Config.ini');
   IdHTTPServer.DefaultPort:=Ini.ReadInteger('Main', 'Port', 735);
-  AllowAnyIPs:=Ini.ReadBool('Main', 'AllowAnyIPs', false);
+  AllowAnyIPs:=Ini.ReadBool('Sync', 'AllowAnyIPs', false);
   UseDarkTheme:=Ini.ReadBool('Main', 'DarkTheme', false);
   Width:=Ini.ReadInteger('Main', 'Width', Width);
   Height:=Ini.ReadInteger('Main', 'Height', Height);
   OldWidth:=Width;
   OldHeight:=Height;
   if Ini.ReadBool('Main', 'FirstRun', true) then begin
-    Ini.WriteInteger('Main', 'Port', 735);
+    Ini.WriteInteger('Sync', 'Port', 735);
     Ini.WriteBool('Main', 'FirstRun', false);
     Reg:=TRegistry.Create;
     Reg.RootKey:=HKEY_CURRENT_USER;
@@ -212,7 +212,7 @@ begin
     ID_SYNC_PORT:='Порт';
     ID_SYNC_WITH_ANY_IPS:='Синхронизация с любыми IP (небезопасно)';
     ID_ALLOW_IPS:='Разрешённые IP адреса';
-    ID_OK:='Ок';
+    ID_OK:='ОК';
     ID_CANCEL:='Отмена';
   end else begin
     ID_NEW_NOTE:='New note';
@@ -233,7 +233,7 @@ begin
     ID_SYNC_PORT:='Port';
     ID_SYNC_WITH_ANY_IPS:='Synchronization with any IP (not secure)';
     ID_ALLOW_IPS:='Allowed IP addresses';
-    ID_OK:='Ok';
+    ID_OK:='OK';
     ID_CANCEL:='Cancel';
   end;
   CutBtn.Caption:=ID_CUT;
@@ -266,7 +266,7 @@ begin
   Result:=Str;
 end;
 
-function NoteDateTime(sDate: string): string; //Без "вчера" и "сегодня"
+function NoteDateTime(sDate: string): string; //Дата в заметке
 var
   mTime, nYear: string;
 begin
@@ -278,7 +278,7 @@ begin
   if nYear = FormatDateTime('yyyy', Date) then
     Result:=FormatDateTime('d mmm.', StrToDate(Copy(sDate, 1, Pos(' ', sDate)))) + ' ' + Copy(mTime, 1, Length(mTime) - 3)
   else
-    Result:=FormatDateTime('d.mm.yyyy', StrToDate(Copy(sDate, 1, Pos(' ', sDate)))) + ' ' + Copy(mTime, 1, Length(mTime) - 3);
+    Result:=FormatDateTime('d.mm.yyyy', StrToDate(Copy(sDate, 1, Pos(' ', sDate)))) + ', ' + Copy(mTime, 1, Length(mTime) - 3);
 end;
 
 function ListDateTime(sDate: string): string;
