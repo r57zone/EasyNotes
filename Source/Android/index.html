@@ -44,7 +44,7 @@ textarea:focus{outline:none;}
 #settings #controls #item:last-child{border-bottom-left-radius:15px; border-bottom-right-radius:15px;}
 #settings #controls #item .title{float:left; width:60%; overflow:hidden; white-space:nowrap;}
 #settings #controls #item #control{float:left; width:40%; overflow:hidden; text-align:right;}
-#settings .titlebox{margin:7px auto; width:87%; font-size:14px; }
+#settings .titlebox{margin:7px auto; width:87%; font-size:14px;}
 #settings input[type="text"],#settings input[type="number"]{border:none; padding:0 8px; width:90%; outline:none; font-size:14px; -webkit-tap-highlight-color:rgba(0,0,0,0); text-align:right;}
 .switch{position:relative; display:inline-block; width:40px; height:20px; background-color:#7e7e7e; border-radius:20px; top:1px;}
 .switch::after{content:''; position:absolute; width:18px; height:18px; border-radius:50%; background-color:white; top:1px; left:1px;}
@@ -59,6 +59,9 @@ textarea:focus{outline:none;}
 @keyframes fadein{from {opacity: 0;} to {opacity: 1;}}
 @-webkit-keyframes fadeout{from {opacity: 1;} to {opacity: 0;}}
 @keyframes fadeout{from {opacity: 1;} to {opacity: 0;}}
+
+#sync-progress{display:none; position:absolute; bottom:0; width:100%; height:4px; background-color:blue; background:linear-gradient(to left, transparent, transparent, #23A6D5, transparent, transparent); background-size:200% 200%; animation:move-background 2s linear infinite;}	
+@keyframes move-background{0% {background-position: 100% 0%} 100% {background-position: -100% 0%}}
 
 /* Sliding pages */
 .page{position:absolute; top:0; left:0; width:100%; height:100%}
@@ -526,6 +529,7 @@ textarea:focus{outline:none;}
 	}
 	
 	function Notification(Str){
+		document.getElementById('sync-progress').style.display = 'none';
 		var notifyBlock = document.getElementById("notification");
 		notifyBlock.innerHTML = Str;
 		notifyBlock.className = "show";
@@ -579,6 +583,8 @@ textarea:focus{outline:none;}
 	
 	function Sync(){
 		if (window.navigator.onLine) {
+		
+			document.getElementById('sync-progress').style.display = 'block';
 		
 			function InsertNote(ID, Note, DateTime){
 				NotesDB.transaction(function (tx) {
@@ -815,10 +821,11 @@ textarea:focus{outline:none;}
 				</div>
 			</div>
 		</div>
-		<div class="titlebox" style="text-align:center;"><br>EasyNotes<br><span id="LastUpdate"></span> 19.09.20<br>https://r57zone.github.io</div>
+		<div class="titlebox" style="text-align:center;"><br>EasyNotes<br><span id="LastUpdate"></span> 23.09.20<br>https://r57zone.github.io</div>
 	</div>
 	
 	<div id="notification" onclick="this.className='';"></div>
+	<div id="sync-progress"></div>
 </div>
 
 </body>
