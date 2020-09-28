@@ -114,6 +114,8 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 	var IDS_ABOUT_AUTO_SYNC = 'Automatically sync on app launch.';
 	//Для всех
 	var IDS_DARK_THEME = 'Dark theme';
+	var IDS_THEME_TIME_DEPENDENT = 'Theme is time dependent';
+	var IDS_ABOUT_THEME_TIME = 'The dark theme turns on automatically from 5:00 pm to 10:00 am.';
 	var IDS_LAST_UPDATE = 'Last update: ';
 	
 	//Уведомления
@@ -145,6 +147,8 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 		IDS_ABOUT_AUTO_SYNC = 'Автоматическая синхронизация при запуске приложения.';
 		//Для всех
 		IDS_DARK_THEME = 'Темная тема';
+		IDS_THEME_TIME_DEPENDENT = 'Тема в зависимости от времени';
+		IDS_ABOUT_THEME_TIME = 'Темная тема включается автоматически с 17:00 до 10:00.';
 		IDS_LAST_UPDATE = 'Последнее обновление: ';
 		
 		//Уведомления
@@ -189,7 +193,7 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 		return NewStr;
 	}
 	
-	/*function DropBDs()
+	/*function DropDBs()
 	{
 		NotesDB.transaction(function (tx) {
 			tx.executeSql('DROP TABLE IF EXISTS Notes');
@@ -197,7 +201,7 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 		ActionsDB.transaction(function (tx) {
 			tx.executeSql('DROP TABLE IF EXISTS Actions');
 		});
-		//console.log('DropBDs');
+		//console.log('DropDBs');
 	}*/
 	
 	function NoteDateAgo(TimeStampSec) //Дней прошло
@@ -362,7 +366,7 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 		var CurrentStyle = document.getElementsByTagName('style')[0].innerHTML;
 		var DarkThemePos = document.getElementsByTagName('style')[0].innerHTML.indexOf('/*DarkTheme*/');
 		if (DarkThemePos !== -1)
-			document.getElementsByTagName('style')[0].innerHTML = CurrentStyle.substring(0, DarkThemePos);//document.getElementsByTagName('style')[0].innerHTML
+			document.getElementsByTagName('style')[0].innerHTML = CurrentStyle.substring(0, DarkThemePos);
 	}
 	
 	function DarkTheme(){
@@ -405,13 +409,26 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 			}, null);
 		});
 		
-		//Theme
+		//Dark Theme
 		var UsingDarkTheme = document.getElementById('DarkThemeCB').checked;
+		
+		//Theme time	
+		var UsingThemeTime = document.getElementById('ThemeTimeCB').checked;
+		if (UsingThemeTime) {
+			UsingDarkTheme = false;
+			document.getElementById('DarkThemeCB').checked = false;
+			var date = new Date();
+			if (date.getHours() <=9 || date.getHours() >= 17) 
+				DarkTheme();
+		}
+		
+		//Dark Theme
 		if (UsingDarkTheme)
 			DarkTheme();
-		else
+		else if (UsingThemeTime == false)
 			BackTheme();
 			
+		//Save dark theme status	
 		SettingsDB.transaction(function (tx) {
 			tx.executeSql('SELECT * FROM Settings WHERE Parameter="DarkTheme"', [], function (tx, results) {
 				
@@ -419,6 +436,17 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 					tx.executeSql('INSERT INTO Settings (Parameter, Value) VALUES ("DarkTheme", "' + UsingDarkTheme + '")');
 				else
 					tx.executeSql('UPDATE Settings SET Value="' + UsingDarkTheme + '" WHERE Parameter="DarkTheme"');
+			}, null);
+		});
+		
+		//Theme time status
+		SettingsDB.transaction(function (tx) {
+			tx.executeSql('SELECT * FROM Settings WHERE Parameter="ThemeTime"', [], function (tx, results) {
+				
+				if (results.rows.length == 0)
+					tx.executeSql('INSERT INTO Settings (Parameter, Value) VALUES ("ThemeTime", "' + UsingThemeTime + '")');
+				else
+					tx.executeSql('UPDATE Settings SET Value="' + UsingThemeTime + '" WHERE Parameter="ThemeTime"');
 			}, null);
 		});
 		
@@ -677,6 +705,8 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 		//document.getElementById('SyncPort').innerText = IDS_SYNC_PORT;
 		//document.getElementById('AboutSync').innerText = IDS_ABOUT_SYNC;
 		document.getElementById('DarkTheme').innerText = IDS_DARK_THEME;
+		document.getElementById('ThemeTime').innerText = IDS_THEME_TIME_DEPENDENT;
+		document.getElementById('AboutThemeTime').innerText = IDS_ABOUT_THEME_TIME;
 		document.getElementById('AutoSync').innerText = IDS_AUTO_SYNC;
 		document.getElementById('AboutAutoSync').innerText = IDS_ABOUT_AUTO_SYNC;
 		document.getElementById('LastUpdate').innerText = IDS_LAST_UPDATE;
@@ -693,6 +723,21 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 				if (results.rows.length != 0 && results.rows.item(0).Value == 'true') {
 					document.getElementById('DarkThemeCB').checked = true;
 					DarkTheme();
+				} else {
+				
+					//Theme time
+					SettingsDB.transaction(function (tx) {
+						tx.executeSql('SELECT * FROM Settings WHERE Parameter="ThemeTime"', [], function (tx, results) {
+							if (results.rows.length != 0 && results.rows.item(0).Value == 'true') {
+								document.getElementById('ThemeTimeCB').checked = true;
+								
+								var date = new Date();
+								if (date.getHours() <=9 || date.getHours() >= 17) 
+									DarkTheme();
+							}
+						}, null);
+					});
+				
 				}
 			}, null);
 		});
@@ -773,8 +818,8 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 		</div>
 		<div id="controls">
 			<div id="item">
-				<div class="title" id="AutoSync" style="width:70%;">Синхронизация при запуске</div>
-				<div id="control" style="width:30%;margin-top:-3px;">
+				<div class="title" id="AutoSync" style="width:80%;">Синхронизация при запуске</div>
+				<div id="control" style="width:20%;margin-top:-3px;">
 					<input type="checkbox" id="AutoSyncCB" class="checkbox" /><label for="AutoSyncCB" class="switch"></label>
 				</div>
 			</div>
@@ -784,13 +829,25 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 		
 		<div id="controls">
 			<div id="item">
-				<div class="title" id="DarkTheme" style="width:70%;">Темная тема</div>
-				<div id="control" style="width:30%;margin-top:-3px;">
+				<div class="title" id="DarkTheme" style="width:80%;">Тёмная тема</div>
+				<div id="control" style="width:20%;margin-top:-3px;">
 					<input type="checkbox" id="DarkThemeCB" class="checkbox" /><label for="DarkThemeCB" class="switch"></label>
 				</div>
 			</div>
 		</div>
-		<div class="titlebox" style="text-align:center;"><br>EasyNotes<br><span id="LastUpdate"></span> 19.09.20<br>https://r57zone.github.io</div>
+		
+		<div id="controls">
+			<div id="item">
+				<div class="title" id="ThemeTime" style="width:80%;">Тема в зависимости от времени</div>
+				<div id="control" style="width:20%;margin-top:-3px;">
+					<input type="checkbox" id="ThemeTimeCB" class="checkbox" /><label for="ThemeTimeCB" class="switch"></label>
+				</div>
+			</div>
+		</div>
+		
+		<div id="AboutThemeTime" class="titlebox"></div>
+		
+		<div class="titlebox" style="text-align:center;"><br>EasyNotes<br><span id="LastUpdate"></span> 28.09.20<br>https://r57zone.github.io</div>
 	</div>
 	
 	<div id="notification" onclick="this.className='';"></div>
