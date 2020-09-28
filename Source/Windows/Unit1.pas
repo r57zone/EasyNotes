@@ -166,6 +166,8 @@ var
 
   CurDate: TDateTime;
   CurHour, NilTime: Word;
+
+  i: integer;
 begin
   //ѕредотвращение повторого запуска
   WND:=FindWindow('TMain', 'EasyNotes');
@@ -261,8 +263,11 @@ begin
   WebView.Navigate(ExtractFilePath(ParamStr(0)) + 'style\main.html');
 
   DBFileName:='Notes.db';
-  if (LowerCase(ParamStr(1)) = '-db') and (Trim(ParamStr(2)) <> '') and (FileExists(ParamStr(2))) then
-    DBFileName:=ParamStr(2);
+  for i:=1 to ParamCount do
+    if (LowerCase(ParamStr(i)) = '-db') and (Trim(ParamStr(i + 1)) <> '') then begin
+      DBFileName:=ParamStr(i + 1);
+      break;
+    end;
 
   SQLDB:=TSQLiteDatabase.Create(DBFileName);
   if not SQLDB.TableExists('notes') then
@@ -273,8 +278,11 @@ begin
   AllowIPs.LoadFromFile(ExtractFilePath(ParamStr(0)) + 'AllowIPs.txt');
 
   //Ёкспорт
-  if (LowerCase(ParamStr(1)) = '-export') and (Trim(ParamStr(2)) <> '') then
-    ExportNotes(ParamStr(2));
+  for i:=1 to ParamCount do
+    if (LowerCase(ParamStr(i)) = '-export') and (Trim(ParamStr(i + 1)) <> '') then begin
+      ExportNotes(ParamStr(i + 1));
+      break;
+    end;
 end;
 
 function ExtractTitle(Str: string): string;
