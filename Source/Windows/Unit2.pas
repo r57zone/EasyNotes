@@ -19,11 +19,14 @@ type
     AllowedIPsMemo: TMemo;
     AboutBtn: TButton;
     AllowAnyIPsCB: TCheckBox;
+    ThemeTimeCB: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure CancelBtnClick(Sender: TObject);
     procedure AboutBtnClick(Sender: TObject);
     procedure OkBtnClick(Sender: TObject);
     procedure AllowAnyIPsCBClick(Sender: TObject);
+    procedure ThemeTimeCBClick(Sender: TObject);
+    procedure DarkThemeCBClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -47,7 +50,8 @@ begin
 
   Caption:=ID_SETTINGS;
   InterfaceGB.Caption:=ID_INTERFACE;
-  DarkThemeCB.Caption:=ID_USE_DARK_THEME;
+  DarkThemeCB.Caption:=ID_DARK_THEME;
+  ThemeTimeCB.Caption:=IDS_THEME_TIME;
   SyncGB.Caption:=ID_SYNCHRONIZATION;
   PortLbl.Caption:=ID_SYNC_PORT;
   AllowAnyIPsCB.Caption:=ID_SYNC_WITH_ANY_IPS;
@@ -58,6 +62,7 @@ begin
   Ini:=TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Config.ini');
   PortEdt.Text:=IntToStr(Main.IdHTTPServer.DefaultPort);
   DarkThemeCB.Checked:=UseDarkTheme;
+  ThemeTimeCB.Checked:=UseThemeTime;
   if AllowAnyIPs then begin
     AllowAnyIPsCB.Checked:=true;
     AllowedIPsMemo.Enabled:=false;
@@ -73,8 +78,8 @@ end;
 
 procedure TSettings.AboutBtnClick(Sender: TObject);
 begin
-  Application.MessageBox(PChar(Caption + ' 0.8.5' + #13#10 +
-    IDS_LAST_UPDATE + ' 14.09.20' + #13#10 +
+  Application.MessageBox(PChar(Caption + ' 0.8.6' + #13#10 +
+    IDS_LAST_UPDATE + ' 28.09.20' + #13#10 +
     'https://r57zone.github.io' + #13#10 +
     'r57zone@gmail.com'), PChar(Caption), MB_ICONINFORMATION);
 end;
@@ -84,9 +89,12 @@ var
   Ini: TIniFile;
 begin
   Ini:=TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Config.ini');
-  Ini.WriteInteger('Main', 'Port', StrToIntDef(PortEdt.Text, 735));
+  Ini.WriteInteger('Sync', 'Port', StrToIntDef(PortEdt.Text, 735));
+  if ThemeTimeCB.Checked then
+    DarkThemeCB.Checked:=false;
   Ini.WriteBool('Main', 'DarkTheme', DarkThemeCB.Checked);
-  Ini.WriteBool('Main', 'AllowAnyIPs', AllowAnyIPsCB.Checked);
+  Ini.WriteBool('Main', 'ThemeTime', ThemeTimeCB.Checked);
+  Ini.WriteBool('Sync', 'AllowAnyIPs', AllowAnyIPsCB.Checked);
   AllowedIPsMemo.Lines.SaveToFile(ExtractFilePath(ParamStr(0)) + 'AllowIPs.txt');
   Ini.Free;
   Main.IdHTTPServer.Active:=false;
@@ -97,6 +105,18 @@ end;
 procedure TSettings.AllowAnyIPsCBClick(Sender: TObject);
 begin
   AllowedIPsMemo.Enabled:=not AllowAnyIPsCB.Checked;
+end;
+
+procedure TSettings.ThemeTimeCBClick(Sender: TObject);
+begin
+  if (ThemeTimeCB.Checked) and (DarkThemeCB.Checked) then
+    DarkThemeCB.Checked:=false;
+end;
+
+procedure TSettings.DarkThemeCBClick(Sender: TObject);
+begin
+  if (DarkThemeCB.Checked) and (ThemeTimeCB.Checked) then
+    ThemeTimeCB.Checked:=false;
 end;
 
 end.

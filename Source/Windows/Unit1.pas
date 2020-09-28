@@ -35,6 +35,7 @@ type
     procedure CopyBtnClick(Sender: TObject);
     procedure CutBtnClick(Sender: TObject);
     procedure AddStyle(FileName: string);
+    procedure ExportNotes(FileName: string);
   private
     procedure LoadNotes;
     procedure NewNote(MemoFocus: boolean);
@@ -60,12 +61,12 @@ var
   ID_NEW_NOTE, ID_NOTES, ID_TODAY, ID_YESTERDAY, ID_DAYSAGO, ID_SYNC: string;
   ID_CUT, ID_COPY, ID_PASTE, IDS_LAST_UPDATE: string;
 
-  ID_SETTINGS, ID_INTERFACE, ID_USE_DARK_THEME, ID_SYNCHRONIZATION,
+  ID_SETTINGS, ID_INTERFACE, ID_DARK_THEME, IDS_THEME_TIME, ID_SYNCHRONIZATION,
   ID_SYNC_PORT, ID_SYNC_WITH_ANY_IPS, ID_ALLOW_IPS, ID_OK, ID_CANCEL: string;
 
   AllowIPs: TStringList;
   AllowAnyIPs: boolean;
-  UseDarkTheme: boolean;
+  UseDarkTheme, UseThemeTime: boolean;
 
 implementation
 
@@ -162,6 +163,9 @@ var
   Ini: TIniFile;
   Reg: TRegistry;
   WND: HWND;
+
+  CurDate: TDateTime;
+  CurHour, NilTime: Word;
 begin
   //Предотвращение повторого запуска
   WND:=FindWindow('TMain', 'EasyNotes');
@@ -174,7 +178,17 @@ begin
   Ini:=TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Config.ini');
   IdHTTPServer.DefaultPort:=Ini.ReadInteger('Main', 'Port', 735);
   AllowAnyIPs:=Ini.ReadBool('Sync', 'AllowAnyIPs', false);
+
   UseDarkTheme:=Ini.ReadBool('Main', 'DarkTheme', false);
+  UseThemeTime:=Ini.ReadBool('Main', 'ThemeTime', false);
+
+  //Автоматическое изменение темы от времени суток
+  if (UseDarkTheme = false) and (UseThemeTime) then begin
+    DecodeTime(Now, CurHour, NilTime, NilTime, NilTime);
+    if (CurHour <= 9) or (CurHour >= 17) then
+      UseDarkTheme:=true;
+  end;
+
   Width:=Ini.ReadInteger('Main', 'Width', Width);
   Height:=Ini.ReadInteger('Main', 'Height', Height);
   OldWidth:=Width;
@@ -207,7 +221,8 @@ begin
 
     ID_SETTINGS:='Настройки';
     ID_INTERFACE:='Интерфейс';
-    ID_USE_DARK_THEME:='Использовать тёмную тему';
+    ID_DARK_THEME:='Тёмная тема';
+    IDS_THEME_TIME:='Тема в зависимости от времени';
     ID_SYNCHRONIZATION:='Синхронизация';
     ID_SYNC_PORT:='Порт';
     ID_SYNC_WITH_ANY_IPS:='Синхронизация с любыми IP (небезопасно)';
@@ -228,7 +243,8 @@ begin
 
     ID_SETTINGS:='Settings';
     ID_INTERFACE:='Interface';
-    ID_USE_DARK_THEME:='Use a dark theme';
+    ID_DARK_THEME:='Dark theme';
+    IDS_THEME_TIME:='Theme is time dependent';
     ID_SYNCHRONIZATION:='Synchronization';
     ID_SYNC_PORT:='Port';
     ID_SYNC_WITH_ANY_IPS:='Synchronization with any IP (not secure)';
@@ -255,6 +271,10 @@ begin
   //Ограничение IP адресов для синхронизации
   AllowIPs:=TStringList.Create;
   AllowIPs.LoadFromFile(ExtractFilePath(ParamStr(0)) + 'AllowIPs.txt');
+
+  //Экспорт
+  if (LowerCase(ParamStr(1)) = '-export') and (Trim(ParamStr(2)) <> '') then
+    ExportNotes(ParamStr(2));
 end;
 
 function ExtractTitle(Str: string): string;
@@ -684,6 +704,24 @@ begin
   StyleSheet:=HTMLDocument.createStyleSheet('', StyleSheetIndex);
   StyleSheet.cssText:=StyleFile.Text;
   StyleFile.Free;
+end;
+
+procedure TMain.ExportNotes(FileName: string);
+var
+  i: integer; SQLTB: TSQLiteTable; Notes: TStringList;
+begin
+  Notes:=TStringList.Create;
+  SQLTB:=SQLDB.GetTable('SELECT * FROM Notes ORDER BY DateTime DESC');
+  try
+    for i:=0 to SQLTB.Count - 1 do begin
+      Notes.Text:=Notes.Text + DateTimeToStr(UNIXToDateTime(StrToInt64(SQLTB.FieldAsString(2)))) + #13#10 + CharCodesToStr(SQLTB.FieldAsString(1)) + #13#10 + #13#10;
+      SQLTB.Next;
+    end;
+  finally
+    SQLTB.Free;
+  end;
+  Notes.SaveToFile(FileName);
+  Notes.Free;
 end;
 
 initialization

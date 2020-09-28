@@ -4,7 +4,7 @@ object Settings: TSettings
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = #1053#1072#1089#1090#1088#1086#1081#1082#1080
-  ClientHeight = 280
+  ClientHeight = 296
   ClientWidth = 272
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -21,21 +21,31 @@ object Settings: TSettings
     Left = 8
     Top = 8
     Width = 257
-    Height = 49
+    Height = 65
     Caption = #1048#1085#1090#1077#1088#1092#1077#1081#1089
     TabOrder = 0
     object DarkThemeCB: TCheckBox
       Left = 8
       Top = 20
+      Width = 97
+      Height = 17
+      Caption = #1058#1105#1084#1085#1072#1103' '#1090#1077#1084#1072
+      TabOrder = 0
+      OnClick = DarkThemeCBClick
+    end
+    object ThemeTimeCB: TCheckBox
+      Left = 8
+      Top = 40
       Width = 201
       Height = 17
-      Caption = #1048#1089#1087#1086#1083#1100#1079#1086#1074#1072#1090#1100' '#1090#1077#1084#1085#1091#1102' '#1090#1077#1084#1091
-      TabOrder = 0
+      Caption = #1058#1077#1084#1072' '#1074' '#1079#1072#1074#1080#1089#1080#1084#1086#1089#1090#1080' '#1086#1090' '#1074#1088#1077#1084#1077#1085#1080
+      TabOrder = 1
+      OnClick = ThemeTimeCBClick
     end
   end
   object SyncGB: TGroupBox
     Left = 8
-    Top = 64
+    Top = 80
     Width = 257
     Height = 177
     Caption = #1057#1080#1085#1093#1088#1086#1085#1080#1079#1072#1094#1080#1103
@@ -81,16 +91,16 @@ object Settings: TSettings
   end
   object OkBtn: TButton
     Left = 8
-    Top = 248
+    Top = 264
     Width = 75
     Height = 25
-    Caption = #1054#1082
+    Caption = #1054#1050
     TabOrder = 2
     OnClick = OkBtnClick
   end
   object CancelBtn: TButton
     Left = 88
-    Top = 248
+    Top = 264
     Width = 75
     Height = 25
     Caption = #1054#1090#1084#1077#1085#1072
@@ -99,7 +109,7 @@ object Settings: TSettings
   end
   object AboutBtn: TButton
     Left = 240
-    Top = 248
+    Top = 264
     Width = 25
     Height = 25
     Caption = '?'
