@@ -8,45 +8,48 @@
 <style type="text/css">
 html,body{padding:0;margin:0; }
 body{font-family: Arial, sans-serif; font-size:16px; color:#333; background-color:#f8f8f8; -webkit-user-select:none; -webkit-tap-highlight-color:transparent;}
-a{text-decoration:none;font-weight:bold; color:gray;}
-#clear{clear:both;float:none; height:0;}
-#wrapper{position:fixed; width:100%; height:100%; overflow:hidden;}
+a{text-decoration:none; font-weight:bold; color:gray;}
+#wrapper{position:absolute; width:100%; height:100%;}
 
 /* Action bar */
-#panel{width:100%; height:45px; overflow:hidden; background-color:#017d93; color:white; text-align:center; cursor:default;}
+#panel{position:absolute; display:flex; flex-direction:row; justify-content:space-between; align-items:center; width:inherit; height:45px; overflow:hidden; background-color:#017d93; color:white; text-align:center; cursor:default;}
+#panel-bg{width:inherit; height:45px;}
 #btn{width:45px; height:45px; cursor:pointer;}
 #btn:hover{opacity:0.7;}
-#panel .title{display:inline-block; max-width:60%; margin-top:13px; font-weight:500px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+#panel .title{font-weight:500px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
 
-/* List */
+/* List of notes */
 #list{width:100%; height:100%; color:black;}
 #list #items{height:calc(100% - 45px); overflow-y:auto; -webkit-overflow-scrolling:touch;}
-#list #items #note{cursor:pointer; height:44px; border-bottom:1px solid #ededed; overflow:hidden;}
+#list #items #note{display:flex; flex-direction:row; justify-content:space-between; align-items:center; cursor:pointer; height:44px; border-bottom:1px solid #ededed; overflow:hidden;}
 #list #items #note:hover{background-color:#ededed;}
-#list #items #note #title{float:left; width:calc(100% - 138px); margin:14px 0 0 8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-#list #items #note #date{float:right; width:94px; margin:15px 10px 0 0; color:#454545; font-size:10pt; text-align:right;}
+#list #items #note #title{margin-left:8px; margin-right:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+#list #items #note #date{margin-right:10px; margin-left:4px; color:#454545; font-size:13px; white-space:nowrap; text-align:right;}
 
-/* Editor */
-#editor{width:100%; height:100%;}
-#meta{color:#ac5942; height:32px; width:100%; cursor:default; overflow:hidden; white-space:nowrap;}
-#meta #DaysAgo{float:left; margin:8px 0 0 12px; }
-#meta #DateNote{float:right; margin:8px 12px 0 0;}
+/* Note editor */
+#editor{display:none; width:100%; height:100%;}
+#editor #page{height:calc(100% - 90px);}
+#meta{display:flex; flex-direction:row; justify-content:space-between; align-items:center; color:#ac5942; height:32px; width:100%; cursor:default; overflow:hidden; white-space:nowrap;}
+#meta #DaysAgo{margin-left:12px;}
+#meta #DateNote{margin-right:12px;}
 
-#editor #memo{display:block; width:calc(100% - 24px); height:calc(100% - 142px); padding:4px 12px 4px 12px; background-color:transparent; border:none;}
-textarea{font-weight:normal; font-size:17px; font-family: Arial, sans-serif; color:#333; overflow-y:auto; -webkit-overflow-scrolling:touch; border-radius:0; -webkit-tap-highlight-color: rgba(0,0,0,0);}
+#editor #memo{display:block; width:calc(100% - 24px); height:calc(100% - 45px); padding:4px 12px 4px 12px; background-color:transparent; border:none;}
+textarea{font-weight:normal; font-size:17px; font-family: Arial, sans-serif; color:#333; overflow-y:auto; -webkit-overflow-scrolling:touch; border-radius:0; -webkit-tap-highlight-color:rgba(0,0,0,0);}
 textarea:focus{outline:none;}
-#sub-panel{position:absolute; bottom:0; width:100%; height:45px; overflow:hidden; background-color:#e7e7e7; text-align:center; cursor:default;}
+#sub-panel{display:flex; flex-direction:row; justify-content:space-between; align-items:center; height:45px; overflow:hidden; background-color:#e7e7e7; text-align:center; cursor:default;}
 
 /* Settings */
-#settings #controls{margin:15px auto; width:92%; overflow:hidden; font-size:14px;}
-#settings #controls #item{border:1px solid #dbdbdb; padding:14px 8px; height:16px; background-color:#fff; border-top:none; color:black;}
-#settings #controls #item:first-child{border-top-left-radius:15px; border-top-right-radius:15px; border:1px solid #dbdbdb;}
-#settings #controls #item:last-child{border-bottom-left-radius:15px; border-bottom-right-radius:15px;}
-#settings #controls #item .title{float:left; width:60%; overflow:hidden; white-space:nowrap;}
-#settings #controls #item #control{float:left; width:40%; overflow:hidden; text-align:right;}
-#settings .titlebox{margin:7px auto; width:87%; font-size:14px;}
-#settings input[type="text"],#settings input[type="number"]{border:none; padding:0 8px; width:90%; outline:none; font-size:14px; -webkit-tap-highlight-color:rgba(0,0,0,0); text-align:right;}
-.switch{position:relative; display:inline-block; width:40px; height:20px; background-color:#7e7e7e; border-radius:20px; top:1px;}
+#settings{display:none; width:100%; height:100%;}
+#settings #page{height:calc(100% - 45px); overflow-y:auto; -webkit-overflow-scrolling:touch;}
+#settings #items{padding:10px 0; margin:0 auto; width:92%; overflow:hidden; font-size:14px;}
+#settings #items #item{display:flex; flex-direction:row; justify-content:space-between; align-items:center; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; border:1px solid #dbdbdb; padding:14px 8px;  background-color:#fff; border-top:none; color:black;}
+#settings #items #item:first-child{border-top-left-radius:15px; border-top-right-radius:15px; border:1px solid #dbdbdb;}
+#settings #items #item:last-child{border-bottom-left-radius:15px; border-bottom-right-radius:15px;}
+#settings #items #item .title{margin-left:4px;}
+#settings #items #item #control{text-align:right;}
+#settings .titlebox{padding:5px 0; margin:0 auto; width:87%; font-size:14px;}
+#settings input[type="text"],#settings input[type="number"]{border:none; padding:0 7px; width:90%; outline:none; font-size:14px; -webkit-tap-highlight-color:rgba(0,0,0,0); text-align:right;}
+.switch{position:relative; display:inline-block; width:40px; height:20px; background-color:#7e7e7e; border-radius:20px; top:3px;}
 .switch::after{content:''; position:absolute; width:18px; height:18px; border-radius:50%; background-color:white; top:1px; left:1px;}
 .checkbox:checked + .switch::after{left:20px;}
 .checkbox:checked + .switch{background-color:#3498db;}
@@ -54,23 +57,35 @@ textarea:focus{outline:none;}
 
 /* Notification */
 #notification{position:absolute; bottom:0; width:100%; padding: 15px 0; visibility:hidden; font-size:14px; background-color:#e7e7e7; text-align:center; border-top:1px solid #bdbdbd;}
-#notification.show{visibility: visible; -webkit-animation: fadein 0.5s, fadeout 0.5s 3s; animation: fadein 0.5s, fadeout 0.5s 3s;}
-@-webkit-keyframes fadein{from {opacity: 0;} to {opacity: 1;}}
+#notification.show{visibility:visible; animation:fadein 0.5s, fadeout 0.5s 3s;}
 @keyframes fadein{from {opacity: 0;} to {opacity: 1;}}
-@-webkit-keyframes fadeout{from {opacity: 1;} to {opacity: 0;}}
+@keyframes fadein{from {opacity: 0;} to {opacity: 1;}}
+@keyframes fadeout{from {opacity: 1;} to {opacity: 0;}}
 @keyframes fadeout{from {opacity: 1;} to {opacity: 0;}}
 
 #sync-progress{display:none; position:absolute; bottom:0; width:100%; height:4px; background-color:blue; background:linear-gradient(to left, transparent, transparent, #23A6D5, transparent, transparent); background-size:200% 200%; animation:move-background 2s linear infinite;}	
-@keyframes move-background{0% {background-position: 100% 0%} 100% {background-position: -100% 0%}}
+@keyframes move-background{0% {background-position:100% 0%} 100% {background-position:-100% 0%}}
 
-/* Sliding pages */
-.page{position:absolute; top:0; left:0; width:100%; height:100%}
-.page.left{-webkit-transform:translate3d(-100%,0,0); transform:translate3d(-100%,0,0);}
-.page.center{-webkit-transform:translate3d(0,0,0); transform:translate3d(0,0,0);}
-.page.right{-webkit-transform:translate3d(100%,0,0); transform:translate3d(100%,0,0);}
-.page.transition{-webkit-transition-duration:.25s; transition-duration:.25s;}
+/* Layout switching animation */
+#list,#editor,#settings{animation:fadeInFromNone 0.5s ease-out;}
+@keyframes fadeInFromNone{
+	0%{display:none; opacity:0;}
+	1% {display:block; opacity:0;}
+	100%{display:block; opacity:1;}
+}
+
+/* Tablet mode */
+@media all and (min-width:550px) {
+	#list{display:block; float:left; width:37%;}
+	#list #items{border-right:1px solid #d5d5d5;}
+	#editor{display:block; float:right; width:63%;}
+	#settings{float:right; width:63%;}
+	.hide-btn img{opacity:0;}
+}
 </style>
 <script type="text/javascript">
+	var TabletMode;
+
 	var NotesDB;
 	var ActionsDB;
 	var SettingsDB;
@@ -78,6 +93,8 @@ textarea:focus{outline:none;}
 	var CurNoteID = -1; //По умолчанию, для возврата настроек
 	var LatestNote;
 	var CurNoteDateTime;
+	
+	var SyncWait = false;
 	
 	var UpdateDateTime = true;
 	
@@ -103,6 +120,8 @@ textarea:focus{outline:none;}
 	var IDS_ABOUT_AUTO_SYNC = 'Automatically sync on app launch.';
 	//Для всех
 	var IDS_DARK_THEME = 'Dark theme';
+	var IDS_THEME_TIME_DEPENDENT = 'Theme is time dependent';
+	var IDS_ABOUT_THEME_TIME = 'The dark theme turns on automatically from 5:00 pm to 10:00 am.';
 	var IDS_LAST_UPDATE = 'Last update: ';
 	
 	//Уведомления
@@ -134,6 +153,8 @@ textarea:focus{outline:none;}
 		IDS_ABOUT_AUTO_SYNC = 'Автоматическая синхронизация при запуске приложения.';
 		//Для всех
 		IDS_DARK_THEME = 'Темная тема';
+		IDS_THEME_TIME_DEPENDENT = 'Тема в зависимости от времени';
+		IDS_ABOUT_THEME_TIME = 'Темная тема включается автоматически с 17:00 до 10:00.';
 		IDS_LAST_UPDATE = 'Последнее обновление: ';
 		
 		//Уведомления
@@ -178,7 +199,7 @@ textarea:focus{outline:none;}
 		return NewStr;
 	}
 	
-	/*function DropBDs()
+	/*function DropDBs()
 	{
 		NotesDB.transaction(function (tx) {
 			tx.executeSql('DROP TABLE IF EXISTS Notes');
@@ -186,7 +207,7 @@ textarea:focus{outline:none;}
 		ActionsDB.transaction(function (tx) {
 			tx.executeSql('DROP TABLE IF EXISTS Actions');
 		});
-		//console.log('DropBDs');
+		//console.log('DropDBs');
 	}*/
 	
 	function NoteDateAgo(TimeStampSec) //Дней прошло
@@ -293,10 +314,11 @@ textarea:focus{outline:none;}
 	
 	function ShowNotes()
 	{
-		document.getElementById('list').className = 'page transition center';
-		document.getElementById('editor').className = 'page transition right';
-		//document.getElementById('editor').style.display = 'none';
-		//document.getElementById('list').style.display = 'block';
+		//document.getElementById('list').className = 'page transition center';
+		//document.getElementById('editor').className = 'page transition right';
+		if (TabletMode == false)
+			document.getElementById('editor').style.display = 'none';
+		document.getElementById('list').style.display = 'block';
 		var Notes = '';
 		
 		NotesDB.transaction(function (tx) {
@@ -317,11 +339,10 @@ textarea:focus{outline:none;}
 	function NewNote()
 	{
 		CurNoteID = '-1';
-		document.getElementById('list').className = 'page transition left';
-		document.getElementById('editor').className = 'page transition center';
-		document.getElementById('settings').className = 'page transition right';
-		//document.getElementById('list').style.display = 'none';
-		//document.getElementById('editor').style.display = 'block';
+		if (TabletMode == false)
+			document.getElementById('list').style.display = 'none';
+		document.getElementById('settings').style.display = 'none';
+		document.getElementById('editor').style.display = 'block';
 		
 		document.getElementById('memo').value = '';
 		document.getElementById('memo').select();
@@ -333,12 +354,8 @@ textarea:focus{outline:none;}
 	
 	function ShowSettings()
 	{
-		//document.getElementById('list').className = 'page transition left';
-		document.getElementById('editor').className = 'page transition left';
-		document.getElementById('settings').className = 'page transition center';
-		//document.getElementById('list').style.display = 'none';
-		//document.getElementById('editor').style.display = 'none';
-		//document.getElementById('settings').style.display = 'none';
+		document.getElementById('editor').style.display = 'none';
+		document.getElementById('settings').style.display = 'block';
 
 		document.getElementById('memo').value = '';
 		document.getElementById('NoteTitle').innerHTML = IDS_NEW_NOTE;
@@ -351,7 +368,7 @@ textarea:focus{outline:none;}
 		var CurrentStyle = document.getElementsByTagName('style')[0].innerHTML;
 		var DarkThemePos = document.getElementsByTagName('style')[0].innerHTML.indexOf('/*DarkTheme*/');
 		if (DarkThemePos !== -1)
-			document.getElementsByTagName('style')[0].innerHTML = CurrentStyle.substring(0, DarkThemePos);//document.getElementsByTagName('style')[0].innerHTML
+			document.getElementsByTagName('style')[0].innerHTML = CurrentStyle.substring(0, DarkThemePos);
 	}
 	
 	function DarkTheme(){
@@ -365,15 +382,16 @@ textarea:focus{outline:none;}
 			'#sub-panel{background-color:#202329;}' +
 
 			'#list{color:#ededef;}' +
+			'#list #items{border-color:#202329;}' +
 			'#list #items #note{border-bottom:1px solid #3a404a;}' +
 			'#list #items #note:hover{background-color:#202329;}' +
 			'#list #items #note #date{color:#787c81;}' +
 
 			'textarea{color:white;}' +
 
-			'#settings #controls #item{background-color:#202329; color:white;}' +
-			'#settings #controls #item{border:1px solid #3a404a; border-top:none;}' +
-			'#settings #controls #item:first-child{border:1px solid #3a404a;}' +
+			'#settings #items #item{background-color:#202329; color:white;}' +
+			'#settings #items #item{border:1px solid #3a404a; border-top:none;}' +
+			'#settings #items #item:first-child{border:1px solid #3a404a;}' +
 			'#settings input[type="text"],#settings input[type="number"]{background-color:#202329;color:white;}' +
 			'#settings .titlebox{color:#787c81;}' +
 
@@ -424,13 +442,26 @@ textarea:focus{outline:none;}
 			}, null);
 		});
 		
-		//Theme
+		//Dark Theme
 		var UsingDarkTheme = document.getElementById('DarkThemeCB').checked;
+		
+		//Theme time	
+		var UsingThemeTime = document.getElementById('ThemeTimeCB').checked;
+		if (UsingThemeTime) {
+			UsingDarkTheme = false;
+			document.getElementById('DarkThemeCB').checked = false;
+			var date = new Date();
+			if (date.getHours() <=9 || date.getHours() >= 17) 
+				DarkTheme();
+		}
+		
+		//Dark Theme
 		if (UsingDarkTheme)
 			DarkTheme();
-		else
+		else if (UsingThemeTime == false)
 			BackTheme();
-			
+		
+		//Save dark theme status	
 		SettingsDB.transaction(function (tx) {
 			tx.executeSql('SELECT * FROM Settings WHERE Parameter="DarkTheme"', [], function (tx, results) {
 				
@@ -438,6 +469,17 @@ textarea:focus{outline:none;}
 					tx.executeSql('INSERT INTO Settings (Parameter, Value) VALUES ("DarkTheme", "' + UsingDarkTheme + '")');
 				else
 					tx.executeSql('UPDATE Settings SET Value="' + UsingDarkTheme + '" WHERE Parameter="DarkTheme"');
+			}, null);
+		});
+		
+		//Theme time status
+		SettingsDB.transaction(function (tx) {
+			tx.executeSql('SELECT * FROM Settings WHERE Parameter="ThemeTime"', [], function (tx, results) {
+				
+				if (results.rows.length == 0)
+					tx.executeSql('INSERT INTO Settings (Parameter, Value) VALUES ("ThemeTime", "' + UsingThemeTime + '")');
+				else
+					tx.executeSql('UPDATE Settings SET Value="' + UsingThemeTime + '" WHERE Parameter="ThemeTime"');
 			}, null);
 		});
 		
@@ -461,12 +503,10 @@ textarea:focus{outline:none;}
 				document.getElementById('DateNote').innerHTML = NoteDate(results.rows.item(0).DateTime); 
 				CurNoteID = results.rows.item(0).ID;
 				CurNoteDateTime = results.rows.item(0).DateTime;
-				document.getElementById('list').className = 'page transition left';
-				document.getElementById('editor').className = 'page transition center';
-				document.getElementById('settings').className = 'page transition right';
-				//document.getElementById('list').style.display = 'none';
-				//document.getElementById('settings').style.display = 'none';
-				//document.getElementById('editor').style.display = 'block';
+				if (TabletMode == false)
+					document.getElementById('list').style.display = 'none';
+				document.getElementById('settings').style.display = 'none';
+				document.getElementById('editor').style.display = 'block';
 			}, null);
 			
 		});
@@ -534,7 +574,9 @@ textarea:focus{outline:none;}
 		notifyBlock.innerHTML = Str;
 		notifyBlock.className = "show";
 
-		setTimeout(function(){ notifyBlock.className = notifyBlock.className.replace("show", ""); }, 3000);
+		setTimeout(function(){
+			notifyBlock.className = notifyBlock.className.replace("show", ""); 
+		}, 3000);
 	}
 	
 	function GetData(URL){
@@ -573,7 +615,6 @@ textarea:focus{outline:none;}
 			}
 			
 			request.onerror = function() {
-				Notification(IDS_SYNC_ERROR);
 				reject();
 			};
 			
@@ -582,7 +623,13 @@ textarea:focus{outline:none;}
 	}
 	
 	function Sync(){
+		
+		if (SyncWait == true) //Ждем выполнения
+			return;
+		
 		if (window.navigator.onLine) {
+			
+			SyncWait = true;
 		
 			document.getElementById('sync-progress').style.display = 'block';
 		
@@ -618,8 +665,10 @@ textarea:focus{outline:none;}
 							
 							Notification(IDS_SYNC_SUCCESSFUL);
 							
+							SyncWait = false; //Разрешаем повторную синхронизацию;
+							
 						}).catch(function() {
-							Notification(IDS_SYNC_ERROR);
+							Notification(IDS_CONNECTION_FAILED);
 						});
 						
 					}, null);
@@ -648,7 +697,9 @@ textarea:focus{outline:none;}
 						
 						SyncNotes();
 					}).catch(function() {
-						Notification(IDS_SYNC_ERROR);
+						Notification(IDS_CONNECTION_FAILED);
+						
+						SyncWait = false; //Разрешаем повторную синхронизацию;
 					});
 					
 				}, null);
@@ -658,8 +709,26 @@ textarea:focus{outline:none;}
 			Notification(IDS_SYNC_NEED_CONNECT);
 		}
 	}
+
+	function ChangeUIbyOrientation(){
+		if (window.innerWidth >= 550) { //|| window.innerWidth > window.innerHeight
+			TabletMode = true;
+			document.getElementById('list').style.display = 'block';
+			
+			if (document.getElementById('editor').style.display == 'none' && document.getElementById('settings').style.display == 'none')
+				document.getElementById('editor').style.display = 'block';
+		} else {
+			TabletMode = false;
+			if (document.getElementById('editor').style.display == 'block' || document.getElementById('settings').style.display == 'block')
+				document.getElementById('list').style.display = 'none';
+		}
+	}
 	
-	/*function UpdateSizes(){
+	window.onresize = function(){
+		ChangeUIbyOrientation();
+	}
+	
+	/*function UpdateSizes(){ //Для устройств не поддерживающих css calc
 		document.getElementById('items').style.height = window.innerHeight - 45 + 'px';
 		document.getElementById('memo').style.width = window.innerWidth - 24 + 'px';
 		document.getElementById('memo').style.height = window.innerHeight - 134 + 'px';
@@ -673,10 +742,12 @@ textarea:focus{outline:none;}
 		document.getElementById('SettingsTitle').innerText = IDS_SETTINGS;
 		document.getElementById('SyncIP').innerText = IDS_SYNC_IP;
 		document.getElementById('SyncPort').innerText = IDS_SYNC_PORT;
-		document.getElementById('DarkTheme').innerText = IDS_DARK_THEME;
 		document.getElementById('AboutSync').innerText = IDS_ABOUT_SYNC;
 		document.getElementById('AutoSync').innerText = IDS_AUTO_SYNC;
 		document.getElementById('AboutAutoSync').innerText = IDS_ABOUT_AUTO_SYNC;
+		document.getElementById('DarkTheme').innerText = IDS_DARK_THEME;
+		document.getElementById('ThemeTime').innerText = IDS_THEME_TIME_DEPENDENT;
+		document.getElementById('AboutThemeTime').innerText = IDS_ABOUT_THEME_TIME;
 		document.getElementById('LastUpdate').innerText = IDS_LAST_UPDATE;
 		
 		//База данных записей
@@ -703,11 +774,28 @@ textarea:focus{outline:none;}
 				if (results.rows.length != 0 && results.rows.item(0).Value == 'true') {
 					document.getElementById('DarkThemeCB').checked = true;
 					DarkTheme();
+				} else {
+				
+					//Theme time
+					SettingsDB.transaction(function (tx) {
+						tx.executeSql('SELECT * FROM Settings WHERE Parameter="ThemeTime"', [], function (tx, results) {
+							if (results.rows.length != 0 && results.rows.item(0).Value == 'true') {
+								document.getElementById('ThemeTimeCB').checked = true;
+								
+								var date = new Date();
+								if (date.getHours() <=9 || date.getHours() >= 17) 
+									DarkTheme();
+							}
+						}, null);
+					});
+				
 				}
 			}, null);
 		});
 
 		ShowNotes();
+		
+		ChangeUIbyOrientation();
 		
 		//IP
 		SettingsDB.transaction(function (tx) {
@@ -743,19 +831,20 @@ textarea:focus{outline:none;}
 			}, null);
 		});
 		
-		//Старые устройства не поддерживают css calc
-		//UpdateSizes();
+		//UpdateSizes(); //Для устройств не поддерживающих css calc
 	});
 </script>
 </head>
 <body>
 <div id="wrapper">
-	<div id="list" class="page">
+	<div id="list">
 		<div id="panel">
-			<div id="btn" style="float:left;" onclick="Sync()"><img src="images/sync.png" /></div>
+			<div id="btn" onclick="Sync()"><img src="images/sync.png" /></div>
 			<div class="title" id="NotesCount">Заметки (0)</div>
-			<div id="btn" style="float:right;" onclick="NewNote()"><img src="images/new.png" /></div>
+			<div id="btn" onclick="NewNote()"><img src="images/new.png" /></div>
 		</div>
+		<div id="panel-bg"></div>
+		
 		<div id="items">
 			<!--<div id="note">
 				<div id="title">Заголовок</div>
@@ -764,64 +853,81 @@ textarea:focus{outline:none;}
 		</div>
 	</div>
 	
-	<div id="editor" class="page right">
+	<div id="editor">
 		<div id="panel">
-			<div id="btn" style="float:left;" onclick="ShowNotes()"><img src="images/back.png" /></div>
+			<div id="btn" class="hide-btn" onclick="ShowNotes()"><img src="images/back.png" /></div>
 			<div class="title" id="NoteTitle">Заметка</div>
-			<div id="btn" style="float:right;" onclick="NoteDone()"><img src="images/done.png" /></div>
+			<div id="btn" onclick="NoteDone()"><img src="images/done.png" /></div>
 		</div>
-		<div id="meta" onselectstart="return false">
-			<div id="DaysAgo">3 дня назад</div>
-			<div id="DateNote" onclick="ChangeDateTimeStatus()">25 сент. 2:29</div>
+		<div id="panel-bg"></div>
+		<div id="page">
+			<div id="meta" onselectstart="return false">
+				<div id="DaysAgo">3 дня назад</div>
+				<div id="DateNote" onclick="ChangeDateTimeStatus()">25 сент. 2:29</div>
+			</div>
+			<textarea id="memo" value="Текст"></textarea>
 		</div>
-		<div id="clear"></div>
-		<textarea id="memo" value="Текст"></textarea>
 		<div id="sub-panel">
-			<div id="btn" style="float:left;" onclick="RemNote()"><img src="images/rm.png" /></div>
-			<div id="btn" style="float:right;" onclick="ShowSettings()"><img src="images/settings.png" /></div>
+			<div id="btn" onclick="RemNote()"><img src="images/rm.png" /></div>
+			<div id="btn" onclick="ShowSettings()"><img src="images/settings.png" /></div>
 		</div>
 	</div>
 	
-	<div id="settings" class="page right">
+	<div id="settings">
 		<div id="panel">
-			<div id="btn" style="float:left;" onclick="GetNote(CurNoteID)"><img src="images/back.png" /></div>
+			<div id="btn" onclick="GetNote(CurNoteID)"><img src="images/back.png" /></div>
 			<div class="title" id="SettingsTitle">Настройки</div>
-			<div id="btn" style="float:right;" onclick="SettingsDone()"><img src="images/done.png" /></div>
+			<div id="btn" onclick="SettingsDone()"><img src="images/done.png" /></div>
 		</div>
-		
-		<div id="controls">
-			<div id="item">
-				<div class="title" id="SyncIP">IP адрес</div>
-				<div id="control"><input type="text" id="ServerIP" value="192.168.0.1" placeholder="192.168.0.1"></div>
-			</div>
-			<div id="item">
-				<div class="title" id="SyncPort">Порт</div>
-				<div id="control"><input type="number" id="ServerPort" value="735" placeholder="735"></div>
-			</div>
-		</div>
-		
-		<div id="AboutSync" class="titlebox"></div>
-		
-		<div id="controls">
-			<div id="item">
-				<div class="title" id="AutoSync" style="width:70%;">Синхронизация при запуске</div>
-				<div id="control" style="width:30%;margin-top:-3px;">
-					<input type="checkbox" id="AutoSyncCB" class="checkbox" /><label for="AutoSyncCB" class="switch"></label>
+		<div id="panel-bg"></div>
+		<div id="page">
+			<div id="items">
+				<div id="item">
+					<div class="title" id="SyncIP">IP адрес</div>
+					<div id="control"><input type="text" id="ServerIP" value="192.168.0.1" placeholder="192.168.0.1"></div>
+				</div>
+				<div id="item">
+					<div class="title" id="SyncPort">Порт</div>
+					<div id="control"><input type="number" id="ServerPort" value="735" placeholder="735"></div>
 				</div>
 			</div>
-		</div>
-		
-		<div id="AboutAutoSync" class="titlebox"></div>
-		
-		<div id="controls">
-			<div id="item">
-				<div class="title" id="DarkTheme" style="width:70%;">Темная тема</div>
-				<div id="control" style="width:30%;margin-top:-3px;">
-					<input type="checkbox" id="DarkThemeCB" class="checkbox" /><label for="DarkThemeCB" class="switch"></label>
+			
+			<div id="AboutSync" class="titlebox"></div>
+			
+			<div id="items">
+				<div id="item">
+					<div class="title" id="AutoSync" style="width:70%;">Синхронизация при запуске</div>
+					<div id="control" style="width:30%;margin-top:-3px;">
+						<input type="checkbox" id="AutoSyncCB" class="checkbox" /><label for="AutoSyncCB" class="switch"></label>
+					</div>
 				</div>
 			</div>
+			
+			<div id="AboutAutoSync" class="titlebox"></div>
+			
+			<div id="items">
+				<div id="item">
+					<div class="title" id="DarkTheme" style="width:70%;">Тёмная тема</div>
+					<div id="control" style="width:30%;margin-top:-3px;">
+						<input type="checkbox" id="DarkThemeCB" class="checkbox" /><label for="DarkThemeCB" class="switch"></label>
+					</div>
+				</div>
+			</div>
+			
+			<div id="items">
+				<div id="item">
+					<div class="title" id="ThemeTime" style="width:70%;">Тема в зависимости от времени</div>
+					<div id="control" style="width:30%;margin-top:-3px;">
+						<input type="checkbox" id="ThemeTimeCB" class="checkbox" /><label for="ThemeTimeCB" class="switch"></label>
+					</div>
+				</div>
+			</div>
+			
+			<div id="AboutThemeTime" class="titlebox"></div>
+			
+			<div class="titlebox" style="text-align:center;"><br>EasyNotes<br><span id="LastUpdate"></span> 28.09.20<br>https://r57zone.github.io</div>
+			<br><br>
 		</div>
-		<div class="titlebox" style="text-align:center;"><br>EasyNotes<br><span id="LastUpdate"></span> 23.09.20<br>https://r57zone.github.io</div>
 	</div>
 	
 	<div id="notification" onclick="this.className='';"></div>
