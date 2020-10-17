@@ -1,7 +1,7 @@
-[![EN](https://user-images.githubusercontent.com/9499881/33184537-7be87e86-d096-11e7-89bb-f3286f752bc6.png)](https://github.com/r57zone/eNotes/) 
-[![RU](https://user-images.githubusercontent.com/9499881/27683795-5b0fbac6-5cd8-11e7-929c-057833e01fb1.png)](https://github.com/r57zone/eNotes/blob/master/README.RU.md) 
+[![EN](https://user-images.githubusercontent.com/9499881/33184537-7be87e86-d096-11e7-89bb-f3286f752bc6.png)](https://github.com/r57zone/EasyNotes/) 
+[![RU](https://user-images.githubusercontent.com/9499881/27683795-5b0fbac6-5cd8-11e7-929c-057833e01fb1.png)](https://github.com/r57zone/EasyNotes/blob/master/README.RU.md) 
 # EasyNotes
-Приложения заметок для Windows, iOS и Android, с синхронизацией. Сервером выступает приложение для Windows, поэтому для синхронизации необходимо запускать его. Посмотреть API можно [здесь](https://github.com/r57zone/eNotes/blob/master/API.md).
+Приложения заметок для Windows, iOS и Android, с синхронизацией. Сервером выступает приложение для Windows, поэтому для синхронизации необходимо запускать его. Посмотреть API можно [здесь](https://github.com/r57zone/EasyNotes/blob/master/API.md).
 
 ## Особенности
 Если необходимо оставить старую дату, при редактировани заметки, то на мобильных телефонах нужно нажать на дату, а на ПК зажать клавишу "Shift", при нажатии на кнопку готово.
@@ -39,6 +39,6 @@
 ## Загрузка
 >Версии для Windows 7, 8.1, 10, с установленным Internet Explorer 11, iOS 6+ и Android 5+.
 
-**[Загрузить](https://github.com/r57zone/eNotes/releases)**
+**[Загрузить](https://github.com/r57zone/EasyNotes/releases)**
 ## Обратная связь
 `r57zone[собака]gmail.com`
