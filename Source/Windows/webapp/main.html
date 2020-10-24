@@ -3,56 +3,68 @@
 <!--<html>-->
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover" />
 <meta name="apple-mobile-web-app-capable" content="yes">
 <!--<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />-->
 <title>EasyNotes</title>
 <meta name="apple-mobile-web-app-title" content="EasyNotes">
 <!--<link rel="stylesheet" href="all.css">-->
-<link rel="apple-touch-icon" href="images/icon.png">
+<link rel="apple-touch-icon" href="icons/Icon-76.png">
+<link rel="apple-touch-icon" sizes="57x57" href="icons/Icon-57.png">
+<link rel="apple-touch-icon" sizes="60x60" href="icons/Icon-60.png">
+<link rel="apple-touch-icon" sizes="72x72" href="icons/Icon-60.png">
+<link rel="apple-touch-icon" sizes="76x76" href="icons/Icon-76.png">
+<link rel="apple-touch-icon" sizes="114x114" href="icons/Icon-114.png">
+<link rel="apple-touch-icon" sizes="120x120" href="icons/Icon-120.png">
+<link rel="apple-touch-icon" sizes="144x144" href="icons/Icon-144.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icons/Icon-152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/Icon-180x180.png">
 <link rel="apple-touch-startup-image" href="images/launch.png">
 <style type="text/css">
 html,body{padding:0;margin:0; }
-body{font-family: Arial, sans-serif; font-size:16px; color: #333; background-color:#f8f8f8; -webkit-user-select:none; -webkit-tap-highlight-color:transparent;}
-a{text-decoration:none;font-weight:bold; color:gray;}
-#clear{clear:both;float:none; height:0;}
-#wrapper{position:fixed; width:100%; height:100%; overflow:hidden;}
+body{font-family: Arial, sans-serif; font-size:16px; color:#333; background-color:#f8f8f8; -webkit-user-select:none; -webkit-tap-highlight-color:transparent;}
+a{text-decoration:none; font-weight:bold; color:gray;}
+#wrapper{position:absolute; width:100%; height:100%;}
 
 /* Action bar */
-#panel{width:100%; height:45px; overflow:hidden; background-color:#017d93; color:white; text-align:center; cursor:default;}
+#panel{position:absolute; display:flex; flex-direction:row; justify-content:space-between; align-items:center; width:inherit; height:45px; overflow:hidden; background-color:#017d93; color:white; text-align:center; cursor:default;}
+#panel-bg{width:inherit; height:45px;}
 #btn{width:45px; height:45px; cursor:pointer;}
 #btn:hover{opacity:0.7;}
-#panel .title{display:inline-block; max-width:60%; margin-top:12px; font-weight:500px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+#panel .title{font-weight:500px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
 
-/* List */
+/* List of notes */
 #list{width:100%; height:100%; color:black;}
 #list #items{height:calc(100% - 45px); overflow-y:auto; -webkit-overflow-scrolling:touch;}
-#list #items #note{cursor:pointer; height:44px; border-bottom:1px solid #ededed; overflow:hidden;}
+#list #items #note{display:flex; flex-direction:row; justify-content:space-between; align-items:center; cursor:pointer; height:44px; border-bottom:1px solid #ededed; overflow:hidden;}
 #list #items #note:hover{background-color:#ededed;}
-#list #items #note #title{float:left; width:calc(100% - 138px); margin:14px 0 0 8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-#list #items #note #date{float:right; width:94px; margin:15px 10px 0 0; color:#454545; font-size:10pt; text-align:right;}
+#list #items #note #title{margin-left:8px; margin-right:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+#list #items #note #date{margin-right:10px; margin-left:4px; color:#454545; font-size:13px; white-space:nowrap; text-align:right;}
 
-/* Editor */
-#editor{width:100%; height:100%;}
-#meta{color:#ac5942; height:32px; width:100%; cursor:default; overflow:hidden; white-space:nowrap;}
-#meta #DaysAgo{float:left; margin:8px 0 0 12px; }
-#meta #DateNote{float:right; margin:8px 12px 0 0;}
+/* Note editor */
+#editor{display:none; width:100%; height:100%;}
+#editor #page{height:calc(100% - 90px);}
+#meta{display:flex; flex-direction:row; justify-content:space-between; align-items:center; color:#ac5942; height:32px; width:100%; cursor:default; overflow:hidden; white-space:nowrap;}
+#meta #DaysAgo{margin-left:12px;}
+#meta #DateNote{margin-right:12px;}
 
-#editor #memo{display:block; width:calc(100% - 24px); height:calc(100% - 142px); padding:4px 12px 4px 12px; background-color:transparent; border:none;}
-textarea{font-weight:normal; font-size:17px; font-family: Arial, sans-serif; color:#333; overflow-y:auto; -webkit-overflow-scrolling:touch; border-radius:0; -webkit-tap-highlight-color: rgba(0,0,0,0);}
+#editor #memo{display:block; width:calc(100% - 24px); height:calc(100% - 45px); padding:4px 0 4px 0; margin:0 auto; background-color:transparent; border:none;}
+textarea{font-weight:normal; font-size:17px; font-family: Arial, sans-serif; color:#333; overflow-y:auto; -webkit-overflow-scrolling:touch; border-radius:0; -webkit-tap-highlight-color:rgba(0,0,0,0);}
 textarea:focus{outline:none;}
-#sub-panel{position:absolute; bottom:0; width:100%; height:45px; overflow:hidden; background-color:#e7e7e7; text-align:center; cursor:default;}
+#sub-panel{display:flex; flex-direction:row; justify-content:space-between; align-items:center; height:45px; overflow:hidden; background-color:#e7e7e7; text-align:center; cursor:default;}
 
 /* Settings */
-#settings #controls{margin:15px auto; width:92%; overflow:hidden; font-size:14px;}
-#settings #controls #item{border:1px solid #dbdbdb; padding:14px 8px; height:16px; background-color:#fff; border-top:none; color:black;}
-#settings #controls #item:first-child{border-top-left-radius:15px; border-top-right-radius:15px; border:1px solid #dbdbdb;}
-#settings #controls #item:last-child{border-bottom-left-radius:15px; border-bottom-right-radius:15px;}
-#settings #controls #item .title{float:left; width:60%; overflow:hidden; white-space:nowrap;}
-#settings #controls #item #control{float:left; width:40%; overflow:hidden; text-align:right;}
-#settings .titlebox{margin:7px auto; width:87%; font-size:14px;}
-#settings input[type="text"],#settings input[type="number"]{border:none; padding:0 8px; width:90%; outline:none; font-size:14px; -webkit-tap-highlight-color:rgba(0,0,0,0); text-align:right;}
-.switch{position:relative; display:inline-block; width:40px; height:20px; background-color:#7e7e7e; border-radius:20px; top:1px;}
+#settings{display:none; width:100%; height:100%;}
+#settings #page{height:calc(100% - 45px); overflow-y:auto; -webkit-overflow-scrolling:touch;}
+#settings #items{padding:10px 0; margin:0 auto; width:92%; overflow:hidden; font-size:14px;}
+#settings #items #item{display:flex; flex-direction:row; justify-content:space-between; align-items:center; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; border:1px solid #dbdbdb; padding:14px 8px;  background-color:#fff; border-top:none; color:black;}
+#settings #items #item:first-child{border-top-left-radius:15px; border-top-right-radius:15px; border:1px solid #dbdbdb;}
+#settings #items #item:last-child{border-bottom-left-radius:15px; border-bottom-right-radius:15px;}
+#settings #items #item .title{margin-left:4px;}
+#settings #items #item #control{text-align:right;}
+#settings .titlebox{padding:5px 0; margin:0 auto; width:87%; font-size:14px;}
+#settings input[type="text"],#settings input[type="number"]{border:none; padding:0 7px; width:90%; outline:none; font-size:14px; -webkit-tap-highlight-color:rgba(0,0,0,0); text-align:right;}
+.switch{position:relative; display:inline-block; width:40px; height:20px; background-color:#7e7e7e; border-radius:20px; top:3px;}
 .switch::after{content:''; position:absolute; width:18px; height:18px; border-radius:50%; background-color:white; top:1px; left:1px;}
 .checkbox:checked + .switch::after{left:20px;}
 .checkbox:checked + .switch{background-color:#3498db;}
@@ -60,39 +72,70 @@ textarea:focus{outline:none;}
 
 /* Notification */
 #notification{position:absolute; bottom:0; width:100%; padding: 15px 0; visibility:hidden; font-size:14px; background-color:#e7e7e7; text-align:center; border-top:1px solid #bdbdbd;}
-#notification.show{visibility: visible; -webkit-animation: fadein 0.5s, fadeout 0.5s 3s; animation: fadein 0.5s, fadeout 0.5s 3s;}
-@-webkit-keyframes fadein{from {opacity: 0;} to {opacity: 1;}}
+#notification.show{visibility:visible; animation:fadein 0.5s, fadeout 0.5s 3s;}
 @keyframes fadein{from {opacity: 0;} to {opacity: 1;}}
-@-webkit-keyframes fadeout{from {opacity: 1;} to {opacity: 0;}}
+@keyframes fadein{from {opacity: 0;} to {opacity: 1;}}
+@keyframes fadeout{from {opacity: 1;} to {opacity: 0;}}
 @keyframes fadeout{from {opacity: 1;} to {opacity: 0;}}
 
-/* Sliding pages */
-.page{position:absolute; top:0; left:0; width:100%; height:100%}
-.page.left{-webkit-transform:translate3d(-100%,0,0); transform:translate3d(-100%,0,0);}
-.page.center{-webkit-transform:translate3d(0,0,0); transform:translate3d(0,0,0);}
-.page.right{-webkit-transform:translate3d(100%,0,0); transform:translate3d(100%,0,0);}
-.page.transition{-webkit-transition-duration:.25s; transition-duration:.25s;}
+#sync-progress{display:none; position:absolute; bottom:0; width:100%; height:4px; background-color:blue; background:linear-gradient(to left, transparent, transparent, #23A6D5, transparent, transparent); background-size:200% 200%; animation:move-background 2s linear infinite;}	
+@keyframes move-background{0% {background-position:100% 0%} 100% {background-position:-100% 0%}}
+
+/* Layout switching animation */
+#list,#editor,#settings{animation:fadeInFromNone 0.5s ease-out;}
+@keyframes fadeInFromNone{
+	0%{display:none; opacity:0;}
+	1% {display:block; opacity:0;}
+	100%{display:block; opacity:1;}
+}
 </style>
 <style type="text/css">
-/* iOS & iOS 6.1 fixes */
-body{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
-
-#list #items{height:calc(100% - 40px);}
-#list #items #note #title{width:65%; margin:11px 0 0 8px;}
-#list #items #note #date{font-size:14px; margin:13px 10px 0 0;}
-
+/* iOS fixes */
+body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 #settings #controls #item .title{margin-top:-1px;}
 
-textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
+/* iPhone X , XS, 11 Pro */
+@media only screen and (min-device-width: 375px) and (max-device-height: 812px) and (orientation: portrait){
+	#btn{padding:0 10px 0 10px;}
+	#list #items #note #title{margin-left:18px;}
+	#list #items #note #date{margin-right:20px;}
+	#notification{padding:15px 0 25px 0;}
+}
+
+@media only screen and (min-device-width: 375px) and (max-device-height: 812px) and (orientation: landscape){
+	#btn{padding:0 20px 0 20px;}
+	#list #items #note #title{margin-left:46px;}
+	#list #items #note #date{margin-right:48px;}
+	#editor #memo{display:block; width:calc(100% - 76px);}
+}
+
+/* iPhone XR, 11, iPhone XS Max, 11 Pro Max */
+@media only screen and (min-device-width: 414px) and (max-device-height: 896px) and (orientation: portrait){
+	#btn{padding:0 10px 0 10px;}
+	#list #items #note #title{margin-left:18px;}
+	#list #items #note #date{margin-right:20px;}
+	#notification{padding:15px 0 25px 0;}
+}
+
+@media only screen and (min-device-width: 414px) and (max-device-height: 896px) and (orientation: landscape){
+	#btn{padding:0 20px 0 20px;}
+	#list #items #note #title{margin-left:46px;}
+	#list #items #note #date{margin-right:48px;}
+	#editor #memo{display:block; width:calc(100% - 76px);}
+}
 </style>
 <script type="text/javascript">
+	var TabletMode = false;
+ 
 	var NotesDB;
 	var ActionsDB;
 	var SettingsDB;
 	
-	var CurNoteID;
+	var CurNoteID = -1; //По умолчанию, для возврата настроек
 	var LatestNote;
 	var CurNoteDateTime;
+	
+	var SyncWait = false;
 	
 	var UpdateDateTime = true;
 	
@@ -308,10 +351,11 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 	
 	function ShowNotes()
 	{
-		document.getElementById('list').className = 'page transition center';
-		document.getElementById('editor').className = 'page transition right';
-		//document.getElementById('editor').style.display = 'none';
-		//document.getElementById('list').style.display = 'block';
+		//document.getElementById('list').className = 'page transition center';
+		//document.getElementById('editor').className = 'page transition right';
+		if (TabletMode == false)
+			document.getElementById('editor').style.display = 'none';
+		document.getElementById('list').style.display = 'block';
 		var Notes = '';
 		
 		NotesDB.transaction(function (tx) {
@@ -332,12 +376,11 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 	function NewNote()
 	{
 		CurNoteID = '-1';
-		document.getElementById('list').className = 'page transition left';
-		document.getElementById('editor').className = 'page transition center';
-		document.getElementById('settings').className = 'page transition right';
-		//document.getElementById('list').style.display = 'none';
-		//document.getElementById('editor').style.display = 'block';
-
+		if (TabletMode == false)
+			document.getElementById('list').style.display = 'none';
+		document.getElementById('settings').style.display = 'none';
+		document.getElementById('editor').style.display = 'block';
+		
 		document.getElementById('memo').value = '';
 		//document.getElementById('memo').select(); для iOS после исправления бага с увеличением textarea, при клике
 		document.getElementById('NoteTitle').innerHTML = IDS_NEW_NOTE;
@@ -348,18 +391,10 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 	
 	function ShowSettings()
 	{
-		//document.getElementById('list').className = 'page transition left';
-		document.getElementById('editor').className = 'page transition left';
-		document.getElementById('settings').className = 'page transition center';
-		//document.getElementById('list').style.display = 'none';
-		//document.getElementById('editor').style.display = 'none';
-		//document.getElementById('settings').style.display = 'none';
-
-		document.getElementById('memo').value = '';
-		document.getElementById('NoteTitle').innerHTML = IDS_NEW_NOTE;
-		
-		document.getElementById('DaysAgo').innerHTML = NoteDateAgo(GetUTCTimeStamp());
-		document.getElementById('DateNote').innerHTML = NoteDate(GetUTCTimeStamp());
+		if (TabletMode == false)
+			document.getElementById('list').style.display = 'none';
+		document.getElementById('editor').style.display = 'none';
+		document.getElementById('settings').style.display = 'block';
 	}
 	
 	function BackTheme(){
@@ -380,15 +415,16 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 			'#sub-panel{background-color:#202329;}' +
 
 			'#list{color:#ededef;}' +
+			'#list #items{border-color:#202329;}' +
 			'#list #items #note{border-bottom:1px solid #3a404a;}' +
 			'#list #items #note:hover{background-color:#202329;}' +
 			'#list #items #note #date{color:#787c81;}' +
 
 			'textarea{color:white;}' +
 
-			'#settings #controls #item{background-color:#202329; color:white;}' +
-			'#settings #controls #item{border:1px solid #3a404a; border-top:none;}' +
-			'#settings #controls #item:first-child{border:1px solid #3a404a;}' +
+			'#settings #items #item{background-color:#202329; color:white;}' +
+			'#settings #items #item{border:1px solid #3a404a; border-top:none;}' +
+			'#settings #items #item:first-child{border:1px solid #3a404a;}' +
 			'#settings input[type="text"],#settings input[type="number"]{background-color:#202329;color:white;}' +
 			'#settings .titlebox{color:#787c81;}' +
 
@@ -427,7 +463,7 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 			DarkTheme();
 		else if (UsingThemeTime == false)
 			BackTheme();
-			
+		
 		//Save dark theme status	
 		SettingsDB.transaction(function (tx) {
 			tx.executeSql('SELECT * FROM Settings WHERE Parameter="DarkTheme"', [], function (tx, results) {
@@ -470,12 +506,10 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 				document.getElementById('DateNote').innerHTML = NoteDate(results.rows.item(0).DateTime); 
 				CurNoteID = results.rows.item(0).ID;
 				CurNoteDateTime = results.rows.item(0).DateTime;
-				document.getElementById('list').className = 'page transition left';
-				document.getElementById('editor').className = 'page transition center';
-				document.getElementById('settings').className = 'page transition right';
-				//document.getElementById('list').style.display = 'none';
-				//document.getElementById('settings').style.display = 'none';
-				//document.getElementById('editor').style.display = 'block';
+				if (TabletMode == false)
+					document.getElementById('list').style.display = 'none';
+				document.getElementById('settings').style.display = 'none';
+				document.getElementById('editor').style.display = 'block';
 			}, null);
 			
 		});
@@ -538,45 +572,70 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 	}
 	
 	function Notification(Str){
+		document.getElementById('sync-progress').style.display = 'none';
 		var notifyBlock = document.getElementById("notification");
 		notifyBlock.innerHTML = Str;
 		notifyBlock.className = "show";
 
-		setTimeout(function(){ notifyBlock.className = notifyBlock.className.replace("show", ""); }, 3000);
+		setTimeout(function(){
+			notifyBlock.className = notifyBlock.className.replace("show", ""); 
+		}, 3000);
 	}
 	
 	function GetData(URL){
-		var xhr = new XMLHttpRequest();
-		xhr.open('GET', URL, false);
-		xhr.send();
-		if (xhr.status === 200) {
-			return xhr.responseText;
-		} else {
-			return '';
-		}
+		return new Promise(function(resolve, reject) {
+			var request = new XMLHttpRequest();
+			
+			request.open('GET', URL, false);
+			
+			request.onload = function() {
+				if	(request.status == 200)
+					resolve(request.responseText);
+				else
+					reject();
+			}
+			
+			request.onerror = function() {
+				reject();
+			};
+			
+			request.send();
+		});
 	}
 	
 	function SendData(URL, Data){
-		try {
-			var xhr = new XMLHttpRequest();
-			xhr.open('POST', URL, false);
-			xhr.setRequestHeader('Content-type', 'text/plain');
-			xhr.send(Data);
-			if (xhr.status === 200) {
-				return xhr.responseText;
-			} else {
-				return '';
+		 return new Promise(function(resolve, reject) {
+		 
+			var request = new XMLHttpRequest();
+			request.open('POST', URL);
+			request.setRequestHeader('Content-type', 'text/plain');
+			
+			request.onload = function() {
+				if	(request.status == 200)
+					resolve(request.response);
+				else
+					reject();
 			}
-		} catch (e) {
-			Notification(IDS_CONNECTION_FAILED);
-			return '';
-		}
+			
+			request.onerror = function() {
+				reject();
+			};
+			
+			request.send(Data);
+		});
 	}
 	
 	function Sync(){
-	
+		
+		if (SyncWait == true) //Ждем выполнения
+			return;
+		
 		if (window.navigator.onLine) {
 			
+			SyncWait = true;
+		
+			document.getElementById('sync-progress').style.display = 'block';
+		
 			function InsertNote(ID, Note, DateTime){
 				NotesDB.transaction(function (tx) {
 					tx.executeSql('INSERT INTO Notes (ID, Note, DateTime) VALUES (' + ID + ', "' + Note + '", ' + DateTime + ')');
@@ -590,27 +649,31 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 					tx.executeSql('DELETE FROM Notes', [], function (tx, results) {
 						
 						var XMLDoc = document.createElement('div');
-						XMLDoc.innerHTML = GetData('/api/getfullnotes'); 
 						
-						for (var i = 0; i < XMLDoc.getElementsByTagName('note').length; i++) { 
-
-							var ServerNoteID = XMLDoc.getElementsByTagName('note')[i].getAttribute('id');
-							var ServerNote = XMLDoc.getElementsByTagName('note')[i].innerHTML;
-							var ServerNoteDateTime = XMLDoc.getElementsByTagName('note')[i].getAttribute('datetime');
+						GetData('/api/getfullnotes').then(function(responseNotes) {
+							XMLDoc.innerHTML = responseNotes;
 							
-							InsertNote(ServerNoteID, ServerNote, ServerNoteDateTime);
-						}
-				
-						delete XMLDoc;
-						
-						ShowNotes();
-						
-						Notification(IDS_SYNC_SUCCESSFUL);
+							var NotesItems = XMLDoc.getElementsByTagName('note');
+							
+							for (var i = 0; i < NotesItems.length; i++)
+								InsertNote(NotesItems[i].getAttribute('id'), NotesItems[i].innerHTML, NotesItems[i].getAttribute('datetime'));
+					
+							delete XMLDoc;
+							
+							ShowNotes();
+							
+							Notification(IDS_SYNC_SUCCESSFUL);
+							
+							SyncWait = false; //Разрешаем повторную синхронизацию;
+							
+						}).catch(function() {
+							Notification(IDS_CONNECTION_FAILED);
+						});
 						
 					}, null);
 				});
 			}
-
+			
 			//Генерирация XML действий пользователя и отправка на "сервер"
 			ActionsDB.transaction(function (tx) {
 				tx.executeSql('SELECT * FROM Actions', [], function (tx, results) {
@@ -626,30 +689,46 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 					XMLAPI += '</actions>';
 
 					//Отправка XML на "сервер"
-					if (SendData('/api/syncnotes', XMLAPI) == 'ok') {
+					SendData('/api/syncnotes', XMLAPI).then(function(result) {
 						ActionsDB.transaction(function (tx) {
 							tx.executeSql('DELETE FROM Actions');
 						});
 						
 						SyncNotes();
-					} else {
-						Notification(IDS_SYNC_ERROR);
-					}
+					}).catch(function() {
+						Notification(IDS_CONNECTION_FAILED);
+						
+						SyncWait = false; //Разрешаем повторную синхронизацию;
+					});
 					
 				}, null);
 			}); //Завершение генерации и отправки XML API.
-
-
+		
 		} else {
 			Notification(IDS_SYNC_NEED_CONNECT);
 		}
 	}
 	
-	function UpdateSizes(){
-		document.getElementById('items').style.height = window.innerHeight - 45 + 'px';
-		document.getElementById('memo').style.width = window.innerWidth - 24 + 'px';
-		document.getElementById('memo').style.height = window.innerHeight - 134 + 'px';
+	function CheckTabletMode() //Специфика iOS, window.innerWidth не работает, заменяется с height при смене ориентации.
+	{
+		//Если в useragent есть iPad с любым регистром
+		if (/iPad/i.test(window.navigator.userAgent))
+		{
+			TabletMode = true;
+			document.getElementsByTagName('style')[0].innerHTML +=
+			'#list{display:block; float:left; width:37%;}' +
+			'#list #items{border-right:1px solid #d5d5d5;}' +
+			'#editor{display:block; float:right; width:63%;}' +
+			'#settings{float:right; width:63%;}' +
+			'.hide-btn img{opacity:0;}';
+		} else {
+			TabletMode = false;
+		}
 	}
+	
+	/*window.onresize = function(){ //На iOS нет необходимости из-за проблем
+		CheckTabletMode();
+	}*/
 	
 	function iOSBlockOffsetAppScrolling(){
 		document.ontouchmove = function(e){
@@ -697,25 +776,43 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 	
 	//Инициализация
 	document.addEventListener('DOMContentLoaded', function(){
-	
+		
 		//Перевод
 		document.getElementById('NotesCount').innerHTML = IDS_NOTES + ' (0)';
-		//document.getElementById('SettingsTitle').innerText = IDS_SETTINGS;
+		document.getElementById('NoteTitle').innerHTML = IDS_NEW_NOTE;
+		document.getElementById('SettingsTitle').innerText = IDS_SETTINGS;
 		//document.getElementById('SyncIP').innerText = IDS_SYNC_IP;
 		//document.getElementById('SyncPort').innerText = IDS_SYNC_PORT;
 		//document.getElementById('AboutSync').innerText = IDS_ABOUT_SYNC;
+		document.getElementById('AutoSync').innerText = IDS_AUTO_SYNC;
+		document.getElementById('AboutAutoSync').innerText = IDS_ABOUT_AUTO_SYNC;
 		document.getElementById('DarkTheme').innerText = IDS_DARK_THEME;
 		document.getElementById('ThemeTime').innerText = IDS_THEME_TIME_DEPENDENT;
 		document.getElementById('AboutThemeTime').innerText = IDS_ABOUT_THEME_TIME;
-		document.getElementById('AutoSync').innerText = IDS_AUTO_SYNC;
-		document.getElementById('AboutAutoSync').innerText = IDS_ABOUT_AUTO_SYNC;
 		document.getElementById('LastUpdate').innerText = IDS_LAST_UPDATE;
+		
+		document.getElementById('DaysAgo').innerHTML = NoteDateAgo(GetUTCTimeStamp());
+		document.getElementById('DateNote').innerHTML = NoteDate(GetUTCTimeStamp());
+		
+		//База данных записей
+		NotesDB = openDatabase('NotesDB', '1.0', 'Notes', 2 * 1024 * 1024);
+		NotesDB.transaction(function (tx) {
+			tx.executeSql('CREATE TABLE IF NOT EXISTS Notes (ID, Note, DateTime)');
+		});
+		
+		//База данных действий пользователя
+		ActionsDB = openDatabase('NotesDB', '1.0', 'Actions', 2 * 1024 * 1024);
+		ActionsDB.transaction(function (tx) {
+			tx.executeSql('CREATE TABLE IF NOT EXISTS Actions (Action, ID, Note, DateTime)');
+		});
 		
 		//База данных настроек
 		SettingsDB = openDatabase('NotesDB', '1.0', 'Settings', 2 * 1024 * 1024);
 		SettingsDB.transaction(function (tx) {
 			tx.executeSql('CREATE TABLE IF NOT EXISTS Settings (Parameter, Value)');
 		});
+		
+		CheckTabletMode();
 		
 		//Настройки, Dark theme
 		SettingsDB.transaction(function (tx) {
@@ -741,23 +838,8 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 				}
 			}, null);
 		});
-		
-		//База данных записей
-		NotesDB = openDatabase('NotesDB', '1.0', 'Notes', 2 * 1024 * 1024);
-		NotesDB.transaction(function (tx) {
-			tx.executeSql('CREATE TABLE IF NOT EXISTS Notes (ID, Note, DateTime)');
-		});
-		
-		//База данных действий пользователя
-		ActionsDB = openDatabase('NotesDB', '1.0', 'Actions', 2 * 1024 * 1024);
-		ActionsDB.transaction(function (tx) {
-			tx.executeSql('CREATE TABLE IF NOT EXISTS Actions (Action, ID, Note, DateTime)');
-		});
-		
+
 		ShowNotes();
-		
-		//Старые устройства не поддерживают css calc
-		UpdateSizes();
 		
 		//Настройки, автоматическая синхронизация при запуске
 		SettingsDB.transaction(function (tx) {
@@ -778,12 +860,14 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 </head>
 <body>
 <div id="wrapper">
-	<div id="list" class="page">
+	<div id="list">
 		<div id="panel">
-			<div id="btn" style="float:left;" onclick="Sync()"><img src="images/sync.png" /></div>
+			<div id="btn" onclick="Sync()"><img src="images/sync.png" /></div>
 			<div class="title" id="NotesCount">Заметки (0)</div>
-			<div id="btn" style="float:right;" onclick="NewNote()"><img src="images/new.png" /></div>
+			<div id="btn" onclick="NewNote()"><img src="images/new.png" /></div>
 		</div>
+		<div id="panel-bg"></div>
+		
 		<div id="items">
 			<!--<div id="note">
 				<div id="title">Заголовок</div>
@@ -792,65 +876,85 @@ textarea{font-family:Helvetica, Arial, "Lucida Grande", sans-serif;}
 		</div>
 	</div>
 	
-	<div id="editor" class="page right">
+	<div id="editor">
 		<div id="panel">
-			<div id="btn" style="float:left;" onclick="ShowNotes()"><img src="images/back.png" /></div>
+			<div id="btn" class="hide-btn" onclick="ShowNotes()"><img src="images/back.png" /></div>
 			<div class="title" id="NoteTitle">Заметка</div>
-			<div id="btn" style="float:right;" onclick="NoteDone()"><img src="images/done.png" /></div>
+			<div id="btn" onclick="NoteDone()"><img src="images/done.png" /></div>
 		</div>
-		<div id="meta" onselectstart="return false">
-			<div id="DaysAgo">3 дня назад</div>
-			<div id="DateNote" onclick="ChangeDateTimeStatus()">25 сент. 2:29</div>
+		<div id="panel-bg"></div>
+		<div id="page">
+			<div id="meta" onselectstart="return false">
+				<div id="DaysAgo">3 дня назад</div>
+				<div id="DateNote" onclick="ChangeDateTimeStatus()">25 сент. 2:29</div>
+			</div>
+			<textarea id="memo" value="Текст"></textarea>
 		</div>
-		<div id="clear"></div>
-		<textarea id="memo" value="Текст"></textarea>
 		<div id="sub-panel">
-			<div id="btn" style="float:left;" onclick="RemNote()"><img src="images/rm.png" /></div>
-			<div id="btn" style="float:right;" onclick="ShowSettings()"><img src="images/settings.png" /></div>
+			<div id="btn" onclick="RemNote()"><img src="images/rm.png" /></div>
+			<div id="btn" onclick="ShowSettings()"><img src="images/settings.png" /></div>
 		</div>
 	</div>
 	
-	<div id="settings" class="page right">
+	<div id="settings">
 		<div id="panel">
-			<div id="btn" style="float:left;" onclick="GetNote(CurNoteID)"><img src="images/back.png" /></div>
+			<div id="btn" onclick="GetNote(CurNoteID)"><img src="images/back.png" /></div>
 			<div class="title" id="SettingsTitle">Настройки</div>
-			<div id="btn" style="float:right;" onclick="SettingsDone()"><img src="images/done.png" /></div>
+			<div id="btn" onclick="SettingsDone()"><img src="images/done.png" /></div>
 		</div>
-		<div id="controls">
-			<div id="item">
-				<div class="title" id="AutoSync" style="width:80%;">Синхронизация при запуске</div>
-				<div id="control" style="width:20%;margin-top:-3px;">
-					<input type="checkbox" id="AutoSyncCB" class="checkbox" /><label for="AutoSyncCB" class="switch"></label>
+		<div id="panel-bg"></div>
+		<div id="page">
+			<!--<div id="items">
+				<div id="item">
+					<div class="title" id="SyncIP">IP адрес</div>
+					<div id="control"><input type="text" id="ServerIP" value="192.168.0.1" placeholder="192.168.0.1"></div>
+				</div>
+				<div id="item">
+					<div class="title" id="SyncPort">Порт</div>
+					<div id="control"><input type="number" id="ServerPort" value="735" placeholder="735"></div>
 				</div>
 			</div>
-		</div>
-		
-		<div id="AboutAutoSync" class="titlebox"></div>
-		
-		<div id="controls">
-			<div id="item">
-				<div class="title" id="DarkTheme" style="width:80%;">Тёмная тема</div>
-				<div id="control" style="width:20%;margin-top:-3px;">
-					<input type="checkbox" id="DarkThemeCB" class="checkbox" /><label for="DarkThemeCB" class="switch"></label>
+			
+			<div id="AboutSync" class="titlebox"></div>-->
+			
+			<div id="items">
+				<div id="item">
+					<div class="title" id="AutoSync" style="width:70%;">Синхронизация при запуске</div>
+					<div id="control" style="width:30%;margin-top:-3px;">
+						<input type="checkbox" id="AutoSyncCB" class="checkbox" /><label for="AutoSyncCB" class="switch"></label>
+					</div>
 				</div>
 			</div>
-		</div>
-		
-		<div id="controls">
-			<div id="item">
-				<div class="title" id="ThemeTime" style="width:80%;">Тема в зависимости от времени</div>
-				<div id="control" style="width:20%;margin-top:-3px;">
-					<input type="checkbox" id="ThemeTimeCB" class="checkbox" /><label for="ThemeTimeCB" class="switch"></label>
+			
+			<div id="AboutAutoSync" class="titlebox"></div>
+			
+			<div id="items">
+				<div id="item">
+					<div class="title" id="DarkTheme" style="width:70%;">Тёмная тема</div>
+					<div id="control" style="width:30%;margin-top:-3px;">
+						<input type="checkbox" id="DarkThemeCB" class="checkbox" /><label for="DarkThemeCB" class="switch"></label>
+					</div>
 				</div>
 			</div>
+			
+			<div id="items">
+				<div id="item">
+					<div class="title" id="ThemeTime" style="width:70%;">Тема в зависимости от времени</div>
+					<div id="control" style="width:30%;margin-top:-3px;">
+						<input type="checkbox" id="ThemeTimeCB" class="checkbox" /><label for="ThemeTimeCB" class="switch"></label>
+					</div>
+				</div>
+			</div>
+			
+			<div id="AboutThemeTime" class="titlebox"></div>
+			
+			<div class="titlebox" style="text-align:center;"><br>EasyNotes<br><span id="LastUpdate"></span> 24.10.20<br>https://r57zone.github.io</div>
+			<br><br>
 		</div>
-		
-		<div id="AboutThemeTime" class="titlebox"></div>
-		
-		<div class="titlebox" style="text-align:center;"><br>EasyNotes<br><span id="LastUpdate"></span> 28.09.20<br>https://r57zone.github.io</div>
 	</div>
 	
 	<div id="notification" onclick="this.className='';"></div>
+	<div id="sync-progress"></div>
 </div>
 
 </body>
