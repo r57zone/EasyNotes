@@ -84,7 +84,7 @@ textarea:focus{outline:none;}
 }
 </style>
 <script type="text/javascript">
-	var TabletMode;
+	var TabletMode = false;
 
 	var NotesDB;
 	var ActionsDB;
@@ -354,14 +354,10 @@ textarea:focus{outline:none;}
 	
 	function ShowSettings()
 	{
+		if (TabletMode == false)
+			document.getElementById('list').style.display = 'none';
 		document.getElementById('editor').style.display = 'none';
 		document.getElementById('settings').style.display = 'block';
-
-		document.getElementById('memo').value = '';
-		document.getElementById('NoteTitle').innerHTML = IDS_NEW_NOTE;
-		
-		document.getElementById('DaysAgo').innerHTML = NoteDateAgo(GetUTCTimeStamp());
-		document.getElementById('DateNote').innerHTML = NoteDate(GetUTCTimeStamp());
 	}
 	
 	function BackTheme(){
@@ -650,14 +646,10 @@ textarea:focus{outline:none;}
 						GetData('http://' + ServerIP + ':' + ServerPort + '/api/getfullnotes').then(function(responseNotes) {
 							XMLDoc.innerHTML = responseNotes;
 							
-							for (var i = 0; i < XMLDoc.getElementsByTagName('note').length; i++) { 
-
-								var ServerNoteID = XMLDoc.getElementsByTagName('note')[i].getAttribute('id');
-								var ServerNote = XMLDoc.getElementsByTagName('note')[i].innerHTML;
-								var ServerNoteDateTime = XMLDoc.getElementsByTagName('note')[i].getAttribute('datetime');
-								
-								InsertNote(ServerNoteID, ServerNote, ServerNoteDateTime);
-							}
+							var NotesItems = XMLDoc.getElementsByTagName('note');
+							
+							for (var i = 0; i < NotesItems.length; i++)
+								InsertNote(NotesItems[i].getAttribute('id'), NotesItems[i].innerHTML, NotesItems[i].getAttribute('datetime'));
 					
 							delete XMLDoc;
 							
@@ -710,7 +702,7 @@ textarea:focus{outline:none;}
 		}
 	}
 
-	function ChangeUIbyOrientation(){
+	function CheckTabletMode(){
 		if (window.innerWidth >= 550) { //|| window.innerWidth > window.innerHeight
 			TabletMode = true;
 			document.getElementById('list').style.display = 'block';
@@ -725,20 +717,15 @@ textarea:focus{outline:none;}
 	}
 	
 	window.onresize = function(){
-		ChangeUIbyOrientation();
+		CheckTabletMode();
 	}
-	
-	/*function UpdateSizes(){ //Для устройств не поддерживающих css calc
-		document.getElementById('items').style.height = window.innerHeight - 45 + 'px';
-		document.getElementById('memo').style.width = window.innerWidth - 24 + 'px';
-		document.getElementById('memo').style.height = window.innerHeight - 134 + 'px';
-	}*/
 	
 	//Инициализация
 	document.addEventListener('DOMContentLoaded', function(){
 		
 		//Перевод
 		document.getElementById('NotesCount').innerHTML = IDS_NOTES + ' (0)';
+		document.getElementById('NoteTitle').innerHTML = IDS_NEW_NOTE;
 		document.getElementById('SettingsTitle').innerText = IDS_SETTINGS;
 		document.getElementById('SyncIP').innerText = IDS_SYNC_IP;
 		document.getElementById('SyncPort').innerText = IDS_SYNC_PORT;
@@ -749,6 +736,8 @@ textarea:focus{outline:none;}
 		document.getElementById('ThemeTime').innerText = IDS_THEME_TIME_DEPENDENT;
 		document.getElementById('AboutThemeTime').innerText = IDS_ABOUT_THEME_TIME;
 		document.getElementById('LastUpdate').innerText = IDS_LAST_UPDATE;
+		document.getElementById('DaysAgo').innerHTML = NoteDateAgo(GetUTCTimeStamp());
+		document.getElementById('DateNote').innerHTML = NoteDate(GetUTCTimeStamp());
 		
 		//База данных записей
 		NotesDB = openDatabase('NotesDB', '1.0', 'Notes', 2 * 1024 * 1024);
@@ -767,6 +756,8 @@ textarea:focus{outline:none;}
 		SettingsDB.transaction(function (tx) {
 			tx.executeSql('CREATE TABLE IF NOT EXISTS Settings (Parameter, Value)');
 		});
+		
+		CheckTabletMode();
 		
 		//Настройки, Dark theme
 		SettingsDB.transaction(function (tx) {
@@ -794,8 +785,6 @@ textarea:focus{outline:none;}
 		});
 
 		ShowNotes();
-		
-		ChangeUIbyOrientation();
 		
 		//IP
 		SettingsDB.transaction(function (tx) {
