@@ -7,7 +7,10 @@ Apps notes for Windows, iOS and Android, with sync. The server is a Windows appl
 If you want to leave the old date when editing a note then on mobile phones you need to click on the date and on the PC hold down the "Shift" key when you click on the done button.
 
 
-Apps have a dark theme.
+Apps have a dark theme and automatic switching to it in the dark time.
+
+
+Full tablet support is also present.
 ## Setup
 ### Sync of the mobile apps
 1. Reserve a permanent IP address for a computer with a Windows application. This is done in the settings of the Wi-Fi router in the "DHCP" section.
@@ -15,7 +18,10 @@ Apps have a dark theme.
 3. Check Windows Firewall to see if incoming connections are allowed on your network type (private) and allow if disabled.
 
 ### iOS
-Go to Safari on your iOS device and enter there "http://IP:735/webapp", where IP is the reserved permanent IP of your computer. Next you need to click "Share" -> "On the Home Screen". A shortcut to EasyNotes appears on the desktop.
+For iOS 12 and above, go to Settings -> Safari -> Advanced -> Experimental Features and uncheck the "Disable Web SQL" checkbox.
+
+
+Next, go to Safari on your mobile device and enter there "http://IP:735/webapp", where IP is the reserved permanent IP of your computer. Next you need to click "Share" -> "On the Home Screen". A shortcut to EasyNotes appears on the desktop.
 
 ### Android
 Install "EasyNotes.apk" and enter the reserved permanent IP of your computer.
@@ -37,7 +43,7 @@ Install "EasyNotes.apk" and enter the reserved permanent IP of your computer.
 [![](https://user-images.githubusercontent.com/9499881/93085078-14ab5c00-f6a6-11ea-9657-239175a85f24.png)](https://user-images.githubusercontent.com/9499881/93084998-f7768d80-f6a5-11ea-8ed3-b75c1404bc77.png)
 
 ## Download
->Versions for Windows 7, 8.1, 10 with Internet Explorer 11 installed, iOS 6+ and Android 5+.
+>Versions for iOS 6+, Android 5+ and Windows 7, 8.1, 10 (with Internet Explorer 11 installed). 
 
 **[Download](https://github.com/r57zone/EasyNotes/releases)**
 ## Feedback
