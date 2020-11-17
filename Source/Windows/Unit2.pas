@@ -67,7 +67,7 @@ begin
     AllowAnyIPsCB.Checked:=true;
     AllowedIPsMemo.Enabled:=false;
   end;
-  AllowedIPsMemo.Text:=AllowIPs.Text;
+  AllowedIPsMemo.Text:=AllowedIPs.Text;
   Ini.Free;
 end;
 
@@ -78,15 +78,15 @@ end;
 
 procedure TSettings.AboutBtnClick(Sender: TObject);
 begin
-  Application.MessageBox(PChar(Caption + ' 0.8.6' + #13#10 +
-    IDS_LAST_UPDATE + ' 28.09.20' + #13#10 +
+  Application.MessageBox(PChar(Main.Caption + ' 0.8.7' + #13#10 +
+    IDS_LAST_UPDATE + ' 17.11.20' + #13#10 +
     'https://r57zone.github.io' + #13#10 +
     'r57zone@gmail.com'), PChar(Caption), MB_ICONINFORMATION);
 end;
 
 procedure TSettings.OkBtnClick(Sender: TObject);
 var
-  Ini: TIniFile;
+  Ini: TIniFile; ParamsStr: string; i: integer;
 begin
   Ini:=TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Config.ini');
   Ini.WriteInteger('Sync', 'Port', StrToIntDef(PortEdt.Text, 735));
@@ -95,10 +95,15 @@ begin
   Ini.WriteBool('Main', 'DarkTheme', DarkThemeCB.Checked);
   Ini.WriteBool('Main', 'ThemeTime', ThemeTimeCB.Checked);
   Ini.WriteBool('Sync', 'AllowAnyIPs', AllowAnyIPsCB.Checked);
-  AllowedIPsMemo.Lines.SaveToFile(ExtractFilePath(ParamStr(0)) + 'AllowIPs.txt');
+  AllowedIPsMemo.Lines.SaveToFile(ExtractFilePath(ParamStr(0)) + AllowedIPsFile);
   Ini.Free;
   Main.IdHTTPServer.Active:=false;
-  WinExec(PChar(ParamStr(0) + ' -show'), SW_SHOW);
+  for i:=1 to ParamCount do
+    if (LowerCase(ParamStr(i)) = '-db') and (Trim(ParamStr(i + 1)) <> '') then begin
+      ParamsStr:=' -db ' + ParamStr(i + 1);
+      break;
+    end;
+  WinExec(PChar(ParamStr(0) + ' -show' + ParamsStr), SW_SHOW);
   Main.Close;
 end;
 

@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html manifest="app.manifest">
-<!--<html>-->
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>EasyNotes</title>
+<meta name="apple-mobile-web-app-title" content="EasyNotes">
 <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover" />
 <meta name="apple-mobile-web-app-capable" content="yes">
 <!--<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />-->
-<title>EasyNotes</title>
-<meta name="apple-mobile-web-app-title" content="EasyNotes">
 <!--<link rel="stylesheet" href="all.css">-->
 <link rel="apple-touch-icon" href="icons/Icon-76.png">
 <link rel="apple-touch-icon" sizes="57x57" href="icons/Icon-57.png">
@@ -21,7 +20,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="icons/Icon-180x180.png">
 <link rel="apple-touch-startup-image" href="images/launch.png">
 <style type="text/css">
-html,body{padding:0;margin:0; }
+html,body{padding:0;margin:0;}
 body{font-family: Arial, sans-serif; font-size:16px; color:#333; background-color:#f8f8f8; -webkit-user-select:none; -webkit-tap-highlight-color:transparent;}
 a{text-decoration:none; font-weight:bold; color:gray;}
 #wrapper{position:absolute; width:100%; height:100%;}
@@ -48,7 +47,7 @@ a{text-decoration:none; font-weight:bold; color:gray;}
 #meta #DaysAgo{margin-left:12px;}
 #meta #DateNote{margin-right:12px;}
 
-#editor #memo{display:block; width:calc(100% - 24px); height:calc(100% - 45px); padding:4px 0 4px 0; margin:0 auto; background-color:transparent; border:none;}
+#editor #memo{display:block; width:calc(100% - 24px); height:calc(100% - 45px); padding:4px 0; margin:0 auto; background-color:transparent; border:none;}
 textarea{font-weight:normal; font-size:17px; font-family: Arial, sans-serif; color:#333; overflow-y:auto; -webkit-overflow-scrolling:touch; border-radius:0; -webkit-tap-highlight-color:rgba(0,0,0,0);}
 textarea:focus{outline:none;}
 #sub-panel{display:flex; flex-direction:row; justify-content:space-between; align-items:center; height:45px; overflow:hidden; background-color:#e7e7e7; text-align:center; cursor:default;}
@@ -56,6 +55,7 @@ textarea:focus{outline:none;}
 /* Settings */
 #settings{display:none; width:100%; height:100%;}
 #settings #page{height:calc(100% - 45px); overflow-y:auto; -webkit-overflow-scrolling:touch;}
+#settings #page #items:first-child{margin-top:3px;}
 #settings #items{padding:10px 0; margin:0 auto; width:92%; overflow:hidden; font-size:14px;}
 #settings #items #item{display:flex; flex-direction:row; justify-content:space-between; align-items:center; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; border:1px solid #dbdbdb; padding:14px 8px;  background-color:#fff; border-top:none; color:black;}
 #settings #items #item:first-child{border-top-left-radius:15px; border-top-right-radius:15px; border:1px solid #dbdbdb;}
@@ -74,8 +74,6 @@ textarea:focus{outline:none;}
 #notification{position:absolute; bottom:0; width:100%; padding: 15px 0; visibility:hidden; font-size:14px; background-color:#e7e7e7; text-align:center; border-top:1px solid #bdbdbd;}
 #notification.show{visibility:visible; animation:fadein 0.5s, fadeout 0.5s 3s;}
 @keyframes fadein{from {opacity: 0;} to {opacity: 1;}}
-@keyframes fadein{from {opacity: 0;} to {opacity: 1;}}
-@keyframes fadeout{from {opacity: 1;} to {opacity: 0;}}
 @keyframes fadeout{from {opacity: 1;} to {opacity: 0;}}
 
 #sync-progress{display:none; position:absolute; bottom:0; width:100%; height:4px; background-color:blue; background:linear-gradient(to left, transparent, transparent, #23A6D5, transparent, transparent); background-size:200% 200%; animation:move-background 2s linear infinite;}	
@@ -131,7 +129,7 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 	var ActionsDB;
 	var SettingsDB;
 	
-	var CurNoteID = -1; //По умолчанию, для возврата настроек
+	var CurNoteID = -1; //По умолчанию новая заметка
 	var LatestNote;
 	var CurNoteDateTime;
 	
@@ -155,6 +153,7 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 	var IDS_ABOUT_SYNC = 'IP address and port to sync notes with your PC.';
 	var IDS_AUTO_SYNC = 'Sync at startup';
 	var IDS_ABOUT_AUTO_SYNC = 'Automatically sync on app launch.';
+	
 	//Для всех
 	var IDS_DARK_THEME = 'Dark theme';
 	var IDS_THEME_TIME_DEPENDENT = 'Theme is time dependent';
@@ -170,9 +169,7 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 	var IDS_CONNECTION_FAILED = 'Connection failed';
 	
 	//Русский
-	//console.log(navigator.language.toLowerCase());
-	//в iOS языки прописными буквами
-	if (navigator.language.toLowerCase() == 'ru-ru') {
+	if (navigator.language.toLowerCase() == 'ru-ru') { //В iOS языки прописными буквами
 		IDS_MONTHS = ['янв.', 'фев.', 'мар.', 'апр.', 'май', 'июн.', 'июл.', 'авг.', 'сен.', 'окт.', 'ноя.', 'дек.'];
 		IDS_DAYOFWEEK = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'];
 		IDS_TODAY = 'Сегодня';
@@ -351,8 +348,6 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 	
 	function ShowNotes()
 	{
-		//document.getElementById('list').className = 'page transition center';
-		//document.getElementById('editor').className = 'page transition right';
 		if (TabletMode == false)
 			document.getElementById('editor').style.display = 'none';
 		document.getElementById('list').style.display = 'block';
@@ -520,49 +515,57 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 	{
 		var CurTimeStamp = GetTimeStamp();
 		var UTCTimeStamp = GetUTCTimeStamp();
+		var MemoText = document.getElementById('memo').value;
+		var LatestCurNoteID = CurNoteID; //Для мновенного переключения на новую заметку, без ожидания выполнения SQL
 		
+		//Новая заметка
 		if (CurNoteID == '-1') {
-		
-			if (document.getElementById('memo').value.trim() != '') { 
+			//Не создаем заметку без текста
+			if (MemoText.trim() != '') { 
 				NotesDB.transaction(function (tx) {
-					tx.executeSql('INSERT INTO Notes (ID, Note, DateTime) VALUES (' + CurTimeStamp + ', "' + StrToCharCodes(document.getElementById('memo').value) + '", ' + UTCTimeStamp + ')');
+					tx.executeSql('INSERT INTO Notes (ID, Note, DateTime) VALUES (' + CurTimeStamp + ', "' + StrToCharCodes(MemoText) + '", ' + UTCTimeStamp + ')');
 				});
 				
 				ActionsDB.transaction(function (tx) {
-					tx.executeSql('INSERT INTO Actions (Action, ID, Note, DateTime) VALUES ("insert", ' + CurTimeStamp + ', "' + StrToCharCodes(document.getElementById('memo').value) + '",' + UTCTimeStamp + ')');
+					tx.executeSql('INSERT INTO Actions (Action, ID, Note, DateTime) VALUES ("insert", ' + CurTimeStamp + ', "' + StrToCharCodes(MemoText) + '",' + UTCTimeStamp + ')');
 				});
+				
 			}
 			//console.log('Inserted done');
-		} else if (LatestNote.trim() != document.getElementById('memo').value.trim()) { //Добавлять только при наличии изменений
+		} else if (LatestNote.trim() != MemoText.trim()) { //Добавлять только при наличии изменений
 
-			if (UpdateDateTime) {
+			if (UpdateDateTime) { //Обновление времени
 				NotesDB.transaction(function (tx) {
-					tx.executeSql('UPDATE Notes SET Note="' + StrToCharCodes(document.getElementById('memo').value) + '", DateTime=' + UTCTimeStamp + ' WHERE ID=' + CurNoteID);
+					tx.executeSql('UPDATE Notes SET Note="' + StrToCharCodes(MemoText) + '", DateTime=' + UTCTimeStamp + ' WHERE ID=' + LatestCurNoteID);
 				});
 			
 				ActionsDB.transaction(function (tx) {
-					tx.executeSql('INSERT INTO Actions (Action, ID, Note, DateTime) VALUES ("update", ' + CurNoteID + ', "' + StrToCharCodes(document.getElementById('memo').value) + '",' + UTCTimeStamp + ')');
+					tx.executeSql('INSERT INTO Actions (Action, ID, Note, DateTime) VALUES ("update", ' + LatestCurNoteID + ', "' + StrToCharCodes(MemoText) + '",' + UTCTimeStamp + ')');
 				});
-			} else {
+			} else { //Сохранение старого времени
 				NotesDB.transaction(function (tx) {
-					tx.executeSql('UPDATE Notes SET Note="' + StrToCharCodes(document.getElementById('memo').value) + '" WHERE ID=' + CurNoteID);
+					tx.executeSql('UPDATE Notes SET Note="' + StrToCharCodes(MemoText) + '" WHERE ID=' + LatestCurNoteID);
 				});
 			
 				ActionsDB.transaction(function (tx) {
-					tx.executeSql('INSERT INTO Actions (Action, ID, Note, DateTime) VALUES ("update", ' + CurNoteID + ', "' + StrToCharCodes(document.getElementById('memo').value) + '",' + CurNoteDateTime + ')');
+					tx.executeSql('INSERT INTO Actions (Action, ID, Note, DateTime) VALUES ("update", ' + LatestCurNoteID + ', "' + StrToCharCodes(MemoText) + '",' + CurNoteDateTime + ')');
 				});
 			}
 			//console.log('Updated done');
 		}
+		if (TabletMode) //Новая заметка открывается только в режиме планшета
+			NewNote();
 		ShowNotes();
 	}
 	
 	function RemNote()
 	{
-		if (CurNoteID == '-1') return;
+		if (CurNoteID == '-1') {ShowNotes(); return;}
 		NotesDB.transaction(function (tx) {
 			tx.executeSql('DELETE FROM Notes WHERE id=' + CurNoteID, [], function (tx, results) {
 				ShowNotes();
+				if (TabletMode) //Новая заметка открывается только в режиме планшета
+					NewNote();
 			}, null);
 		});
 		ActionsDB.transaction(function (tx) {
@@ -586,7 +589,7 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 		return new Promise(function(resolve, reject) {
 			var request = new XMLHttpRequest();
 			
-			request.open('GET', URL, false);
+			request.open('GET', URL, true);
 			
 			request.onload = function() {
 				if	(request.status == 200)
@@ -712,7 +715,7 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 	function CheckTabletMode() //Специфика iOS, window.innerWidth не работает, заменяется с height при смене ориентации.
 	{
 		//Если в useragent есть iPad с любым регистром
-		if (/iPad/i.test(window.navigator.userAgent))
+		if (/iPad/i.test(window.navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1))
 		{
 			TabletMode = true;
 			document.getElementsByTagName('style')[0].innerHTML +=
@@ -948,7 +951,7 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 			
 			<div id="AboutThemeTime" class="titlebox"></div>
 			
-			<div class="titlebox" style="text-align:center;"><br>EasyNotes<br><span id="LastUpdate"></span> 24.10.20<br>https://r57zone.github.io</div>
+			<div class="titlebox" style="text-align:center;"><br>EasyNotes<br><span id="LastUpdate"></span> 17.11.20<br>https://r57zone.github.io</div>
 			<br><br>
 		</div>
 	</div>

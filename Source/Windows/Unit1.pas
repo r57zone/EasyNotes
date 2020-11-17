@@ -36,6 +36,7 @@ type
     procedure CutBtnClick(Sender: TObject);
     procedure AddStyle(FileName: string);
     procedure ExportNotes(FileName: string);
+    procedure ImportNotes(FileName: string);
   private
     procedure LoadNotes;
     procedure NewNote(MemoFocus: boolean);
@@ -64,9 +65,12 @@ var
   ID_SETTINGS, ID_INTERFACE, ID_DARK_THEME, IDS_THEME_TIME, ID_SYNCHRONIZATION,
   ID_SYNC_PORT, ID_SYNC_WITH_ANY_IPS, ID_ALLOW_IPS, ID_OK, ID_CANCEL: string;
 
-  AllowIPs: TStringList;
+  AllowedIPs: TStringList;
   AllowAnyIPs: boolean;
   UseDarkTheme, UseThemeTime: boolean;
+
+const
+  AllowedIPsFile = 'AllowedIPs.txt';
 
 implementation
 
@@ -196,7 +200,6 @@ begin
   OldWidth:=Width;
   OldHeight:=Height;
   if Ini.ReadBool('Main', 'FirstRun', true) then begin
-    Ini.WriteInteger('Sync', 'Port', 735);
     Ini.WriteBool('Main', 'FirstRun', false);
     Reg:=TRegistry.Create;
     Reg.RootKey:=HKEY_CURRENT_USER;
@@ -274,15 +277,18 @@ begin
     SQLDB.ExecSQL('CREATE TABLE Notes (ID TIMESTAMP, Note TEXT, DateTime TIMESTAMP)');
 
   //Ограничение IP адресов для синхронизации
-  AllowIPs:=TStringList.Create;
-  AllowIPs.LoadFromFile(ExtractFilePath(ParamStr(0)) + 'AllowIPs.txt');
+  AllowedIPs:=TStringList.Create;
+  if FileExists(ExtractFilePath(ParamStr(0)) + AllowedIPsFile) then
+    AllowedIPs.LoadFromFile(ExtractFilePath(ParamStr(0)) + AllowedIPsFile);
 
-  //Экспорт
-  for i:=1 to ParamCount do
-    if (LowerCase(ParamStr(i)) = '-export') and (Trim(ParamStr(i + 1)) <> '') then begin
+  //Экспорт, импорт
+  for i:=1 to ParamCount do begin
+    if (LowerCase(ParamStr(i)) = '-export') and (Trim(ParamStr(i + 1)) <> '') then
       ExportNotes(ParamStr(i + 1));
-      break;
-    end;
+
+    if (LowerCase(ParamStr(i)) = '-import') and (Trim(ParamStr(i + 1)) <> '') then
+      ImportNotes(ParamStr(i + 1));
+  end;
 end;
 
 function ExtractTitle(Str: string): string;
@@ -358,19 +364,19 @@ procedure TMain.NoteDone(UpdateList: integer);
 var
   CurTimeStamp: int64;
 begin
-  //Add
-  if (NoteIndex = -1) and (Trim(WebView.OleObject.Document.getElementById('memo').innerHTML) <> '') then begin
-	  CurTimeStamp:=GetTimeStamp;
-	  SQLDB.ExecSQL('INSERT INTO Notes (ID, Note, DateTime) values("' + IntToStr(CurTimeStamp) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML)+'", "' + IntToStr(DateTimeToUnix(Now)) + '")');
-	  NoteIndex:=CurTimeStamp; //Для того, чтобы последняя запись не создавалась снова и снова
-  end;
-
   //Update
   if (NoteIndex <> -1) and (Trim(LatestNote) <> Trim(WebView.OleObject.Document.getElementById('memo').innerHTML)) then begin
     if (GetAsyncKeyState(VK_LSHIFT) <> 0) or (GetAsyncKeyState(VK_RSHIFT) <> 0) then //Если нажат Shift, то не обновляем дату
       SQLDB.ExecSQL('UPDATE Notes SET Note="' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '" WHERE ID=' + IntToStr(NoteIndex))
     else //По умолчанию (обновление текста и даты)
 	    SQLDB.ExecSQL('UPDATE Notes SET Note="' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", DateTime="' + IntToStr(DateTimeToUnix(Now)) + '" WHERE ID=' + IntToStr(NoteIndex));
+  end;
+
+  //Add, обязательно под Update, потому что обновляется текущий NoteIndex
+  if (NoteIndex = -1) and (Trim(WebView.OleObject.Document.getElementById('memo').innerHTML) <> '') then begin
+	  CurTimeStamp:=GetTimeStamp;
+	  SQLDB.ExecSQL('INSERT INTO Notes (ID, Note, DateTime) values("' + IntToStr(CurTimeStamp) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML)+'", "' + IntToStr(DateTimeToUnix(Now)) + '")');
+	  NoteIndex:=CurTimeStamp; //Для того, чтобы последняя запись не создавалась снова и снова
   end;
 
   if UpdateList = 0 then begin
@@ -490,7 +496,7 @@ begin
   SQLDB.Free;
   Application.OnMessage:=SaveMessageHandler;
   FOleInPlaceActiveObject:=nil;
-  AllowIPs.Free;
+  AllowedIPs.Free;
 end;
 
 procedure TMain.MessageHandler(var Msg: TMsg; var Handled: Boolean);
@@ -556,8 +562,7 @@ var
 begin
   CoInitialize(nil);
 
-  if (AllowIPs.Count > 0) and (AllowAnyIPs = false) then
-    if Pos(AThread.Connection.Socket.Binding.PeerIP, AllowIPs.Text) = 0 then Exit;
+  if (AllowAnyIPs = false) and (Pos(AThread.Connection.Socket.Binding.PeerIP, AllowedIPs.Text) = 0) then begin CoUninitialize; Exit; end;
 
   AResponseInfo.CustomHeaders.Add('Access-Control-Allow-Origin: *'); //Политика безопасности браузеров
 
@@ -582,7 +587,7 @@ begin
     try
       AResponseInfo.ContentText:='<notes>' + #13#10;
       for i:=0 to SQLTB.Count - 1 do begin
-        AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<note id="' + SQLTB.FieldAsString(0) + '" datetime="' + SQLTB.FieldAsString(2) + '">' + StrToWideCharCodes(CharCodesToStr(SQLTB.FieldAsString(1))) + '</note>' + #13#10;
+        AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<note id="' + SQLTB.FieldAsString(0) + '" datetime="' + SQLTB.FieldAsString(2) + '">' + StrToWideCharCodes( CharCodesToStr(SQLTB.FieldAsString(1)) ) + '</note>' + #13#10;
         SQLTB.Next;
       end;
     finally
@@ -603,7 +608,7 @@ begin
       if Trim(NotesIDs.Strings[i]) <> '' then begin
         SQLTB:=SQLDB.GetTable('SELECT ID, Note, DateTime FROM NOTES WHERE ID=' + NotesIDs.Strings[i]);
         try
-          AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<note id="' + SQLTB.FieldAsString(0) + '" datetime="' + SQLTB.FieldAsString(2) + '">' + StrToWideCharCodes(AnsiToUTF8(CharCodesToStr(SQLTB.FieldAsString(1)))) + '</note>' + #13#10;
+          AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<note id="' + SQLTB.FieldAsString(0) + '" datetime="' + SQLTB.FieldAsString(2) + '">' + StrToWideCharCodes( AnsiToUTF8( CharCodesToStr( SQLTB.FieldAsString(1) ) ) ) + '</note>' + #13#10;
         finally
           SQLTB.Free;
         end;
@@ -634,7 +639,7 @@ begin
           SQLDB.ExecSQL('INSERT INTO Notes (ID, Note, DateTime) values("' + XMLNode.ChildNodes[i].Attributes['id'] + '", "' + StrToCharCodes(WideCharCodesToStr(XMLNode.ChildNodes[i].NodeValue)) + '", "' + XMLNode.ChildNodes[i].Attributes['datetime'] + '")');
 
         if XMLNode.ChildNodes[i].NodeName = 'update' then
-          SQLDB.ExecSQL('UPDATE Notes SET Note="' + StrToCharCodes(WideCharCodesToStr(XMLNode.ChildNodes[i].NodeValue)) + '", DateTime="' + XMLNode.ChildNodes[i].Attributes['datetime'] + '" WHERE ID=' + XMLNode.ChildNodes[i].Attributes['id']);
+          SQLDB.ExecSQL('UPDATE Notes SET Note="' + StrToCharCodes( WideCharCodesToStr(XMLNode.ChildNodes[i].NodeValue) ) + '", DateTime="' + XMLNode.ChildNodes[i].Attributes['datetime'] + '" WHERE ID=' + XMLNode.ChildNodes[i].Attributes['id']);
 
         if XMLNode.ChildNodes[i].NodeName = 'delete' then
           SQLDB.ExecSQL('DELETE FROM Notes WHERE ID=' + XMLNode.ChildNodes[i].Attributes['id']);
@@ -722,13 +727,39 @@ begin
   SQLTB:=SQLDB.GetTable('SELECT * FROM Notes ORDER BY DateTime DESC');
   try
     for i:=0 to SQLTB.Count - 1 do begin
-      Notes.Text:=Notes.Text + DateTimeToStr(UNIXToDateTime(StrToInt64(SQLTB.FieldAsString(2)))) + #13#10 + CharCodesToStr(SQLTB.FieldAsString(1)) + #13#10 + #13#10;
+      Notes.Text:=Notes.Text + DateTimeToStr(UNIXToDateTime(StrToInt64(SQLTB.FieldAsString(2)))) + #9 + SQLTB.FieldAsString(2) + #9 + StringReplace( CharCodesToStr(SQLTB.FieldAsString(1)), #10, ' \n ', [rfReplaceAll]) + #13#10;
       SQLTB.Next;
     end;
   finally
     SQLTB.Free;
   end;
   Notes.SaveToFile(FileName);
+  Notes.Free;
+end;
+
+procedure TMain.ImportNotes(FileName: string);
+var
+  Notes: TStringList;
+  i: integer;
+  ImportNote, ImportNoteDateTime, ImportNoteText: string;
+begin
+  if not FileExists(FileName) then Exit;
+  Notes:=TStringList.Create;
+  Notes.LoadFromFile(FileName);
+
+  for i:=Notes.Count - 1 downto 0 do begin
+    ImportNote:=Notes.Strings[i];
+    Delete(ImportNote, 1, Pos(#9, ImportNote));
+    if Pos(#9, ImportNote) > 0 then begin
+      ImportNoteDateTime:=Copy(ImportNote, 1, Pos(#9, ImportNote) - 1);
+      Delete(ImportNote, 1, Pos(#9, ImportNote));
+      ImportNoteText:=StringReplace(ImportNote, ' \n ', #10, [rfReplaceAll]);
+    end;
+
+    if (Trim(ImportNoteDateTime) <> '') and (Trim(ImportNoteText) <> '') then
+      SQLDB.ExecSQL('INSERT INTO Notes (ID, Note, DateTime) values("' + ImportNoteDateTime + '", "' + StrToCharCodes(ImportNoteText) + '", "' + ImportNoteDateTime + '")');
+  end;
+
   Notes.Free;
 end;
 

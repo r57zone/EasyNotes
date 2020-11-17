@@ -23,6 +23,8 @@ For iOS 12 and above, go to Settings -> Safari -> Advanced -> Experimental Featu
 
 Next, go to Safari on your mobile device and enter there "http://IP:735/webapp", where IP is the reserved permanent IP of your computer. Next you need to click "Share" -> "On the Home Screen". A shortcut to EasyNotes appears on the desktop.
 
+
+To update, you need to synchronize, then go to the "Safari" settings and delete history and data, after which you can add the application again.
 ### Android
 Install "EasyNotes.apk" and enter the reserved permanent IP of your computer.
 

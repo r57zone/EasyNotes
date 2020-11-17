@@ -2,8 +2,8 @@
 <widget xmlns   = "http://www.w3.org/ns/widgets"
     xmlns:gap   = "http://phonegap.com/ns/1.0"
     id          = "com.r57zone.easynotes"
-    versionCode = "13"
-    version     = "0.8.6" >
+    versionCode = "14"
+    version     = "0.8.7" >
 
 	<!-- versionCode is optional and Android only -->
 	<name>EasyNotes</name>
@@ -18,8 +18,8 @@
 	<access origin="*" />
 	
 	<preference name="android-minSdkVersion" value="21" />
-	<preference name="android-targetSdkVersion"  value="26" />
+	<preference name="android-targetSdkVersion" value="26" />
 	
-	<plugin name="cordova-plugin-whitelist" source="npm" spec="1.1.0" />
+	<plugin name="cordova-plugin-whitelist" source="npm" spec="*" />
 
 </widget>
