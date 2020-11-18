@@ -31,10 +31,10 @@ scrollbar-darkshadow-color: #dedede;}
 
 #list{float:left; width:37%; height:100%; font-size:14px; color:black;}
 #list #items{height:calc(100% - 40px); overflow:auto; border-right: 1px solid #d5d5d5;}
-#list #items #note{cursor:pointer; height:40px; border-bottom:1px solid #ededed; overflow:hidden;}
+#list #items #note{display:-ms-flexbox; flex-direction:row; justify-content:space-between; align-items:center; cursor:pointer; height:40px; border-bottom:1px solid #ededed; overflow:hidden;}
 #list #items #note:hover{background-color:#ededed;}
-#list #items #note #title{float:left; width:calc(100% - 125px); margin:10px 0 0 8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-#list #items #note #date{float:right; width:85px; margin:10px 10px 0 0; color:#454545; font-size:13px; text-align:right;}
+#list #items #note #title{display:inline-block; margin-left:8px; margin-right:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+#list #items #note #date{display:inline-block; margin-right:10px; margin-left:4px; color:#454545; font-size:13px; white-space:nowrap; text-align:right;}
 
 #editor{float:right; width:63%; height:100%;}
 #meta{color:#ac5942; height:38px; width:100%; font-size:14px; cursor:default; overflow:hidden; white-space:nowrap;}
