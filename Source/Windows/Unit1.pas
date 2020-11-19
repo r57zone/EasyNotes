@@ -411,19 +411,13 @@ begin
     DaysAgo:=DaysBetween(StrToDate(NoteDate), Date);
 
     if ID_DAYSAGO='дн. назад' then begin
+      if DaysAgo mod 10 = 1 then NoteDate:=IntToStr(DaysAgo) + ' день назад';
 
-      if IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))] = '1' then NoteDate:=IntToStr(DaysAgo) + ' день назад';
-    
-      if (IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))] = '2') or
-      (IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))] = '3') or
-      (IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))] = '4') then NoteDate:=IntToStr(DaysAgo) + ' дня назад';
+      if (DaysAgo mod 10 >= 2) and (DaysAgo mod 10 <= 4) then
+        NoteDate:=IntToStr(DaysAgo) + ' дня назад';
 
-      if (IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))]= '5') or
-      (IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))] = '6') or
-      (IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))] = '7') or
-      (IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))] = '8') or
-      (IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))] = '9') or
-      (IntToStr(DaysAgo)[Length(IntToStr(DaysAgo))] = '0') then NoteDate:=IntToStr(DaysAgo) + ' дней назад';
+      if ( (DaysAgo mod 10 >= 5) and (DaysAgo mod 10 <= 9) ) or (DaysAgo mod 10 = 0) then
+        NoteDate:=IntToStr(DaysAgo) + ' дней назад';
     end else
       NoteDate:=IntToStr(DaysAgo) + ' ' + ID_DAYSAGO;
 
