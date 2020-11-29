@@ -2,8 +2,8 @@
 <widget xmlns   = "http://www.w3.org/ns/widgets"
     xmlns:gap   = "http://phonegap.com/ns/1.0"
     id          = "com.r57zone.easynotes"
-    versionCode = "14"
-    version     = "0.8.7" >
+    versionCode = "15"
+    version     = "1.0.0" >
 
 	<!-- versionCode is optional and Android only -->
 	<name>EasyNotes</name>
@@ -12,14 +12,14 @@
 	<author href="https://r57zone.github.io" email="r57zone@gmail.com">r57zone</author>
 	<icon src="icon.png" />
   
-	<allow-intent href="*" />
-	<allow-intent href="*" />
-	<allow-intent href="*" />
 	<access origin="*" />
+	<allow-intent href="*" />
+	<allow-navigation href="*"/>
 	
 	<preference name="android-minSdkVersion" value="21" />
 	<preference name="android-targetSdkVersion" value="26" />
 	
-	<plugin name="cordova-plugin-whitelist" source="npm" spec="*" />
-
+    <plugin name="cordova-plugin-whitelist" source="npm" spec="*"/>
+	<plugin name="cordova-plugin-qrscanner" spec="~2.4.0" />
+	
 </widget>

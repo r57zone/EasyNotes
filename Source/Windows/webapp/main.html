@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html manifest="app.manifest">
+<html manifest="app.manifest"> 
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>EasyNotes</title>
@@ -8,21 +8,21 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <!--<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />-->
 <!--<link rel="stylesheet" href="all.css">-->
-<link rel="apple-touch-icon" href="icons/Icon-76.png">
-<link rel="apple-touch-icon" sizes="57x57" href="icons/Icon-57.png">
-<link rel="apple-touch-icon" sizes="60x60" href="icons/Icon-60.png">
-<link rel="apple-touch-icon" sizes="72x72" href="icons/Icon-60.png">
-<link rel="apple-touch-icon" sizes="76x76" href="icons/Icon-76.png">
-<link rel="apple-touch-icon" sizes="114x114" href="icons/Icon-114.png">
-<link rel="apple-touch-icon" sizes="120x120" href="icons/Icon-120.png">
-<link rel="apple-touch-icon" sizes="144x144" href="icons/Icon-144.png">
-<link rel="apple-touch-icon" sizes="152x152" href="icons/Icon-152.png">
-<link rel="apple-touch-icon" sizes="180x180" href="icons/Icon-180x180.png">
+<link rel="apple-touch-icon" href="icons/icon-76.png">
+<link rel="apple-touch-icon" sizes="57x57" href="icons/icon-57.png">
+<link rel="apple-touch-icon" sizes="60x60" href="icons/icon-60.png">
+<link rel="apple-touch-icon" sizes="72x72" href="icons/icon-72.png">
+<link rel="apple-touch-icon" sizes="76x76" href="icons/icon-76.png">
+<link rel="apple-touch-icon" sizes="114x114" href="icons/icon-114.png">
+<link rel="apple-touch-icon" sizes="120x120" href="icons/icon-120.png">
+<link rel="apple-touch-icon" sizes="144x144" href="icons/icon-144.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180x180.png">
 <link rel="apple-touch-startup-image" href="images/launch.png">
 <style type="text/css">
 html,body{padding:0;margin:0;}
 body{font-family: Arial, sans-serif; font-size:16px; color:#333; background-color:#f8f8f8; -webkit-user-select:none; -webkit-tap-highlight-color:transparent;}
-a{text-decoration:none; font-weight:bold; color:gray;}
+a{text-decoration:none; color:gray;}
 #wrapper{position:absolute; width:100%; height:100%;}
 
 /* Action bar */
@@ -61,7 +61,7 @@ textarea:focus{outline:none;}
 #settings #items #item:first-child{border-top-left-radius:15px; border-top-right-radius:15px; border:1px solid #dbdbdb;}
 #settings #items #item:last-child{border-bottom-left-radius:15px; border-bottom-right-radius:15px;}
 #settings #items #item .title{margin-left:4px;}
-#settings #items #item #control{text-align:right;}
+#settings #items #item #control{text-align:right; margin-right:4px;}
 #settings .titlebox{padding:5px 0; margin:0 auto; width:87%; font-size:14px;}
 #settings input[type="text"],#settings input[type="number"]{border:none; padding:0 7px; width:90%; outline:none; font-size:14px; -webkit-tap-highlight-color:rgba(0,0,0,0); text-align:right;}
 .switch{position:relative; display:inline-block; width:40px; height:20px; background-color:#7e7e7e; border-radius:20px; top:3px;}
@@ -92,15 +92,28 @@ textarea:focus{outline:none;}
 body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 #settings #controls #item .title{margin-top:-1px;}
 
-/* iPhone X , XS, 11 Pro */
+/* iPhone X, XS, 11 Pro, 12 Mini */
 @media only screen and (device-width: 375px) and (device-height: 812px) and (orientation: portrait){
 	#btn{padding:0 10px 0 10px;}
 	#list #items #note #title{margin-left:18px;}
 	#list #items #note #date{margin-right:20px;}
 	#notification{padding:15px 0 25px 0;}
 }
-
 @media only screen and (device-width: 375px) and (device-height: 812px) and (orientation: landscape){
+	#btn{padding:0 20px 0 20px;}
+	#list #items #note #title{margin-left:46px;}
+	#list #items #note #date{margin-right:48px;}
+	#editor #memo{display:block; width:calc(100% - 76px);}
+}
+
+/* iPhone 12, 12 Pro */
+@media only screen and (device-width: 390px) and (device-height: 844px) and (orientation: portrait){
+	#btn{padding:0 10px 0 10px;}
+	#list #items #note #title{margin-left:18px;}
+	#list #items #note #date{margin-right:20px;}
+	#notification{padding:15px 0 25px 0;}
+}
+@media only screen and (device-width: 390px) and (device-height: 844px) and (orientation: landscape){
 	#btn{padding:0 20px 0 20px;}
 	#list #items #note #title{margin-left:46px;}
 	#list #items #note #date{margin-right:48px;}
@@ -114,8 +127,21 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 	#list #items #note #date{margin-right:20px;}
 	#notification{padding:15px 0 25px 0;}
 }
-
 @media only screen and (device-width: 414px) and (device-height: 896px) and (orientation: landscape){
+	#btn{padding:0 20px 0 20px;}
+	#list #items #note #title{margin-left:46px;}
+	#list #items #note #date{margin-right:48px;}
+	#editor #memo{display:block; width:calc(100% - 76px);}
+}
+
+/* iPhone 12 Pro Max */
+@media only screen and (device-width: 428px) and (device-height: 926px) and (orientation: portrait){
+	#btn{padding:0 10px 0 10px;}
+	#list #items #note #title{margin-left:18px;}
+	#list #items #note #date{margin-right:20px;}
+	#notification{padding:15px 0 25px 0;}
+}
+@media only screen and (device-width: 428px) and (device-height: 926px) and (orientation: landscape){
 	#btn{padding:0 20px 0 20px;}
 	#list #items #note #title{margin-left:46px;}
 	#list #items #note #date{margin-right:48px;}
@@ -123,8 +149,10 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 }
 </style>
 <script type="text/javascript">
+	var FirstRun = false;
+	var DeviceID;
 	var TabletMode = false;
- 
+
 	var NotesDB;
 	var ActionsDB;
 	var SettingsDB;
@@ -136,6 +164,11 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 	var SyncWait = false;
 	
 	var UpdateDateTime = true;
+	
+	//Настройки для Android
+	var ServerIP;
+	var ServerPort;
+	var AutoSearchIP = false;
 	
 	//Перевод, по умолчанию English
 	var IDS_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -150,11 +183,14 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 	var IDS_SETTINGS = 'Settings';
 	var IDS_SYNC_IP = 'IP address';
 	var IDS_SYNC_PORT = 'Port';
+	var IDS_AUTOSEARCH_IP = 'Autosearch IP address';
 	var IDS_ABOUT_SYNC = 'IP address and port to sync notes with your PC.';
 	var IDS_AUTO_SYNC = 'Sync at startup';
 	var IDS_ABOUT_AUTO_SYNC = 'Automatically sync on app launch.';
 	
 	//Для всех
+	var IDS_FULL_RESET = 'Full reset';
+	var IDS_CONFIRM_FULL_RESET = 'Do you really want to reset everything? All notes and settings will be deleted.';
 	var IDS_DARK_THEME = 'Dark theme';
 	var IDS_THEME_TIME_DEPENDENT = 'Theme is time dependent';
 	var IDS_ABOUT_THEME_TIME = 'The dark theme turns on automatically from 5:00 pm to 10:00 am.';
@@ -163,6 +199,7 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 	//Уведомления
 	var IDS_DATE_UPDATE = 'Date will be update';
 	var IDS_DATE_NOT_UPDATE = 'Date will not be update';
+	var IDS_AUTH_REJECT = 'Authorization rejected';
 	var IDS_SYNC_SUCCESSFUL = 'Sync successful';
 	var IDS_SYNC_ERROR = 'Sync error';
 	var IDS_SYNC_NEED_CONNECT = 'Need connect to the network for sync';
@@ -182,10 +219,14 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 		IDS_SETTINGS = 'Настройки';
 		IDS_SYNC_IP = 'IP адрес';
 		IDS_SYNC_PORT = 'Порт';
+		IDS_AUTOSEARCH_IP = 'Автопоиск IP адреса';
 		IDS_ABOUT_SYNC = 'IP адрес и порт для синхронизации заметок с вашим ПК.';
 		IDS_AUTO_SYNC = 'Синхронизация при запуске';
 		IDS_ABOUT_AUTO_SYNC = 'Автоматическая синхронизация при запуске приложения.';
+		
 		//Для всех
+		IDS_FULL_RESET = 'Полный сброс';
+		IDS_CONFIRM_FULL_RESET = 'Вы действительно хотите сбросить всё? Все заметки и настройки будут удалены.';
 		IDS_DARK_THEME = 'Темная тема';
 		IDS_THEME_TIME_DEPENDENT = 'Тема в зависимости от времени';
 		IDS_ABOUT_THEME_TIME = 'Темная тема включается автоматически с 17:00 до 10:00.';
@@ -194,6 +235,7 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 		//Уведомления
 		IDS_DATE_UPDATE = 'Дата обновится';
 		IDS_DATE_NOT_UPDATE = 'Дата не обновится';
+		IDS_AUTH_REJECT = 'Авторизация отклонена';
 		IDS_SYNC_SUCCESSFUL = 'Синхронизация успешно завершена';
 		IDS_SYNC_ERROR = 'Ошибка синхронизации';
 		IDS_SYNC_NEED_CONNECT = 'Для синхронизации нужно<br>подключиться к сети';
@@ -233,16 +275,20 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 		return NewStr;
 	}
 	
-	/*function DropDBs()
+	function FullReset()
 	{
+		
+		if (!confirm(IDS_CONFIRM_FULL_RESET)) return;
 		NotesDB.transaction(function (tx) {
 			tx.executeSql('DROP TABLE IF EXISTS Notes');
 		});
 		ActionsDB.transaction(function (tx) {
 			tx.executeSql('DROP TABLE IF EXISTS Actions');
 		});
-		//console.log('DropDBs');
-	}*/
+		SettingsDB.transaction(function (tx) {
+			tx.executeSql('DROP TABLE IF EXISTS Settings', [], function(){document.location.reload();}, function(){});
+		});
+	}
 	
 	function NoteDateAgo(TimeStampSec) //Дней прошло
 	{
@@ -327,7 +373,7 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 		if (Str.indexOf('\n') > 0)
 			Str = Str.substring(0, Str.indexOf('\n'));
 		if (Str.length > 50)
-			Str = Str.substring(0, 50);
+			Str = Str.substring(0, 50) + '...';
 		return Str;
 	}
 	
@@ -356,8 +402,10 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 		NotesDB.transaction(function (tx) {
 			tx.executeSql('SELECT * FROM Notes ORDER BY DateTime DESC', [], function (tx, results) {
 
-				for (var i = 0; i < results.rows.length; i++) 
+				for (var i = 0; i < results.rows.length; i++) {
 					Notes += '<div onclick="GetNote(' + results.rows.item(i).ID  + ')" id="note"><div id="title">' + ExtractTitle(CharCodesToStr(results.rows.item(i).Note)) + '</div><div id="date">' + ListDate(results.rows.item(i).DateTime) + '</div></div>';
+					//console.log(results.rows.item(i).ID + ' ' + results.rows.item(i).DateTime + ' ' + ExtractTitle(CharCodesToStr(results.rows.item(i).Note)));
+				}
 
 				document.getElementById('NotesCount').innerHTML = IDS_NOTES + ' (' + results.rows.length + ')';
 				document.getElementById('items').innerHTML = Notes; //Заменяем, чтобы не мерцала пустота
@@ -365,7 +413,6 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 			
 			}, null);
 		});
-		//console.log('ShowNotes');
 	}
 	
 	function NewNote()
@@ -428,8 +475,51 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 	
 	function SettingsDone()
 	{
+		/*//IP
+		var NewIP = document.getElementById('ServerIP').value;
+		SettingsDB.transaction(function (tx) {
+			tx.executeSql('SELECT * FROM Settings WHERE Parameter="ServerIP"', [], function (tx, results) {
+				
+				if (results.rows.length == 0) {
+					tx.executeSql('INSERT INTO Settings (Parameter, Value) VALUES ("ServerIP", "' + NewIP + '")');
+					ServerIP = NewIP;
+				} else {
+					tx.executeSql('UPDATE Settings SET Value="' + NewIP + '" WHERE Parameter="ServerIP"');
+					ServerIP = NewIP;
+				}
+			}, null);
+		}); 
+		
+		//Port
+		var NewPort = document.getElementById('ServerPort').value;
+		SettingsDB.transaction(function (tx) {
+			tx.executeSql('SELECT * FROM Settings WHERE Parameter="ServerPort"', [], function (tx, results) {
+				
+				if (results.rows.length == 0) {
+					tx.executeSql('INSERT INTO Settings (Parameter, Value) VALUES ("ServerPort", "' + NewPort + '")');
+					ServerPort = NewPort;
+				} else {
+					tx.executeSql('UPDATE Settings SET Value="' + NewPort + '" WHERE Parameter="ServerPort"');
+					ServerPort = NewPort;
+				}
+			}, null);
+		}); 
+		
+		//Auto search IP
+		var AutoSearchIPCB = document.getElementById('AutoSearchIPCB').checked;
+		AutoSearchIP = AutoSearchIPCB;
+		SettingsDB.transaction(function (tx) {
+			tx.executeSql('SELECT * FROM Settings WHERE Parameter="AutoSearchIP"', [], function (tx, results) {
+				
+				if (results.rows.length == 0)
+					tx.executeSql('INSERT INTO Settings (Parameter, Value) VALUES ("AutoSearchIP", "' + AutoSearchIPCB + '")');
+				else
+					tx.executeSql('UPDATE Settings SET Value="' + AutoSearchIPCB + '" WHERE Parameter="AutoSearchIP"');
+			}, null);
+		});*/
+		
 		//Auto sync
-		var AutoSyncCB = document.getElementById('AutoSyncCB').checked;
+		/*var AutoSyncCB = document.getElementById('AutoSyncCB').checked;
 		SettingsDB.transaction(function (tx) {
 			tx.executeSql('SELECT * FROM Settings WHERE Parameter="AutoSync"', [], function (tx, results) {
 				
@@ -438,15 +528,15 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 				else
 					tx.executeSql('UPDATE Settings SET Value="' + AutoSyncCB + '" WHERE Parameter="AutoSync"');
 			}, null);
-		});
+		});*/
 		
 		//Dark Theme
-		var UsingDarkTheme = document.getElementById('DarkThemeCB').checked;
+		var DarkThemeCB = document.getElementById('DarkThemeCB').checked;
 		
 		//Theme time	
-		var UsingThemeTime = document.getElementById('ThemeTimeCB').checked;
-		if (UsingThemeTime) {
-			UsingDarkTheme = false;
+		var ThemeTimeCB = document.getElementById('ThemeTimeCB').checked;
+		if (ThemeTimeCB) {
+			DarkThemeCB = false;
 			document.getElementById('DarkThemeCB').checked = false;
 			var date = new Date();
 			if (date.getHours() <=9 || date.getHours() >= 17) 
@@ -454,9 +544,9 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 		}
 		
 		//Dark Theme
-		if (UsingDarkTheme)
+		if (DarkThemeCB)
 			DarkTheme();
-		else if (UsingThemeTime == false)
+		else if (ThemeTimeCB == false)
 			BackTheme();
 		
 		//Save dark theme status	
@@ -464,9 +554,9 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 			tx.executeSql('SELECT * FROM Settings WHERE Parameter="DarkTheme"', [], function (tx, results) {
 				
 				if (results.rows.length == 0)
-					tx.executeSql('INSERT INTO Settings (Parameter, Value) VALUES ("DarkTheme", "' + UsingDarkTheme + '")');
+					tx.executeSql('INSERT INTO Settings (Parameter, Value) VALUES ("DarkTheme", "' + DarkThemeCB + '")');
 				else
-					tx.executeSql('UPDATE Settings SET Value="' + UsingDarkTheme + '" WHERE Parameter="DarkTheme"');
+					tx.executeSql('UPDATE Settings SET Value="' + DarkThemeCB + '" WHERE Parameter="DarkTheme"');
 			}, null);
 		});
 		
@@ -475,9 +565,9 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 			tx.executeSql('SELECT * FROM Settings WHERE Parameter="ThemeTime"', [], function (tx, results) {
 				
 				if (results.rows.length == 0)
-					tx.executeSql('INSERT INTO Settings (Parameter, Value) VALUES ("ThemeTime", "' + UsingThemeTime + '")');
+					tx.executeSql('INSERT INTO Settings (Parameter, Value) VALUES ("ThemeTime", "' + ThemeTimeCB + '")');
 				else
-					tx.executeSql('UPDATE Settings SET Value="' + UsingThemeTime + '" WHERE Parameter="ThemeTime"');
+					tx.executeSql('UPDATE Settings SET Value="' + ThemeTimeCB + '" WHERE Parameter="ThemeTime"');
 			}, null);
 		});
 		
@@ -493,7 +583,7 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 		}
 		UpdateDateTime = true;
 		NotesDB.transaction(function (tx) {
-			tx.executeSql('SELECT * FROM Notes WHERE id=' + NoteID, [], function (tx, results) {
+			tx.executeSql('SELECT * FROM Notes WHERE ID=' + NoteID, [], function (tx, results) {
 				document.getElementById('memo').value = CharCodesToStr(results.rows.item(0).Note);
 				LatestNote = document.getElementById('memo').value;
 				document.getElementById('NoteTitle').innerHTML = ExtractTitle(CharCodesToStr(results.rows.item(0).Note));
@@ -562,7 +652,7 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 	{
 		if (CurNoteID == '-1') {ShowNotes(); return;}
 		NotesDB.transaction(function (tx) {
-			tx.executeSql('DELETE FROM Notes WHERE id=' + CurNoteID, [], function (tx, results) {
+			tx.executeSql('DELETE FROM Notes WHERE ID=' + CurNoteID, [], function (tx, results) {
 				ShowNotes();
 				if (TabletMode) //Новая заметка открывается только в режиме планшета
 					NewNote();
@@ -571,7 +661,6 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 		ActionsDB.transaction(function (tx) {
 			tx.executeSql('INSERT INTO Actions (Action, ID, Note, DateTime) VALUES ("delete", ' + CurNoteID + ', "", 0)');
 		});
-		//console.log('Deleted ' + CurNoteID);
 	}
 	
 	function Notification(Str){
@@ -628,13 +717,20 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 		});
 	}
 	
+	function GetDeviceID(){
+		var DeviceOS = 'Unknown'
+		if (/Android/i.test(window.navigator.userAgent))
+			DeviceOS = 'Android';
+		else if (/iPhone|iPod|iPad/i.test(window.navigator.userAgent))
+			DeviceOS = 'iOS';
+		return DeviceOS + '_' + Math.random().toString(36).substr(2, 9);
+	}
+	
 	function Sync(){
-		
-		if (SyncWait == true) //Ждем выполнения
+		if (SyncWait) //Ждем выполнения
 			return;
 		
 		if (window.navigator.onLine) {
-			
 			SyncWait = true;
 		
 			document.getElementById('sync-progress').style.display = 'block';
@@ -645,67 +741,176 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 				});
 			}
 			
-			function SyncNotes(){
-				//"Синхронизация" БД
-				//Оптимизация, чтобы загружались недостающие записи, обновлялись и удалялись, возможно появится в будущем. API - GetData('/api/getnotes') и GetData('/api/getnote=' + ID);
+			function UpdateNote(ID, Note, DateTime){
 				NotesDB.transaction(function (tx) {
-					tx.executeSql('DELETE FROM Notes', [], function (tx, results) {
-						
-						var XMLDoc = document.createElement('div');
-						
-						GetData('/api/getfullnotes').then(function(responseNotes) {
-							XMLDoc.innerHTML = responseNotes;
-							
-							var NotesItems = XMLDoc.getElementsByTagName('note');
-							
-							for (var i = 0; i < NotesItems.length; i++)
-								InsertNote(NotesItems[i].getAttribute('id'), NotesItems[i].innerHTML, NotesItems[i].getAttribute('datetime'));
-					
-							delete XMLDoc;
-							
-							ShowNotes();
-							
-							Notification(IDS_SYNC_SUCCESSFUL);
-							
-							SyncWait = false; //Разрешаем повторную синхронизацию;
-							
-						}).catch(function() {
-							Notification(IDS_CONNECTION_FAILED);
-						});
-						
-					}, null);
+					tx.executeSql('Update Notes SET Note = "' + Note + '", DateTime =' + DateTime + ' WHERE ID=' + ID);
 				});
 			}
 			
-			//Генерирация XML действий пользователя и отправка на "сервер"
-			ActionsDB.transaction(function (tx) {
-				tx.executeSql('SELECT * FROM Actions', [], function (tx, results) {
-					var XMLAPI = '<actions>\n';
-					for (var i = 0; i < results.rows.length; i++) {
-						if (results.rows.item(i).Action == 'insert')
-							XMLAPI += '\t<insert id="' + results.rows.item(i).ID + '" datetime="' + results.rows.item(i).DateTime + '">' + results.rows.item(i).Note + '</insert>\n';
-						if (results.rows.item(i).Action == 'update')
-							XMLAPI += '\t<update id="' + results.rows.item(i).ID + '" datetime="' + results.rows.item(i).DateTime + '">' + results.rows.item(i).Note + '</update>\n';
-						if (results.rows.item(i).Action == 'delete')
-							XMLAPI += '\t<delete id="' + results.rows.item(i).ID + '"></delete>\n';
-					}
-					XMLAPI += '</actions>';
+			function RemoveNote(ID){
+				NotesDB.transaction(function (tx) {
+					tx.executeSql('DELETE FROM Notes WHERE ID=' + ID);
+				});
+			}
+			
+			function SyncNotes(){
+									
+				//Первый запуск
+				if (FirstRun) {
+					//console.log('FirstRun');
+					GetData('/api/auth?id=' + DeviceID).then(function(responseText) {
+						if (responseText == 'auth:ok') {
+							//console.log('auth:ok');
 
-					//Отправка XML на "сервер"
-					SendData('/api/syncnotes', XMLAPI).then(function(result) {
-						ActionsDB.transaction(function (tx) {
-							tx.executeSql('DELETE FROM Actions');
-						});
+							//Получение всех заметок при первом запуске
+							var XMLDoc = document.createElement('div');
+							
+							GetData('/api/notes?id=' + DeviceID).then(function(responseNotes) {
+								XMLDoc.innerHTML = responseNotes;
+								
+								var NoteItems = XMLDoc.getElementsByTagName('note');
+								for (var i = 0; i < NoteItems.length; i++)
+									InsertNote(NoteItems[i].getAttribute('id'), NoteItems[i].innerHTML, NoteItems[i].getAttribute('datetime'));
 						
-						SyncNotes();
+								delete XMLDoc;
+								
+								ShowNotes();
+								
+								Notification(IDS_SYNC_SUCCESSFUL);
+								
+								//Сохраняем статус успешного первого запуска
+								SettingsDB.transaction(function (tx) {
+									tx.executeSql('INSERT INTO Settings (Parameter, Value) VALUES ("FirstRun", "' + false + '")');
+									FirstRun = false;
+								});
+								
+								SyncWait = false; //Разрешаем повторную синхронизацию;
+								
+							}).catch(function() {
+								SyncWait = false; //Разрешаем повторную синхронизацию;
+								
+								Notification(IDS_CONNECTION_FAILED);
+							});
+
+						} else {
+							SyncWait = false; //Разрешаем повторную синхронизацию;
+							
+							Notification(IDS_AUTH_REJECT);
+						}
+							
+						//console.log(responseText);
 					}).catch(function() {
-						Notification(IDS_CONNECTION_FAILED);
-						
 						SyncWait = false; //Разрешаем повторную синхронизацию;
+						
+						Notification(IDS_CONNECTION_FAILED);
+					});
+						
+				} else { //Второй и последующие запуски
+					//Получение действий
+					var XMLDoc = document.createElement('div');
+					GetData('/api/actions?id=' + DeviceID).then(function(responseNotes) {
+						XMLDoc.innerHTML = responseNotes;
+						
+						//Удаляем действия
+						GetData('/api/received?id=' + DeviceID).then(function(responseStatus) {
+						
+							if (responseStatus == 'ok') {
+								var ActionsItems = XMLDoc.getElementsByTagName('*');
+								for (var i = 0; i < ActionsItems.length; i++) { 
+
+									var ReceivedNoteID = ActionsItems[i].getAttribute('id');
+									var ReceivedNote = ActionsItems[i].innerHTML;
+									var ReceivedNoteDateTime = ActionsItems[i].getAttribute('datetime');
+									
+									if (ActionsItems[i].tagName == 'INSERT')
+										InsertNote(ReceivedNoteID, ReceivedNote, ReceivedNoteDateTime);
+									if (ActionsItems[i].tagName == 'UPDATE')
+										UpdateNote(ReceivedNoteID, ReceivedNote, ReceivedNoteDateTime);
+									if (ActionsItems[i].tagName == 'DELETE')
+										RemoveNote(ReceivedNoteID);
+								}
+								
+								ShowNotes();
+							
+								Notification(IDS_SYNC_SUCCESSFUL);
+							} else if (responseStatus == 'auth:denied') {
+								FirstRun = true;
+								//console.log(responseStatus);
+							} else
+								Notification(IDS_CONNECTION_FAILED);
+						
+							SyncWait = false; //Разрешаем повторную синхронизацию
+						
+						}).catch(function() {
+							SyncWait = false; //Разрешаем повторную синхронизацию;
+							
+							Notification(IDS_CONNECTION_FAILED);
+						});
+				
+						delete XMLDoc;
+						
+					}).catch(function() {
+						SyncWait = false; //Разрешаем повторную синхронизацию;
+						
+						Notification(IDS_CONNECTION_FAILED);
 					});
 					
-				}, null);
-			}); //Завершение генерации и отправки XML API.
+				}
+			}	
+				
+			//Генерирация XML действий пользователя и отправка на "сервер"
+			if (FirstRun == false) //При первом запуске отправлять нечего
+				GetData('/api/auth?id=' + DeviceID).then(function(responseText) { //Проверка авторизации
+					if (responseText == 'auth:ok') {
+						ActionsDB.transaction(function (tx) {
+							tx.executeSql('SELECT * FROM Actions', [], function (tx, results) {
+								var XMLAPI = '<actions>\n';
+								for (var i = 0; i < results.rows.length; i++) {
+									if (results.rows.item(i).Action == 'insert')
+										XMLAPI += '\t<insert id="' + results.rows.item(i).ID + '" datetime="' + results.rows.item(i).DateTime + '">' + results.rows.item(i).Note + '</insert>\n';
+									if (results.rows.item(i).Action == 'update')
+										XMLAPI += '\t<update id="' + results.rows.item(i).ID + '" datetime="' + results.rows.item(i).DateTime + '">' + results.rows.item(i).Note + '</update>\n';
+									if (results.rows.item(i).Action == 'delete')
+										XMLAPI += '\t<delete id="' + results.rows.item(i).ID + '"></delete>\n';
+								}
+								XMLAPI += '</actions>';
+
+								//Отправка XML на "сервер"
+								SendData('/api/syncnotes?id=' + DeviceID, XMLAPI).then(function(responseStatus) {
+
+									if (responseStatus == 'ok') {
+										ActionsDB.transaction(function (tx) {
+											tx.executeSql('DELETE FROM Actions');
+										});
+										
+										SyncNotes();
+									} else {
+										SyncWait = false; //Разрешаем повторную синхронизацию;
+										
+										Notification(IDS_CONNECTION_FAILED);
+									}
+								}).catch(function() {
+									SyncWait = false; //Разрешаем повторную синхронизацию;
+								
+									Notification(IDS_CONNECTION_FAILED);
+								});
+								
+							}, null);
+						}); //Завершение генерации и отправки XML API.
+					} else {
+						SyncWait = false; //Разрешаем повторную синхронизацию;
+							
+						Notification(IDS_AUTH_REJECT);
+					}
+				}).catch(function() {
+					SyncWait = false; //Разрешаем повторную синхронизацию;
+							
+					Notification(IDS_CONNECTION_FAILED);
+				});
+			
+			
+			if (FirstRun)
+				SyncNotes();
 		
 		} else {
 			Notification(IDS_SYNC_NEED_CONNECT);
@@ -786,6 +991,7 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 		document.getElementById('SettingsTitle').innerText = IDS_SETTINGS;
 		//document.getElementById('SyncIP').innerText = IDS_SYNC_IP;
 		//document.getElementById('SyncPort').innerText = IDS_SYNC_PORT;
+		//document.getElementById('AutoSearchIP').innerText = IDS_AUTOSEARCH_IP;
 		//document.getElementById('AboutSync').innerText = IDS_ABOUT_SYNC;
 		document.getElementById('AutoSync').innerText = IDS_AUTO_SYNC;
 		document.getElementById('AboutAutoSync').innerText = IDS_ABOUT_AUTO_SYNC;
@@ -793,6 +999,7 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 		document.getElementById('ThemeTime').innerText = IDS_THEME_TIME_DEPENDENT;
 		document.getElementById('AboutThemeTime').innerText = IDS_ABOUT_THEME_TIME;
 		document.getElementById('LastUpdate').innerText = IDS_LAST_UPDATE;
+		document.getElementById('ResetBtn').innerText = IDS_FULL_RESET;
 		
 		document.getElementById('DaysAgo').innerHTML = NoteDateAgo(GetUTCTimeStamp());
 		document.getElementById('DateNote').innerHTML = NoteDate(GetUTCTimeStamp());
@@ -814,8 +1021,6 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 		SettingsDB.transaction(function (tx) {
 			tx.executeSql('CREATE TABLE IF NOT EXISTS Settings (Parameter, Value)');
 		});
-		
-		CheckTabletMode();
 		
 		//Настройки, Dark theme
 		SettingsDB.transaction(function (tx) {
@@ -842,7 +1047,64 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 			}, null);
 		});
 
+		CheckTabletMode();
+
 		ShowNotes();
+		
+		//IP
+		/*SettingsDB.transaction(function (tx) {
+			tx.executeSql('SELECT * FROM Settings WHERE Parameter="ServerIP"', [], function (tx, results) {
+				if (results.rows.length == 0) {
+					ShowSettings();
+				} else {
+					ServerIP = results.rows.item(0).Value;
+					document.getElementById('ServerIP').value = ServerIP;
+				}
+			}, null);
+		});
+		
+		//Port
+		SettingsDB.transaction(function (tx) {
+			tx.executeSql('SELECT * FROM Settings WHERE Parameter="ServerPort"', [], function (tx, results) {
+				if (results.rows.length != 0) {
+					ServerPort = results.rows.item(0).Value;
+					document.getElementById('ServerPort').value = ServerPort;
+				}
+			}, null);
+		});
+		
+		//Автопоиск IP адреса
+		SettingsDB.transaction(function (tx) {
+			tx.executeSql('SELECT * FROM Settings WHERE Parameter="AutoSearchIP"', [], function (tx, results) {
+				if (results.rows.length != 0 && results.rows.item(0).Value == 'true') {
+					document.getElementById('AutoSearchIPCB').checked = true;
+					AutoSearchIP = true;
+				}
+			}, null);
+		});*/
+		
+		//Настройки, первый запуск
+		SettingsDB.transaction(function (tx) {
+			tx.executeSql('SELECT * FROM Settings WHERE Parameter="FirstRun"', [], function (tx, results) {
+				if (results.rows.length == 0)
+					FirstRun = true;
+				else
+					FirstRun = false;
+			}, null);
+		});
+		
+		//Настройки, Device ID
+		SettingsDB.transaction(function (tx) {
+			tx.executeSql('SELECT * FROM Settings WHERE Parameter="DeviceID"', [], function (tx, results) {
+				if (results.rows.length == 0) {
+					DeviceID = GetDeviceID();
+					tx.executeSql('INSERT INTO Settings (Parameter, Value) VALUES ("DeviceID", "' + DeviceID + '")');
+				} else
+					DeviceID = results.rows.item(0).Value;
+				
+				document.getElementById('DeviceID').innerHTML = 'ID: ' + DeviceID;
+			}, null);
+		});
 		
 		//Настройки, автоматическая синхронизация при запуске
 		SettingsDB.transaction(function (tx) {
@@ -916,6 +1178,12 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 					<div class="title" id="SyncPort">Порт</div>
 					<div id="control"><input type="number" id="ServerPort" value="735" placeholder="735"></div>
 				</div>
+				<div id="item">
+					<div class="title" id="AutoSearchIP" style="width:70%;">Автопоиск IP адреса</div>
+					<div id="control" style="width:30%;margin-top:-3px;">
+						<input type="checkbox" id="AutoSearchIPCB" class="checkbox" /><label for="AutoSearchIPCB" class="switch"></label>
+					</div>
+				</div>
 			</div>
 			
 			<div id="AboutSync" class="titlebox"></div>-->
@@ -951,7 +1219,14 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 			
 			<div id="AboutThemeTime" class="titlebox"></div>
 			
-			<div class="titlebox" style="text-align:center;"><br>EasyNotes<br><span id="LastUpdate"></span> 18.11.20<br>https://r57zone.github.io</div>
+			<div class="titlebox" style="text-align:center;"><br>EasyNotes<br><span id="LastUpdate"></span> 27.11.20<br>https://r57zone.github.io<br><br><span id="DeviceID"></span></div>
+			<br>
+			<div id="items">
+				<div id="item">
+					<div class="title" id="ResetBtn" style="width:95%;" onclick="FullReset()">Полный сброс</div>
+					<div id="control" style="width:5%;">></div>
+				</div>
+			</div>
 			<br><br>
 		</div>
 	</div>
@@ -959,6 +1234,5 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 	<div id="notification" onclick="this.className='';"></div>
 	<div id="sync-progress"></div>
 </div>
-
 </body>
 </html>

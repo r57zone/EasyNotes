@@ -8,22 +8,21 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <!--<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />-->
 <!--<link rel="stylesheet" href="all.css">-->
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
-<link rel="apple-touch-icon" href="icons/Icon-76.png">
-<link rel="apple-touch-icon" sizes="57x57" href="icons/Icon-57.png">
-<link rel="apple-touch-icon" sizes="60x60" href="icons/Icon-60.png">
-<link rel="apple-touch-icon" sizes="72x72" href="icons/Icon-60.png">
-<link rel="apple-touch-icon" sizes="76x76" href="icons/Icon-76.png">
-<link rel="apple-touch-icon" sizes="114x114" href="icons/Icon-114.png">
-<link rel="apple-touch-icon" sizes="120x120" href="icons/Icon-120.png">
-<link rel="apple-touch-icon" sizes="144x144" href="icons/Icon-144.png">
-<link rel="apple-touch-icon" sizes="152x152" href="icons/Icon-152.png">
-<link rel="apple-touch-icon" sizes="180x180" href="icons/Icon-180x180.png">
+<link rel="apple-touch-icon" href="icons/icon-76.png">
+<link rel="apple-touch-icon" sizes="57x57" href="icons/icon-57.png">
+<link rel="apple-touch-icon" sizes="60x60" href="icons/icon-60.png">
+<link rel="apple-touch-icon" sizes="72x72" href="icons/icon-72.png">
+<link rel="apple-touch-icon" sizes="76x76" href="icons/icon-76.png">
+<link rel="apple-touch-icon" sizes="114x114" href="icons/icon-114.png">
+<link rel="apple-touch-icon" sizes="120x120" href="icons/icon-120.png">
+<link rel="apple-touch-icon" sizes="144x144" href="icons/icon-144.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180x180.png">
 <link rel="apple-touch-startup-image" href="images/launch.png">
 <style type="text/css">
 html,body{padding:0;margin:0;}
 body{font-family: Arial, sans-serif; font-size:16px; color:#333; background-color:#f8f8f8; -webkit-user-select:none; -webkit-tap-highlight-color:transparent;}
-a{text-decoration:none; font-weight:bold; color:gray;}
+a{text-decoration:none; color:gray;}
 #wrapper{position:absolute; width:100%; height:100%;}
 
 /* Action bar */
@@ -32,6 +31,7 @@ a{text-decoration:none; font-weight:bold; color:gray;}
 #btn{width:45px; height:45px; cursor:pointer;}
 #btn:hover{opacity:0.7;}
 #panel .title{font-weight:500px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+#panel-qr{display:none; position:absolute; width:100%; height:45px; background: rgba(0,0,0,0.5); flex-direction:row; justify-content:space-between; align-items:center;}
 
 /* List of notes */
 #list{width:100%; height:100%; color:black;}
@@ -62,7 +62,7 @@ textarea:focus{outline:none;}
 #settings #items #item:first-child{border-top-left-radius:15px; border-top-right-radius:15px; border:1px solid #dbdbdb;}
 #settings #items #item:last-child{border-bottom-left-radius:15px; border-bottom-right-radius:15px;}
 #settings #items #item .title{margin-left:4px;}
-#settings #items #item #control{text-align:right;}
+#settings #items #item #control{text-align:right; margin-right:4px;}
 #settings .titlebox{padding:5px 0; margin:0 auto; width:87%; font-size:14px;}
 #settings input[type="text"],#settings input[type="number"]{border:none; padding:0 7px; width:90%; outline:none; font-size:14px; -webkit-tap-highlight-color:rgba(0,0,0,0); text-align:right;}
 .switch{position:relative; display:inline-block; width:40px; height:20px; background-color:#7e7e7e; border-radius:20px; top:3px;}
@@ -94,10 +94,13 @@ textarea:focus{outline:none;}
 	#list #items{border-right:1px solid #d5d5d5;}
 	#editor{display:block; float:right; width:63%;}
 	#settings{float:right; width:63%;}
-	.hide-btn img{opacity:0;}
+	.hide-btn img{opacity:0; cursor:pointer;}
 }
 </style>
+<script type="text/javascript" src="cordova.js"></script>
 <script type="text/javascript">
+	var FirstRun = false;
+	var DeviceID;
 	var TabletMode = false;
 
 	var NotesDB;
@@ -109,12 +112,18 @@ textarea:focus{outline:none;}
 	var CurNoteDateTime;
 	
 	var SyncWait = false;
-	
+
 	var UpdateDateTime = true;
+	
+	var UsedDarkTheme = false; //для QR (проблемы с CSS)
+	
 	
 	//Настройки для Android
 	var ServerIP;
 	var ServerPort;
+	var AutoSearchIP = false;
+	
+	var FlashLightEnable = false;
 	
 	//Перевод, по умолчанию English
 	var IDS_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -129,11 +138,14 @@ textarea:focus{outline:none;}
 	var IDS_SETTINGS = 'Settings';
 	var IDS_SYNC_IP = 'IP address';
 	var IDS_SYNC_PORT = 'Port';
+	var IDS_AUTOSEARCH_IP = 'Autosearch IP address';
 	var IDS_ABOUT_SYNC = 'IP address and port to sync notes with your PC.';
 	var IDS_AUTO_SYNC = 'Sync at startup';
 	var IDS_ABOUT_AUTO_SYNC = 'Automatically sync on app launch.';
 	
 	//Для всех
+	var IDS_FULL_RESET = 'Full reset';
+	var IDS_CONFIRM_FULL_RESET = 'Do you really want to reset everything? All notes and settings will be deleted.';
 	var IDS_DARK_THEME = 'Dark theme';
 	var IDS_THEME_TIME_DEPENDENT = 'Theme is time dependent';
 	var IDS_ABOUT_THEME_TIME = 'The dark theme turns on automatically from 5:00 pm to 10:00 am.';
@@ -142,6 +154,7 @@ textarea:focus{outline:none;}
 	//Уведомления
 	var IDS_DATE_UPDATE = 'Date will be update';
 	var IDS_DATE_NOT_UPDATE = 'Date will not be update';
+	var IDS_AUTH_REJECT = 'Authorization rejected';
 	var IDS_SYNC_SUCCESSFUL = 'Sync successful';
 	var IDS_SYNC_ERROR = 'Sync error';
 	var IDS_SYNC_NEED_CONNECT = 'Need connect to the network for sync';
@@ -161,10 +174,14 @@ textarea:focus{outline:none;}
 		IDS_SETTINGS = 'Настройки';
 		IDS_SYNC_IP = 'IP адрес';
 		IDS_SYNC_PORT = 'Порт';
+		IDS_AUTOSEARCH_IP = 'Автопоиск IP адреса';
 		IDS_ABOUT_SYNC = 'IP адрес и порт для синхронизации заметок с вашим ПК.';
 		IDS_AUTO_SYNC = 'Синхронизация при запуске';
 		IDS_ABOUT_AUTO_SYNC = 'Автоматическая синхронизация при запуске приложения.';
+		
 		//Для всех
+		IDS_FULL_RESET = 'Полный сброс';
+		IDS_CONFIRM_FULL_RESET = 'Вы действительно хотите сбросить всё? Все заметки и настройки будут удалены.';
 		IDS_DARK_THEME = 'Темная тема';
 		IDS_THEME_TIME_DEPENDENT = 'Тема в зависимости от времени';
 		IDS_ABOUT_THEME_TIME = 'Темная тема включается автоматически с 17:00 до 10:00.';
@@ -173,6 +190,7 @@ textarea:focus{outline:none;}
 		//Уведомления
 		IDS_DATE_UPDATE = 'Дата обновится';
 		IDS_DATE_NOT_UPDATE = 'Дата не обновится';
+		IDS_AUTH_REJECT = 'Авторизация отклонена';
 		IDS_SYNC_SUCCESSFUL = 'Синхронизация успешно завершена';
 		IDS_SYNC_ERROR = 'Ошибка синхронизации';
 		IDS_SYNC_NEED_CONNECT = 'Для синхронизации нужно<br>подключиться к сети';
@@ -212,16 +230,19 @@ textarea:focus{outline:none;}
 		return NewStr;
 	}
 	
-	/*function DropDBs()
+	function FullReset()
 	{
+		if (!confirm(IDS_CONFIRM_FULL_RESET)) return;
 		NotesDB.transaction(function (tx) {
 			tx.executeSql('DROP TABLE IF EXISTS Notes');
 		});
 		ActionsDB.transaction(function (tx) {
 			tx.executeSql('DROP TABLE IF EXISTS Actions');
 		});
-		//console.log('DropDBs');
-	}*/
+		SettingsDB.transaction(function (tx) {
+			tx.executeSql('DROP TABLE IF EXISTS Settings', [], function(){document.location.reload();}, function(){});
+		});
+	}
 	
 	function NoteDateAgo(TimeStampSec) //Дней прошло
 	{
@@ -306,7 +327,7 @@ textarea:focus{outline:none;}
 		if (Str.indexOf('\n') > 0)
 			Str = Str.substring(0, Str.indexOf('\n'));
 		if (Str.length > 50)
-			Str = Str.substring(0, 50);
+			Str = Str.substring(0, 50) + '...';
 		return Str;
 	}
 	
@@ -335,8 +356,10 @@ textarea:focus{outline:none;}
 		NotesDB.transaction(function (tx) {
 			tx.executeSql('SELECT * FROM Notes ORDER BY DateTime DESC', [], function (tx, results) {
 
-				for (var i = 0; i < results.rows.length; i++) 
+				for (var i = 0; i < results.rows.length; i++) {
 					Notes += '<div onclick="GetNote(' + results.rows.item(i).ID  + ')" id="note"><div id="title">' + ExtractTitle(CharCodesToStr(results.rows.item(i).Note)) + '</div><div id="date">' + ListDate(results.rows.item(i).DateTime) + '</div></div>';
+					//console.log(results.rows.item(i).ID + ' ' + results.rows.item(i).DateTime + ' ' + ExtractTitle(CharCodesToStr(results.rows.item(i).Note)));
+				}
 
 				document.getElementById('NotesCount').innerHTML = IDS_NOTES + ' (' + results.rows.length + ')';
 				document.getElementById('items').innerHTML = Notes; //Заменяем, чтобы не мерцала пустота
@@ -344,7 +367,6 @@ textarea:focus{outline:none;}
 			
 			}, null);
 		});
-		//console.log('ShowNotes');
 	}
 	
 	function NewNote()
@@ -376,6 +398,8 @@ textarea:focus{outline:none;}
 		var DarkThemePos = document.getElementsByTagName('style')[0].innerHTML.indexOf('/*DarkTheme*/');
 		if (DarkThemePos !== -1)
 			document.getElementsByTagName('style')[0].innerHTML = CurrentStyle.substring(0, DarkThemePos);
+		document.body.style.backgroundColor='#f8f8f8'; //После QR js фон приоритетный
+		UsedDarkTheme = false;
 	}
 	
 	function DarkTheme(){
@@ -384,7 +408,6 @@ textarea:focus{outline:none;}
 			'body{background-color:#2a3035;}' +
 
 			'#panel{background-color:#202329;}' +
-			'#btn{background-color:#202329;}' +
 			'#meta{color:#787c81;}' +
 			'#sub-panel{background-color:#202329;}' +
 
@@ -403,6 +426,8 @@ textarea:focus{outline:none;}
 			'#settings .titlebox{color:#787c81;}' +
 
 			'#notification{background-color:#202329; border-top:1px solid black; color:white;}';
+		document.body.style.backgroundColor='#2a3035'; //После QR js фон приоритетный
+		UsedDarkTheme = true;
 	}
 	
 	function SettingsDone()
@@ -437,6 +462,19 @@ textarea:focus{outline:none;}
 			}, null);
 		}); 
 		
+		//Auto search IP
+		var AutoSearchIPCB = document.getElementById('AutoSearchIPCB').checked;
+		AutoSearchIP = AutoSearchIPCB;
+		SettingsDB.transaction(function (tx) {
+			tx.executeSql('SELECT * FROM Settings WHERE Parameter="AutoSearchIP"', [], function (tx, results) {
+				
+				if (results.rows.length == 0)
+					tx.executeSql('INSERT INTO Settings (Parameter, Value) VALUES ("AutoSearchIP", "' + AutoSearchIPCB + '")');
+				else
+					tx.executeSql('UPDATE Settings SET Value="' + AutoSearchIPCB + '" WHERE Parameter="AutoSearchIP"');
+			}, null);
+		});
+		
 		//Auto sync
 		var AutoSyncCB = document.getElementById('AutoSyncCB').checked;
 		SettingsDB.transaction(function (tx) {
@@ -450,12 +488,12 @@ textarea:focus{outline:none;}
 		});
 		
 		//Dark Theme
-		var UsingDarkTheme = document.getElementById('DarkThemeCB').checked;
+		var DarkThemeCB = document.getElementById('DarkThemeCB').checked;
 		
 		//Theme time	
-		var UsingThemeTime = document.getElementById('ThemeTimeCB').checked;
-		if (UsingThemeTime) {
-			UsingDarkTheme = false;
+		var ThemeTimeCB = document.getElementById('ThemeTimeCB').checked;
+		if (ThemeTimeCB) {
+			DarkThemeCB = false;
 			document.getElementById('DarkThemeCB').checked = false;
 			var date = new Date();
 			if (date.getHours() <=9 || date.getHours() >= 17) 
@@ -463,9 +501,9 @@ textarea:focus{outline:none;}
 		}
 		
 		//Dark Theme
-		if (UsingDarkTheme)
+		if (DarkThemeCB)
 			DarkTheme();
-		else if (UsingThemeTime == false)
+		else if (ThemeTimeCB == false)
 			BackTheme();
 		
 		//Save dark theme status	
@@ -473,9 +511,9 @@ textarea:focus{outline:none;}
 			tx.executeSql('SELECT * FROM Settings WHERE Parameter="DarkTheme"', [], function (tx, results) {
 				
 				if (results.rows.length == 0)
-					tx.executeSql('INSERT INTO Settings (Parameter, Value) VALUES ("DarkTheme", "' + UsingDarkTheme + '")');
+					tx.executeSql('INSERT INTO Settings (Parameter, Value) VALUES ("DarkTheme", "' + DarkThemeCB + '")');
 				else
-					tx.executeSql('UPDATE Settings SET Value="' + UsingDarkTheme + '" WHERE Parameter="DarkTheme"');
+					tx.executeSql('UPDATE Settings SET Value="' + DarkThemeCB + '" WHERE Parameter="DarkTheme"');
 			}, null);
 		});
 		
@@ -484,9 +522,9 @@ textarea:focus{outline:none;}
 			tx.executeSql('SELECT * FROM Settings WHERE Parameter="ThemeTime"', [], function (tx, results) {
 				
 				if (results.rows.length == 0)
-					tx.executeSql('INSERT INTO Settings (Parameter, Value) VALUES ("ThemeTime", "' + UsingThemeTime + '")');
+					tx.executeSql('INSERT INTO Settings (Parameter, Value) VALUES ("ThemeTime", "' + ThemeTimeCB + '")');
 				else
-					tx.executeSql('UPDATE Settings SET Value="' + UsingThemeTime + '" WHERE Parameter="ThemeTime"');
+					tx.executeSql('UPDATE Settings SET Value="' + ThemeTimeCB + '" WHERE Parameter="ThemeTime"');
 			}, null);
 		});
 		
@@ -502,7 +540,7 @@ textarea:focus{outline:none;}
 		}
 		UpdateDateTime = true;
 		NotesDB.transaction(function (tx) {
-			tx.executeSql('SELECT * FROM Notes WHERE id=' + NoteID, [], function (tx, results) {
+			tx.executeSql('SELECT * FROM Notes WHERE ID=' + NoteID, [], function (tx, results) {
 				document.getElementById('memo').value = CharCodesToStr(results.rows.item(0).Note);
 				LatestNote = document.getElementById('memo').value;
 				document.getElementById('NoteTitle').innerHTML = ExtractTitle(CharCodesToStr(results.rows.item(0).Note));
@@ -637,13 +675,70 @@ textarea:focus{outline:none;}
 		});
 	}
 	
-	function Sync(){
+	function ShowApp(){
+		document.getElementById('wrapper').style.display = 'block';
+		document.getElementById('panel-qr').style.display = 'none';
+		if (UsedDarkTheme) //Трюк с сохранением текущего цвета не работает из-за css тёмной темы
+			document.body.style.backgroundColor = '#2a3035';
+		else
+			document.body.style.backgroundColor = '#f8f8f8';
+	}
 		
-		if (SyncWait == true) //Ждем выполнения
+	function HideApp(){
+		document.getElementById('wrapper').style.display = 'none';
+		document.getElementById('panel-qr').style.display = 'flex';
+		document.body.style.backgroundColor = 'transparent';
+	}
+	
+	function QR()
+	{
+		function displayContents(err, text) {
+			if (!err) {
+				document.getElementById('memo').value = document.getElementById('memo').value + text + "\n";
+				ShowApp();
+				QRScanner.hide();
+				QRScanner.cancelScan();
+			} else
+				ShowApp();
+			QRScanner.disableLight();
+			QRScanner.destroy();
+			FlashLightEnable = false;
+		}
+	
+		window.QRScanner.prepare(onDone);
+		function onDone(err, status) {
+			if (status.authorized) {
+				HideApp();
+				QRScanner.show();
+				QRScanner.scan(displayContents);
+			} else {
+				QRScanner.openSettings();
+			}
+		}
+	}
+	
+	function QRClose(){
+		HideApp(); if(FlashLightEnable) QRScanner.disableLight(); QRScanner.cancelScan(); QRScanner.destroy(); if(UsedDarkTheme) document.body.style.backgroundColor='#2a3035'; else document.body.style.backgroundColor='#f8f8f8';
+	}
+	
+	function QRFlashLight(){
+		if(FlashLightEnable == false) {QRScanner.enableLight(); FlashLightEnable=true;} else {QRScanner.disableLight(); FlashLightEnable=false;}
+	}
+	
+	function GetDeviceID(){
+		var DeviceOS = 'Unknown'
+		if (/Android/i.test(window.navigator.userAgent))
+			DeviceOS = 'Android';
+		else if (/iPhone|iPod|iPad/i.test(window.navigator.userAgent))
+			DeviceOS = 'iOS';
+		return DeviceOS + '_' + Math.random().toString(36).substr(2, 9);
+	}
+	
+	function Sync(){
+		if (SyncWait) //Ждем выполнения
 			return;
 		
 		if (window.navigator.onLine) {
-			
 			SyncWait = true;
 		
 			document.getElementById('sync-progress').style.display = 'block';
@@ -654,73 +749,220 @@ textarea:focus{outline:none;}
 				});
 			}
 			
-			function SyncNotes(){
-				//"Синхронизация" БД
-				//Оптимизация, чтобы загружались недостающие записи, обновлялись и удалялись, возможно появится в будущем. API - GetData('/api/getnotes') и GetData('/api/getnote=' + ID);
+			function UpdateNote(ID, Note, DateTime){
 				NotesDB.transaction(function (tx) {
-					tx.executeSql('DELETE FROM Notes', [], function (tx, results) {
-						
-						var XMLDoc = document.createElement('div');
-						
-						GetData('http://' + ServerIP + ':' + ServerPort + '/api/getfullnotes').then(function(responseNotes) {
-							XMLDoc.innerHTML = responseNotes;
-							
-							var NotesItems = XMLDoc.getElementsByTagName('note');
-							
-							for (var i = 0; i < NotesItems.length; i++)
-								InsertNote(NotesItems[i].getAttribute('id'), NotesItems[i].innerHTML, NotesItems[i].getAttribute('datetime'));
-					
-							delete XMLDoc;
-							
-							ShowNotes();
-							
-							Notification(IDS_SYNC_SUCCESSFUL);
-							
-							SyncWait = false; //Разрешаем повторную синхронизацию;
-							
-						}).catch(function() {
-							Notification(IDS_CONNECTION_FAILED);
-						});
-						
-					}, null);
+					tx.executeSql('Update Notes SET Note = "' + Note + '", DateTime =' + DateTime + ' WHERE ID=' + ID);
 				});
 			}
 			
-			//Генерирация XML действий пользователя и отправка на "сервер"
-			ActionsDB.transaction(function (tx) {
-				tx.executeSql('SELECT * FROM Actions', [], function (tx, results) {
-					var XMLAPI = '<actions>\n';
-					for (var i = 0; i < results.rows.length; i++) {
-						if (results.rows.item(i).Action == 'insert')
-							XMLAPI += '\t<insert id="' + results.rows.item(i).ID + '" datetime="' + results.rows.item(i).DateTime + '">' + results.rows.item(i).Note + '</insert>\n';
-						if (results.rows.item(i).Action == 'update')
-							XMLAPI += '\t<update id="' + results.rows.item(i).ID + '" datetime="' + results.rows.item(i).DateTime + '">' + results.rows.item(i).Note + '</update>\n';
-						if (results.rows.item(i).Action == 'delete')
-							XMLAPI += '\t<delete id="' + results.rows.item(i).ID + '"></delete>\n';
-					}
-					XMLAPI += '</actions>';
+			function RemoveNote(ID){
+				NotesDB.transaction(function (tx) {
+					tx.executeSql('DELETE FROM Notes WHERE ID=' + ID);
+				});
+			}
+			
+			function SyncNotes(){
+									
+				//Первый запуск
+				if (FirstRun) {
+					//console.log('FirstRun');
+					GetData('http://' + ServerIP + ':' + ServerPort + '/api/auth?id=' + DeviceID).then(function(responseText) {
+						if (responseText == 'auth:ok') {
+							//console.log('auth:ok');
 
-					//Отправка XML на "сервер"
-					SendData('http://' + ServerIP + ':' + ServerPort + '/api/syncnotes', XMLAPI).then(function(result) {
-						ActionsDB.transaction(function (tx) {
-							tx.executeSql('DELETE FROM Actions');
-						});
+							//Получение всех заметок при первом запуске
+							var XMLDoc = document.createElement('div');
+							
+							GetData('http://' + ServerIP + ':' + ServerPort + '/api/notes?id=' + DeviceID).then(function(responseNotes) {
+								XMLDoc.innerHTML = responseNotes;
+								
+								var NoteItems = XMLDoc.getElementsByTagName('note');
+								for (var i = 0; i < NoteItems.length; i++)
+									InsertNote(NoteItems[i].getAttribute('id'), NoteItems[i].innerHTML, NoteItems[i].getAttribute('datetime'));
 						
-						SyncNotes();
+								delete XMLDoc;
+								
+								ShowNotes();
+								
+								Notification(IDS_SYNC_SUCCESSFUL);
+								
+								//Сохраняем статус успешного первого запуска
+								SettingsDB.transaction(function (tx) {
+									tx.executeSql('INSERT INTO Settings (Parameter, Value) VALUES ("FirstRun", "' + false + '")');
+									FirstRun = false;
+								});
+								
+								SyncWait = false; //Разрешаем повторную синхронизацию;
+								
+							}).catch(function() {
+								SyncWait = false; //Разрешаем повторную синхронизацию;
+								
+								Notification(IDS_CONNECTION_FAILED);
+							});
+
+						} else {
+							SyncWait = false; //Разрешаем повторную синхронизацию;
+							
+							Notification(IDS_AUTH_REJECT);
+						}
+							
+						//console.log(responseText);
 					}).catch(function() {
-						Notification(IDS_CONNECTION_FAILED);
-						
 						SyncWait = false; //Разрешаем повторную синхронизацию;
+						
+						Notification(IDS_CONNECTION_FAILED);
+					});
+						
+				} else { //Второй и последующие запуски
+					//Получение действий
+					var XMLDoc = document.createElement('div');
+					GetData('http://' + ServerIP + ':' + ServerPort + '/api/actions?id=' + DeviceID).then(function(responseNotes) {
+						XMLDoc.innerHTML = responseNotes;
+						
+						//Удаляем действия
+						GetData('http://' + ServerIP + ':' + ServerPort + '/api/received?id=' + DeviceID).then(function(responseStatus) {
+						
+							if (responseStatus == 'ok') {
+								var ActionsItems = XMLDoc.getElementsByTagName('*');
+								for (var i = 0; i < ActionsItems.length; i++) { 
+
+									var ReceivedNoteID = ActionsItems[i].getAttribute('id');
+									var ReceivedNote = ActionsItems[i].innerHTML;
+									var ReceivedNoteDateTime = ActionsItems[i].getAttribute('datetime');
+									
+									if (ActionsItems[i].tagName == 'INSERT')
+										InsertNote(ReceivedNoteID, ReceivedNote, ReceivedNoteDateTime);
+									if (ActionsItems[i].tagName == 'UPDATE')
+										UpdateNote(ReceivedNoteID, ReceivedNote, ReceivedNoteDateTime);
+									if (ActionsItems[i].tagName == 'DELETE')
+										RemoveNote(ReceivedNoteID);
+								}
+								
+								ShowNotes();
+							
+								Notification(IDS_SYNC_SUCCESSFUL);
+							} else if (responseStatus == 'auth:denied') {
+								FirstRun = true;
+								//console.log(responseStatus);
+							} else
+								Notification(IDS_CONNECTION_FAILED);
+						
+							SyncWait = false; //Разрешаем повторную синхронизацию
+						
+						}).catch(function() {
+							SyncWait = false; //Разрешаем повторную синхронизацию;
+							
+							Notification(IDS_CONNECTION_FAILED);
+						});
+				
+						delete XMLDoc;
+						
+					}).catch(function() {
+						SyncWait = false; //Разрешаем повторную синхронизацию;
+						
+						Notification(IDS_CONNECTION_FAILED);
 					});
 					
-				}, null);
-			}); //Завершение генерации и отправки XML API.
+				}
+			}	
+				
+			//Генерирация XML действий пользователя и отправка на "сервер"
+			if (FirstRun == false) //При первом запуске отправлять нечего
+				GetData('http://' + ServerIP + ':' + ServerPort + '/api/auth?id=' + DeviceID).then(function(responseText) { //Проверка авторизации
+					if (responseText == 'auth:ok') {
+						ActionsDB.transaction(function (tx) {
+							tx.executeSql('SELECT * FROM Actions', [], function (tx, results) {
+								var XMLAPI = '<actions>\n';
+								for (var i = 0; i < results.rows.length; i++) {
+									if (results.rows.item(i).Action == 'insert')
+										XMLAPI += '\t<insert id="' + results.rows.item(i).ID + '" datetime="' + results.rows.item(i).DateTime + '">' + results.rows.item(i).Note + '</insert>\n';
+									if (results.rows.item(i).Action == 'update')
+										XMLAPI += '\t<update id="' + results.rows.item(i).ID + '" datetime="' + results.rows.item(i).DateTime + '">' + results.rows.item(i).Note + '</update>\n';
+									if (results.rows.item(i).Action == 'delete')
+										XMLAPI += '\t<delete id="' + results.rows.item(i).ID + '"></delete>\n';
+								}
+								XMLAPI += '</actions>';
+
+								//Отправка XML на "сервер"
+								SendData('http://' + ServerIP + ':' + ServerPort + '/api/syncnotes?id=' + DeviceID, XMLAPI).then(function(responseStatus) {
+
+									if (responseStatus == 'ok') {
+										ActionsDB.transaction(function (tx) {
+											tx.executeSql('DELETE FROM Actions');
+										});
+										
+										SyncNotes();
+									} else {
+										SyncWait = false; //Разрешаем повторную синхронизацию;
+										
+										Notification(IDS_CONNECTION_FAILED);
+									}
+								}).catch(function() {
+									SyncWait = false; //Разрешаем повторную синхронизацию;
+								
+									Notification(IDS_CONNECTION_FAILED);
+								});
+								
+							}, null);
+						}); //Завершение генерации и отправки XML API.
+					} else {
+						SyncWait = false; //Разрешаем повторную синхронизацию;
+							
+						Notification(IDS_AUTH_REJECT);
+					}
+				}).catch(function() {
+					SyncWait = false; //Разрешаем повторную синхронизацию;
+							
+					Notification(IDS_CONNECTION_FAILED);
+				});
+			
+			
+			if (FirstRun)
+				SyncNotes();
 		
 		} else {
 			Notification(IDS_SYNC_NEED_CONNECT);
 		}
 	}
-
+	
+	function SyncWithFoundAddress(){
+		//Проверка доступности IP адреса
+		var FoundIPAddress = false;
+		function CheckIPStatus(IP){
+			if (FoundIPAddress) return;
+			//console.log('Check ' + IP);
+			try {
+				var xhr = new XMLHttpRequest();
+				xhr.onreadystatechange = function () {
+					if (xhr.readyState == 4 && xhr.status == 200 && xhr.responseText == 'ok') {
+						ServerIP = IP;
+						Sync();
+						FoundIPAddress = true;
+						//console.log('WORK ' + ServerIP);
+					}
+				};
+				xhr.open('GET', 'http://' + IP + ':' + ServerPort + '/api/connecttest', true);
+				xhr.timeout = 500;
+				xhr.send();
+			} catch {}
+		}
+		
+		//Список наиболее популярных локальных IP адресов
+		var IPS = ["192.168.0.", "192.168.0.", "192.168.1.", "192.168.1.", "192.168.2.", "192.168.3."];
+		var LastAddrs = [     0,            100,          0,            100,          0,            0]; //Начальный адрес
+		
+		for (var i = 0; i < IPS.length; i++)
+			for (var j = 0; j <= 15; j++)
+				CheckIPStatus(IPS[i] + (LastAddrs[i] + j));
+	}
+	
+	function SyncAdvance(){
+		if (AutoSearchIP)
+			SyncWithFoundAddress();
+		else
+			Sync();
+	}
+	
 	function CheckTabletMode(){
 		if (window.innerWidth >= 550) {
 			TabletMode = true;
@@ -748,6 +990,7 @@ textarea:focus{outline:none;}
 		document.getElementById('SettingsTitle').innerText = IDS_SETTINGS;
 		document.getElementById('SyncIP').innerText = IDS_SYNC_IP;
 		document.getElementById('SyncPort').innerText = IDS_SYNC_PORT;
+		document.getElementById('AutoSearchIP').innerText = IDS_AUTOSEARCH_IP;
 		document.getElementById('AboutSync').innerText = IDS_ABOUT_SYNC;
 		document.getElementById('AutoSync').innerText = IDS_AUTO_SYNC;
 		document.getElementById('AboutAutoSync').innerText = IDS_ABOUT_AUTO_SYNC;
@@ -755,6 +998,8 @@ textarea:focus{outline:none;}
 		document.getElementById('ThemeTime').innerText = IDS_THEME_TIME_DEPENDENT;
 		document.getElementById('AboutThemeTime').innerText = IDS_ABOUT_THEME_TIME;
 		document.getElementById('LastUpdate').innerText = IDS_LAST_UPDATE;
+		document.getElementById('ResetBtn').innerText = IDS_FULL_RESET;
+		
 		document.getElementById('DaysAgo').innerHTML = NoteDateAgo(GetUTCTimeStamp());
 		document.getElementById('DateNote').innerHTML = NoteDate(GetUTCTimeStamp());
 		
@@ -775,8 +1020,6 @@ textarea:focus{outline:none;}
 		SettingsDB.transaction(function (tx) {
 			tx.executeSql('CREATE TABLE IF NOT EXISTS Settings (Parameter, Value)');
 		});
-		
-		CheckTabletMode();
 		
 		//Настройки, Dark theme
 		SettingsDB.transaction(function (tx) {
@@ -803,6 +1046,8 @@ textarea:focus{outline:none;}
 			}, null);
 		});
 
+		CheckTabletMode();
+
 		ShowNotes();
 		
 		//IP
@@ -827,6 +1072,39 @@ textarea:focus{outline:none;}
 			}, null);
 		});
 		
+		//Автопоиск IP адреса
+		SettingsDB.transaction(function (tx) {
+			tx.executeSql('SELECT * FROM Settings WHERE Parameter="AutoSearchIP"', [], function (tx, results) {
+				if (results.rows.length != 0 && results.rows.item(0).Value == 'true') {
+					document.getElementById('AutoSearchIPCB').checked = true;
+					AutoSearchIP = true;
+				}
+			}, null);
+		});
+		
+		//Настройки, первый запуск
+		SettingsDB.transaction(function (tx) {
+			tx.executeSql('SELECT * FROM Settings WHERE Parameter="FirstRun"', [], function (tx, results) {
+				if (results.rows.length == 0)
+					FirstRun = true;
+				else
+					FirstRun = false;
+			}, null);
+		});
+		
+		//Настройки, Device ID
+		SettingsDB.transaction(function (tx) {
+			tx.executeSql('SELECT * FROM Settings WHERE Parameter="DeviceID"', [], function (tx, results) {
+				if (results.rows.length == 0) {
+					DeviceID = GetDeviceID();
+					tx.executeSql('INSERT INTO Settings (Parameter, Value) VALUES ("DeviceID", "' + DeviceID + '")');
+				} else
+					DeviceID = results.rows.item(0).Value;
+				
+				document.getElementById('DeviceID').innerHTML = 'ID: ' + DeviceID;
+			}, null);
+		});
+		
 		//Настройки, автоматическая синхронизация при запуске
 		SettingsDB.transaction(function (tx) {
 			tx.executeSql('SELECT * FROM Settings WHERE Parameter="AutoSync"', [], function (tx, results) {
@@ -834,7 +1112,7 @@ textarea:focus{outline:none;}
 					document.getElementById('AutoSyncCB').checked = true;
 					
 					if (window.navigator.onLine)
-						Sync();
+						SyncAdvance();
 				}
 			}, null);
 		});
@@ -846,7 +1124,7 @@ textarea:focus{outline:none;}
 <div id="wrapper">
 	<div id="list">
 		<div id="panel">
-			<div id="btn" onclick="Sync()"><img src="images/sync.png" /></div>
+			<div id="btn" onclick="SyncAdvance()"><img src="images/sync.png" /></div>
 			<div class="title" id="NotesCount">Заметки (0)</div>
 			<div id="btn" onclick="NewNote()"><img src="images/new.png" /></div>
 		</div>
@@ -876,6 +1154,7 @@ textarea:focus{outline:none;}
 		</div>
 		<div id="sub-panel">
 			<div id="btn" onclick="RemNote()"><img src="images/rm.png" /></div>
+			<div id="btn" onclick="QR()"><img src="images/qr.png" /></div>
 			<div id="btn" onclick="ShowSettings()"><img src="images/settings.png" /></div>
 		</div>
 	</div>
@@ -896,6 +1175,12 @@ textarea:focus{outline:none;}
 				<div id="item">
 					<div class="title" id="SyncPort">Порт</div>
 					<div id="control"><input type="number" id="ServerPort" value="735" placeholder="735"></div>
+				</div>
+				<div id="item">
+					<div class="title" id="AutoSearchIP" style="width:70%;">Автопоиск IP адреса</div>
+					<div id="control" style="width:30%;margin-top:-3px;">
+						<input type="checkbox" id="AutoSearchIPCB" class="checkbox" /><label for="AutoSearchIPCB" class="switch"></label>
+					</div>
 				</div>
 			</div>
 			
@@ -932,7 +1217,14 @@ textarea:focus{outline:none;}
 			
 			<div id="AboutThemeTime" class="titlebox"></div>
 			
-			<div class="titlebox" style="text-align:center;"><br>EasyNotes<br><span id="LastUpdate"></span> 17.11.20<br>https://r57zone.github.io</div>
+			<div class="titlebox" style="text-align:center;"><br>EasyNotes<br><span id="LastUpdate"></span> 27.11.20<br>https://r57zone.github.io<br><br><span id="DeviceID"></span></div>
+			<br>
+			<div id="items">
+				<div id="item">
+					<div class="title" id="ResetBtn" style="width:95%;" onclick="FullReset()">Полный сброс</div>
+					<div id="control" style="width:5%;">></div>
+				</div>
+			</div>
 			<br><br>
 		</div>
 	</div>
@@ -940,6 +1232,9 @@ textarea:focus{outline:none;}
 	<div id="notification" onclick="this.className='';"></div>
 	<div id="sync-progress"></div>
 </div>
-
+<div id="panel-qr">
+	<div id="btn" onclick="QRClose()"><img src="images/close.png" /></div>
+	<div id="btn" onclick="QRFlashLight()"><img src="images/flashlight.png" /></div>
+</div>
 </body>
 </html>

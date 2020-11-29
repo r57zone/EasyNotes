@@ -37,8 +37,8 @@ type
     procedure AddStyle(FileName: string);
     procedure ExportNotes(FileName: string);
     procedure ImportNotes(FileName: string);
-  private
     procedure LoadNotes;
+  private
     procedure NewNote(MemoFocus: boolean);
     procedure NoteDone(UpdateList: integer);
     procedure MessageHandler(var Msg: TMsg; var Handled: Boolean);
@@ -54,22 +54,25 @@ var
   DBFileName: string;
 
   OldWidth, OldHeight: integer;
-  NoteIndex:int64; LatestNote: string;
+  NoteIndex, NoteTimeStamp: int64; LatestNote: string;
 
   FOleInPlaceActiveObject: IOleInPlaceActiveObject;
   SaveMessageHandler: TMessageEvent;
 
   ID_NEW_NOTE, ID_NOTES, ID_TODAY, ID_YESTERDAY, ID_DAYSAGO, ID_SYNC: string;
-  ID_CUT, ID_COPY, ID_PASTE, IDS_LAST_UPDATE: string;
+  ID_DEV_SYNC_CONFIRM, ID_CUT, ID_COPY, ID_PASTE, IDS_LAST_UPDATE: string;
 
   ID_SETTINGS, ID_INTERFACE, ID_DARK_THEME, IDS_THEME_TIME, ID_SYNCHRONIZATION,
-  ID_SYNC_PORT, ID_SYNC_WITH_ANY_IPS, ID_ALLOW_IPS, ID_OK, ID_CANCEL: string;
+  ID_SYNC_PORT, ID_SYNC_WITH_ANY_IPS, ID_ALLOW_IPS, ID_ALLOW_DEVS, ID_ALLOW_DEV_REM,
+  ID_ENTER_DEV_ID, ID_BLOCK_REQUEST_NEW_DEVS, ID_IMPORT, ID_EXPORT, ID_DONE,
+  ID_OK, ID_CANCEL: string;
 
-  AllowedIPs: TStringList;
-  AllowAnyIPs: boolean;
+  AllowedIPs, AuthorizedDevices: TStringList;
+  AllowAnyIPs, BlockReqNewDevs: boolean;
   UseDarkTheme, UseThemeTime: boolean;
 
 const
+  AppName = 'EasyNotes';
   AllowedIPsFile = 'AllowedIPs.txt';
 
 implementation
@@ -172,18 +175,21 @@ var
   CurHour, NilTime: Word;
 
   i: integer;
+
+  SQLTB: TSQLiteTable;
 begin
   //Предотвращение повторого запуска
-  WND:=FindWindow('TMain', 'EasyNotes');
+  WND:=FindWindow('TMain', AppName);
   if (WND <> 0) and (ParamStr(1) <> '-show') then begin
     SetForegroundWindow(WND);
     Halt;
   end;
-  Caption:='EasyNotes';
+  Caption:=AppName;
 
   Ini:=TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Config.ini');
   IdHTTPServer.DefaultPort:=Ini.ReadInteger('Main', 'Port', 735);
   AllowAnyIPs:=Ini.ReadBool('Sync', 'AllowAnyIPs', false);
+  BlockReqNewDevs:=Ini.ReadBool('Sync', 'BlockRequestNewDevs', false);
 
   UseDarkTheme:=Ini.ReadBool('Main', 'DarkTheme', false);
   UseThemeTime:=Ini.ReadBool('Main', 'ThemeTime', false);
@@ -219,6 +225,7 @@ begin
     ID_YESTERDAY:='Вчера';
     ID_DAYSAGO:='дн. назад';
     ID_SYNC:='Синхронизация';
+    ID_DEV_SYNC_CONFIRM:='Устройство %s запрашивает разрешение на синхронизацию. Разрешить?';
     ID_CUT:='Вырезать';
     ID_COPY:='Копировать';
     ID_PASTE:='Вставить';
@@ -231,7 +238,14 @@ begin
     ID_SYNCHRONIZATION:='Синхронизация';
     ID_SYNC_PORT:='Порт';
     ID_SYNC_WITH_ANY_IPS:='Синхронизация с любыми IP (небезопасно)';
-    ID_ALLOW_IPS:='Разрешённые IP адреса';
+    ID_ALLOW_IPS:='Разрешённые IP адреса:';
+    ID_ALLOW_DEVS:='Разрешённые устройства:';
+    ID_ALLOW_DEV_REM:='Удалить';
+    ID_ENTER_DEV_ID:='Введите ID устройства';
+    ID_BLOCK_REQUEST_NEW_DEVS:='Блокировать запросы новых устройств';
+    ID_IMPORT:='Импорт';
+    ID_EXPORT:='Экспорт';
+    ID_DONE:='Готово';
     ID_OK:='ОК';
     ID_CANCEL:='Отмена';
   end else begin
@@ -241,6 +255,7 @@ begin
     ID_YESTERDAY:='Yesterday';
     ID_DAYSAGO:='days ago';
     ID_SYNC:='Sync';
+    ID_DEV_SYNC_CONFIRM:='The %s device requests permission to sync. Allow it?';
     ID_CUT:='Cut';
     ID_COPY:='Copy';
     ID_PASTE:='Paste';
@@ -253,7 +268,14 @@ begin
     ID_SYNCHRONIZATION:='Synchronization';
     ID_SYNC_PORT:='Port';
     ID_SYNC_WITH_ANY_IPS:='Synchronization with any IP (not secure)';
-    ID_ALLOW_IPS:='Allowed IP addresses';
+    ID_ALLOW_IPS:='Allowed IP addresses:';
+    ID_ALLOW_DEVS:='Allowed devices:';
+    ID_ALLOW_DEV_REM:='Remove';
+    ID_ENTER_DEV_ID:='Enter the device ID';
+    ID_BLOCK_REQUEST_NEW_DEVS:='Block requests for new devices';
+    ID_IMPORT:='Import';
+    ID_EXPORT:='Export';
+    ID_DONE:='Done';
     ID_OK:='OK';
     ID_CANCEL:='Cancel';
   end;
@@ -273,13 +295,22 @@ begin
     end;
 
   SQLDB:=TSQLiteDatabase.Create(DBFileName);
-  if not SQLDB.TableExists('notes') then
+  if not SQLDB.TableExists('Notes') then
     SQLDB.ExecSQL('CREATE TABLE Notes (ID TIMESTAMP, Note TEXT, DateTime TIMESTAMP)');
 
   //Ограничение IP адресов для синхронизации
   AllowedIPs:=TStringList.Create;
   if FileExists(ExtractFilePath(ParamStr(0)) + AllowedIPsFile) then
     AllowedIPs.LoadFromFile(ExtractFilePath(ParamStr(0)) + AllowedIPsFile);
+
+  //Авторизованные устройства
+  AuthorizedDevices:=TStringList.Create;
+  SQLTB:=SQLDB.GetTable('SELECT name FROM sqlite_master WHERE name <> "Notes"');
+  for i:=0 to SQLTB.Count - 1 do begin
+    AuthorizedDevices.Add(Copy(SQLTB.FieldAsString(0), 9, Length(SQLTB.FieldAsString(0)))); //Actions_ не берем
+    SQLTB.Next;
+  end;
+  SQLTB.Free;
 
   //Экспорт, импорт
   for i:=1 to ParamCount do begin
@@ -362,21 +393,39 @@ end;
 
 procedure TMain.NoteDone(UpdateList: integer);
 var
-  CurTimeStamp: int64;
+  CurTimeStamp: int64; i: integer;
 begin
   //Update
-  if (NoteIndex <> -1) and (Trim(LatestNote) <> Trim(WebView.OleObject.Document.getElementById('memo').innerHTML)) then begin
-    if (GetAsyncKeyState(VK_LSHIFT) <> 0) or (GetAsyncKeyState(VK_RSHIFT) <> 0) then //Если нажат Shift, то не обновляем дату
-      SQLDB.ExecSQL('UPDATE Notes SET Note="' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '" WHERE ID=' + IntToStr(NoteIndex))
-    else //По умолчанию (обновление текста и даты)
+  if (NoteIndex <> -1) and ( Trim(LatestNote) <> Trim(WebView.OleObject.Document.getElementById('memo').innerHTML) ) then begin
+
+    if (GetAsyncKeyState(VK_LSHIFT) <> 0) or (GetAsyncKeyState(VK_RSHIFT) <> 0) then begin //Если нажат Shift, то не обновляем дату
+      SQLDB.ExecSQL('UPDATE Notes SET Note="' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '" WHERE ID=' + IntToStr(NoteIndex));
+
+      //Добавляем действие во все таблицы авторизованных устройств. Проверка доступности нужна для использования иных баз данных
+      for i:=0 to AuthorizedDevices.Count - 1 do
+        if SQLDB.TableExists('Actions_' + AuthorizedDevices.Strings[i]) then
+          SQLDB.ExecSQL('INSERT INTO Actions_' + AuthorizedDevices.Strings[i] + ' (Action, ID, Note, DateTime) values("UPDATE", "' + IntToStr(NoteIndex) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", "' + IntToStr(NoteTimeStamp) + '")');
+
+    end else begin //По умолчанию (обновление текста и даты)
 	    SQLDB.ExecSQL('UPDATE Notes SET Note="' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", DateTime="' + IntToStr(DateTimeToUnix(Now)) + '" WHERE ID=' + IntToStr(NoteIndex));
+
+      //Добавляем действие во все таблицы авторизованных устройств. Проверка доступности нужна для использования иных баз данных
+      for i:=0 to AuthorizedDevices.Count - 1 do
+        if SQLDB.TableExists('Actions_' + AuthorizedDevices.Strings[i]) then
+          SQLDB.ExecSQL('INSERT INTO Actions_' + AuthorizedDevices.Strings[i] + ' (Action, ID, Note, DateTime) values("UPDATE", "' + IntToStr(NoteIndex) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", "' + IntToStr(DateTimeToUnix(Now)) + '")');
+    end;
   end;
 
   //Add, обязательно под Update, потому что обновляется текущий NoteIndex
   if (NoteIndex = -1) and (Trim(WebView.OleObject.Document.getElementById('memo').innerHTML) <> '') then begin
 	  CurTimeStamp:=GetTimeStamp;
-	  SQLDB.ExecSQL('INSERT INTO Notes (ID, Note, DateTime) values("' + IntToStr(CurTimeStamp) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML)+'", "' + IntToStr(DateTimeToUnix(Now)) + '")');
+	  SQLDB.ExecSQL('INSERT INTO Notes (ID, Note, DateTime) values("' + IntToStr(CurTimeStamp) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", "' + IntToStr(DateTimeToUnix(Now)) + '")');
 	  NoteIndex:=CurTimeStamp; //Для того, чтобы последняя запись не создавалась снова и снова
+
+    //Добавляем действие во все базы авторизованных устройств. Проверка доступности нужна для использования иных баз данных
+    for i:=0 to AuthorizedDevices.Count - 1 do
+      if SQLDB.TableExists('Actions_' + AuthorizedDevices.Strings[i]) then
+        SQLDB.ExecSQL('INSERT INTO Actions_' + AuthorizedDevices.Strings[i] + ' (Action, ID, Note, DateTime) values("INSERT", "' + IntToStr(CurTimeStamp) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", "' + IntToStr(DateTimeToUnix(Now)) + '")');
   end;
 
   if UpdateList = 0 then begin
@@ -401,10 +450,12 @@ begin
   if Pos('main.html#note', sUrl) > 0 then begin
     Delete(sUrl, 1, Pos('#note', sUrl) + 4);
     NoteIndex:=StrToIntDef(sUrl, 0);
-    SQLTB:=SQLDB.GetTable('SELECT ID, Note, DateTime FROM NOTES WHERE ID=' + sURL);
+    SQLTB:=SQLDB.GetTable('SELECT ID, Note, DateTime FROM Notes WHERE ID=' + sURL);
 
     WebView.OleObject.Document.getElementById('NoteTitle').innerHTML:=ExtractTitle(CharCodesToStr(SQLTB.FieldAsString(1)));
     LatestNote:=CharCodesToStr(SQLTB.FieldAsString(1));
+
+    NoteTimeStamp:=StrToInt64(SQLTB.FieldAsString(2)); //Запомнить для синхронизации
 
     sDate:=DateTimeToStr(UNIXToDateTime(StrToInt64(SQLTB.FieldAsString(2)))); //Перевод TimeStamp в DateTimeStr
     NoteDate:=Copy(sDate, 1, Pos(' ', sDate) - 1);
@@ -443,6 +494,12 @@ begin
   if (sUrl = 'main.html#rem') and (NoteIndex <> -1) then begin
     WebView.OleObject.Document.getElementById('memo').innerHTML:='';
     SQLDB.ExecSQL('DELETE FROM Notes WHERE ID=' + IntToStr(NoteIndex));
+
+    //Добавляем действие во все доступные таблицы авторизованных устройств. Проверка доступности нужна для использования иных баз данных
+    for i:=0 to AuthorizedDevices.Count - 1 do
+      if SQLDB.TableExists('Actions_' + AuthorizedDevices.Strings[i]) then
+        SQLDB.ExecSQL('INSERT INTO Actions_' +  AuthorizedDevices.Strings[i] + ' (Action, ID) values("DELETE", "' + IntToStr(NoteIndex) + '")');
+
     LoadNotes;
     NewNote(false);
   end;
@@ -491,6 +548,7 @@ begin
   Application.OnMessage:=SaveMessageHandler;
   FOleInPlaceActiveObject:=nil;
   AllowedIPs.Free;
+  AuthorizedDevices.Free;
 end;
 
 procedure TMain.MessageHandler(var Msg: TMsg; var Handled: Boolean);
@@ -548,11 +606,18 @@ end;
 
 procedure TMain.IdHTTPServerCommandGet(AThread: TIdPeerThread;
   ARequestInfo: TIdHTTPRequestInfo; AResponseInfo: TIdHTTPResponseInfo);
+const
+  AuthorizationSuccessfulStatus = 'auth:ok';
+  AuthorizationDeniedStatus = 'auth:denied';
+  SuccessStatus = 'ok';
+  ErrorStatus = 'error';
 var
-  i: integer; SQLTB: TSQLiteTable; NotesIDs: TStringList;
+  i, j: integer; SQLTB: TSQLiteTable;
   XMLDoc: IXMLDocument;
   XMLNode: IXMLNode;
   RequestDocument: string;
+
+  AuthDeviceID: string;
 begin
   CoInitialize(nil);
 
@@ -560,90 +625,158 @@ begin
 
   AResponseInfo.CustomHeaders.Add('Access-Control-Allow-Origin: *'); //Политика безопасности браузеров
 
-  if ARequestInfo.Document = '/api/getnotes' then begin
-    SQLTB:=SQLDB.GetTable('SELECT * FROM Notes ORDER BY DateTime DESC');
-    try
-      AResponseInfo.ContentText:='<notes>' + #13#10;
-      for i:=0 to SQLTB.Count - 1 do begin
-        AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<note id="' + SQLTB.FieldAsString(0) + '" datetime="' + SQLTB.FieldAsString(2) + '"></note>' + #13#10;
-        SQLTB.Next;
-      end;
-    finally
-      AResponseInfo.ContentText:=AResponseInfo.ContentText + '</notes>';
-      SQLTB.Free;
-    end;
-
-    RequestDocument:='none';
+  AuthDeviceID:='';
+  for i:=0 to ARequestInfo.Params.Count - 1 do begin
+    if AnsiLowerCase(ARequestInfo.Params.Names[i]) = 'id' then
+      AuthDeviceID:=ARequestInfo.Params.ValueFromIndex[i];
   end;
 
-  if ARequestInfo.Document = '/api/getfullnotes' then begin
-    SQLTB:=SQLDB.GetTable('SELECT * FROM Notes ORDER BY DateTime DESC');
-    try
-      AResponseInfo.ContentText:='<notes>' + #13#10;
-      for i:=0 to SQLTB.Count - 1 do begin
-        AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<note id="' + SQLTB.FieldAsString(0) + '" datetime="' + SQLTB.FieldAsString(2) + '">' + StrToWideCharCodes( CharCodesToStr(SQLTB.FieldAsString(1)) ) + '</note>' + #13#10;
-        SQLTB.Next;
-      end;
-    finally
-      AResponseInfo.ContentText:=AResponseInfo.ContentText + '</notes>';
-      SQLTB.Free;
-    end;
+  //Авторизация
+  if (AuthDeviceID <> '') and (ARequestInfo.Document = '/api/auth') then begin
 
-    RequestDocument:='none';
-  end;
+    if Pos(AuthDeviceID, AuthorizedDevices.Text) = 0 then begin
 
-  if Copy(ARequestInfo.Document, 1, 9)= '/api/getnote=' then begin
-    NotesIDs:=TStringList.Create;
-    NotesIDs.Text:=Copy(ARequestInfo.Document, 10, Length(ARequestInfo.Document));
-    NotesIDs.Text:=StringReplace(NotesIDs.Text, ',', #13#10, [rfReplaceAll]);
+      //Если блокировка новых устройств отключена
+      if BlockReqNewDevs = false then begin
+        case MessageBox(Handle, PChar(Format(ID_DEV_SYNC_CONFIRM, [AuthDeviceID])), PChar(Caption), 35) of
+          6: if Pos(AuthDeviceID, AuthorizedDevices.Text) = 0 then begin
+                AuthorizedDevices.Add(AuthDeviceID);
+                AResponseInfo.ContentText:=AuthorizationSuccessfulStatus;
 
-    AResponseInfo.ContentText:='<notes>' + #13#10;
-    for i:=0 to NotesIDs.Count - 1 do
-      if Trim(NotesIDs.Strings[i]) <> '' then begin
-        SQLTB:=SQLDB.GetTable('SELECT ID, Note, DateTime FROM NOTES WHERE ID=' + NotesIDs.Strings[i]);
-        try
-          AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<note id="' + SQLTB.FieldAsString(0) + '" datetime="' + SQLTB.FieldAsString(2) + '">' + StrToWideCharCodes( AnsiToUTF8( CharCodesToStr( SQLTB.FieldAsString(1) ) ) ) + '</note>' + #13#10;
-        finally
-          SQLTB.Free;
+                if not SQLDB.TableExists('Actions_' + AuthDeviceID) then
+                  SQLDB.ExecSQL('CREATE TABLE Actions_' + AuthDeviceID + ' (Action TEXT, ID TIMESTAMP, Note TEXT, DateTime TIMESTAMP)');
+
+            end;
+          7: AResponseInfo.ContentText:=AuthorizationDeniedStatus;
         end;
-      end;
 
-    AResponseInfo.ContentText:=AResponseInfo.ContentText + '</notes>';
-    NotesIDs.Free;
+      //Если блокировка новых устройств включена
+      end else
+        AResponseInfo.ContentText:=AuthorizationDeniedStatus;
+
+
+    end else //Успешная авторизация
+      AResponseInfo.ContentText:=AuthorizationSuccessfulStatus;
+
     RequestDocument:='none';
   end;
 
-  if (ARequestInfo.Document = '/api/syncnotes') and (ARequestInfo.Command = 'POST') and (Trim(ARequestInfo.FormParams) <> '') then begin
+  //Новые действия
+  if (AuthDeviceID <> '') and (ARequestInfo.Document = '/api/actions') then begin
+
+    if Pos(AuthDeviceID + #13#10, AuthorizedDevices.Text) > 0 then begin
+      SQLTB:=SQLDB.GetTable('SELECT * FROM Actions_' + AuthDeviceID);
+      try
+        AResponseInfo.ContentText:='<actions>' + #13#10;
+        for i:=0 to SQLTB.Count - 1 do begin
+          if SQLTB.FieldAsString(0) = 'INSERT' then
+            AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<insert id="' + SQLTB.FieldAsString(1) + '" datetime="' + SQLTB.FieldAsString(3) + '">' + StrToWideCharCodes( CharCodesToStr(SQLTB.FieldAsString(2)) ) + '</insert>' + #13#10;
+
+          if SQLTB.FieldAsString(0) = 'UPDATE' then
+            AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<update id="' + SQLTB.FieldAsString(1) + '" datetime="' + SQLTB.FieldAsString(3) + '">' + StrToWideCharCodes( CharCodesToStr(SQLTB.FieldAsString(2)) ) + '</update>' + #13#10;
+
+          if SQLTB.FieldAsString(0) = 'DELETE' then
+              AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<delete id="' + SQLTB.FieldAsString(1) + '"></delete>' + #13#10;
+
+          SQLTB.Next;
+        end;
+      finally
+        AResponseInfo.ContentText:=AResponseInfo.ContentText + '</actions>';
+        SQLTB.Free;
+      end;
+
+    end else
+      AResponseInfo.ContentText:=AuthorizationDeniedStatus;
+
+    RequestDocument:='none';
+  end;
+
+  //Удаление полученных действий
+  if (AuthDeviceID <> '') and (ARequestInfo.Document = '/api/received') then begin
+    if Pos(AuthDeviceID + #13#10, AuthorizedDevices.Text) > 0 then begin
+      SQLDB.ExecSQL('DELETE FROM Actions_' + AuthDeviceID);
+      AResponseInfo.ContentText:=SuccessStatus;
+    end else
+      AResponseInfo.ContentText:=AuthorizationDeniedStatus;
+
+    RequestDocument:='none';
+  end;
+
+  //Все заметки
+  if (AuthDeviceID <> '') and (ARequestInfo.Document = '/api/notes') then begin
+
+    if Pos(AuthDeviceID + #13#10, AuthorizedDevices.Text) > 0 then begin
+      SQLTB:=SQLDB.GetTable('SELECT * FROM Notes ORDER BY DateTime DESC');
+      try
+        AResponseInfo.ContentText:='<notes>' + #13#10;
+        for i:=0 to SQLTB.Count - 1 do begin
+          AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<note id="' + SQLTB.FieldAsString(0) + '" datetime="' + SQLTB.FieldAsString(2) + '">' + StrToWideCharCodes( CharCodesToStr(SQLTB.FieldAsString(1)) ) + '</note>' + #13#10;
+          SQLTB.Next;
+        end;
+      finally
+        AResponseInfo.ContentText:=AResponseInfo.ContentText + '</notes>';
+        SQLTB.Free;
+      end;
+    end else
+      AResponseInfo.ContentText:=AuthorizationDeniedStatus;
+
+    RequestDocument:='none';
+  end;
+
+  //Проверка соединения
+  if ARequestInfo.Document = '/api/connecttest' then begin
+    AResponseInfo.ContentText:=SuccessStatus;
+    RequestDocument:='none';
+  end;
+
+  if (AuthDeviceID <> '') and (Pos(AuthDeviceID, AuthorizedDevices.Text) > 0) and (ARequestInfo.Document = '/api/syncnotes') and (ARequestInfo.Command = 'POST') and (Trim(ARequestInfo.FormParams) <> '') then begin
     //NoteDone(1); //Сохранение текущий заметки, без обновления списка
-    Caption:='EasyNotes - ' + ID_SYNC;
+    Caption:=AppName + ' - ' + ID_SYNC;
     Application.Title:=Caption;
     XMLDoc:=TXMLDocument.Create(nil);
     try
       XMLDoc:=LoadXMLData(ARequestInfo.FormParams);
       XMLDoc.Active:=true;
-      AResponseInfo.ContentText:='ok';
+      AResponseInfo.ContentText:=SuccessStatus;
     except;
-      AResponseInfo.ContentText:='error';
+      AResponseInfo.ContentText:=ErrorStatus;
     end;
 
     XMLNode:=XMLDoc.DocumentElement;
     for i:=0 to XMLNode.ChildNodes.Count - 1 do
       try
-        if (XMLNode.ChildNodes[i].NodeName = 'insert') and (Trim( StrToCharCodes( WideCharCodesToStr(XMLNode.ChildNodes[i].NodeValue) ) ) <> '') then
-          SQLDB.ExecSQL('INSERT INTO Notes (ID, Note, DateTime) values("' + XMLNode.ChildNodes[i].Attributes['id'] + '", "' + StrToCharCodes(WideCharCodesToStr(XMLNode.ChildNodes[i].NodeValue)) + '", "' + XMLNode.ChildNodes[i].Attributes['datetime'] + '")');
+        if (XMLNode.ChildNodes[i].NodeName = 'insert') and (Trim( StrToCharCodes( WideCharCodesToStr(XMLNode.ChildNodes[i].NodeValue) ) ) <> '') then begin
+          SQLDB.ExecSQL('INSERT INTO Notes (ID, Note, DateTime) values("' + XMLNode.ChildNodes[i].Attributes['id'] + '", "' + StrToCharCodes( WideCharCodesToStr(XMLNode.ChildNodes[i].NodeValue) ) + '", "' + XMLNode.ChildNodes[i].Attributes['datetime'] + '")');
 
-        if XMLNode.ChildNodes[i].NodeName = 'update' then
+          //Добавляем действие во все таблицы авторизованных устройств. Проверка доступности нужна для использования иных баз данных
+          for j:=0 to AuthorizedDevices.Count - 1 do
+            if (AuthorizedDevices.Strings[j] <> AuthDeviceID) and (SQLDB.TableExists('Actions_' + AuthorizedDevices.Strings[j])) then //Исключаем устройств отправляющее действие
+              SQLDB.ExecSQL('INSERT INTO Actions_' + AuthorizedDevices.Strings[j] + ' (Action, ID, Note, DateTime) values("INSERT", "' + XMLNode.ChildNodes[i].Attributes['id'] + '", "' + StrToCharCodes( WideCharCodesToStr(XMLNode.ChildNodes[i].NodeValue) ) + '", "' + XMLNode.ChildNodes[i].Attributes['datetime'] + '")');
+        end;
+
+        if XMLNode.ChildNodes[i].NodeName = 'update' then begin
           SQLDB.ExecSQL('UPDATE Notes SET Note="' + StrToCharCodes( WideCharCodesToStr(XMLNode.ChildNodes[i].NodeValue) ) + '", DateTime="' + XMLNode.ChildNodes[i].Attributes['datetime'] + '" WHERE ID=' + XMLNode.ChildNodes[i].Attributes['id']);
 
-        if XMLNode.ChildNodes[i].NodeName = 'delete' then
+          //Добавляем действие во все таблицы авторизованных устройств. Проверка доступности нужна для использования иных баз данных
+          for j:=0 to AuthorizedDevices.Count - 1 do
+           if (AuthorizedDevices.Strings[j] <> AuthDeviceID) and (SQLDB.TableExists('Actions_' + AuthorizedDevices.Strings[j])) then //Исключаем устройств отправляющее действие
+              SQLDB.ExecSQL('INSERT INTO Actions_' + AuthorizedDevices.Strings[j] + ' (Action, ID, Note, DateTime) values("UPDATE", "' + XMLNode.ChildNodes[i].Attributes['id'] + '", "' + StrToCharCodes( WideCharCodesToStr(XMLNode.ChildNodes[i].NodeValue) ) + '", "' + XMLNode.ChildNodes[i].Attributes['datetime'] + '")');
+        end;
+
+        if XMLNode.ChildNodes[i].NodeName = 'delete' then begin
           SQLDB.ExecSQL('DELETE FROM Notes WHERE ID=' + XMLNode.ChildNodes[i].Attributes['id']);
+          //Добавляем действие во все доступные таблицы авторизованных устройств. Проверка доступности нужна для использования иных баз данных
+          for j:=0 to AuthorizedDevices.Count - 1 do
+            if (AuthorizedDevices.Strings[j] <> AuthDeviceID) and (SQLDB.TableExists('Actions_' + AuthorizedDevices.Strings[j])) then //Исключаем устройств отправляющее действие
+              SQLDB.ExecSQL('INSERT INTO Actions_' +  AuthorizedDevices.Strings[j] + ' (Action, ID) values("DELETE", "' + XMLNode.ChildNodes[i].Attributes['id'] + '")');
+        end;
       except
       end;
 
     //Проблема с мгновенным выводом, поэтому просто обновляем страницу и LoadNotes загружается снова.
     WebView.Navigate(ExtractFilePath(ParamStr(0)) + 'style\main.html');
 
-    Caption:='EasyNotes';
+    Caption:=AppName;
     Application.Title:=Caption;
     XMLDoc.Active:=false;
     RequestDocument:='none';
@@ -664,7 +797,7 @@ begin
 
       IdHTTPServer.ServeFile(AThread, AResponseinfo, RequestDocument);
     end else
-      AResponseInfo.ContentText:='error';
+      AResponseInfo.ContentText:=ErrorStatus;
   end;
 
   CoUninitialize;
@@ -764,3 +897,4 @@ finalization
  OleUninitialize;
 
 end.
+

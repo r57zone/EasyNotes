@@ -1,6 +1,8 @@
 [![EN](https://user-images.githubusercontent.com/9499881/33184537-7be87e86-d096-11e7-89bb-f3286f752bc6.png)](https://github.com/r57zone/EasyNotes/) 
 [![RU](https://user-images.githubusercontent.com/9499881/27683795-5b0fbac6-5cd8-11e7-929c-057833e01fb1.png)](https://github.com/r57zone/EasyNotes/blob/master/README.RU.md) 
 # EasyNotes
+![](https://user-images.githubusercontent.com/9499881/100446367-1cd14000-30c8-11eb-8e82-335f134a8c95.png)
+
 Apps notes for Windows, iOS and Android, with sync. The server is a Windows application so you need to run it for sync. View API can be [here](https://github.com/r57zone/EasyNotes/blob/master/API.md).
 
 ## Features
@@ -11,6 +13,10 @@ Apps have a dark theme and automatic switching to it in the dark time.
 
 
 Full tablet support is also present.
+
+
+The Android version has a QR code scanner.
+
 ## Setup
 ### Sync of the mobile apps
 1. Reserve a permanent IP address for a computer with a Windows application. This is done in the settings of the Wi-Fi router in the "DHCP" section.
@@ -26,7 +32,7 @@ Next, go to Safari on your mobile device and enter there "http://IP:735/webapp",
 
 To update, you need to synchronize, then go to the "Safari" settings and delete history and data, after which you can add the application again.
 ### Android
-Install "EasyNotes.apk" and enter the reserved permanent IP of your computer.
+Install "EasyNotes.apk" and enter the reserved permanent IP of your computer. If your router assigns the following IP addresses: `192.168.0.0/15`, `192.168.0.100/115`, `192.168.1.0/15`, `192.168.1.100/115`, `192.168.2.0/15`, `192.168.3.0/15`, then you can just enable auto-search for IP addresses and the app will find your computer itself.
 
 ## Screenshots
 ### Windows
@@ -45,7 +51,7 @@ Install "EasyNotes.apk" and enter the reserved permanent IP of your computer.
 [![](https://user-images.githubusercontent.com/9499881/93085078-14ab5c00-f6a6-11ea-9657-239175a85f24.png)](https://user-images.githubusercontent.com/9499881/93084998-f7768d80-f6a5-11ea-8ed3-b75c1404bc77.png)
 
 ## Download
->Versions for iOS 6+, Android 5+ and Windows 7, 8.1, 10 (with Internet Explorer 11 installed). 
+>Versions for iOS 9+, Android 5+ and Windows 7, 8.1, 10 (with Internet Explorer 11 installed). 
 
 **[Download](https://github.com/r57zone/EasyNotes/releases)**
 ## Feedback

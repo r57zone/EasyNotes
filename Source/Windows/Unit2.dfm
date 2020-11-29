@@ -4,8 +4,8 @@ object Settings: TSettings
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = #1053#1072#1089#1090#1088#1086#1081#1082#1080
-  ClientHeight = 296
-  ClientWidth = 272
+  ClientHeight = 357
+  ClientWidth = 536
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -15,10 +15,11 @@ object Settings: TSettings
   OldCreateOrder = False
   Position = poScreenCenter
   OnCreate = FormCreate
+  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object InterfaceGB: TGroupBox
-    Left = 8
+    Left = 272
     Top = 8
     Width = 257
     Height = 65
@@ -45,9 +46,9 @@ object Settings: TSettings
   end
   object SyncGB: TGroupBox
     Left = 8
-    Top = 80
+    Top = 8
     Width = 257
-    Height = 177
+    Height = 310
     Caption = #1057#1080#1085#1093#1088#1086#1085#1080#1079#1072#1094#1080#1103
     TabOrder = 1
     object PortLbl: TLabel
@@ -63,6 +64,13 @@ object Settings: TSettings
       Width = 126
       Height = 13
       Caption = #1056#1072#1079#1088#1077#1096#1105#1085#1085#1099#1077' IP '#1072#1076#1088#1077#1089#1072':'
+    end
+    object AllowedDevsLbl: TLabel
+      Left = 8
+      Top = 176
+      Width = 134
+      Height = 13
+      Caption = #1056#1072#1079#1088#1077#1096#1105#1085#1085#1099#1077' '#1091#1089#1090#1088#1086#1081#1089#1090#1074#1072':'
     end
     object PortEdt: TEdit
       Left = 40
@@ -88,10 +96,46 @@ object Settings: TSettings
       TabOrder = 1
       OnClick = AllowAnyIPsCBClick
     end
+    object AllowedDevsLB: TListBox
+      Left = 8
+      Top = 195
+      Width = 241
+      Height = 62
+      ItemHeight = 13
+      TabOrder = 3
+      OnKeyDown = AllowedDevsLBKeyDown
+      OnMouseDown = AllowedDevsLBMouseDown
+    end
+    object AddManualDev: TButton
+      Left = 7
+      Top = 260
+      Width = 34
+      Height = 17
+      Caption = '+'
+      TabOrder = 4
+      OnClick = AddManualDevClick
+    end
+    object BlockReqNewDevsCB: TCheckBox
+      Left = 8
+      Top = 285
+      Width = 241
+      Height = 17
+      Caption = #1041#1083#1086#1082#1080#1088#1086#1074#1072#1090#1100' '#1079#1072#1087#1088#1086#1089#1099' '#1085#1086#1074#1099#1093' '#1091#1089#1090#1088#1086#1081#1089#1090#1074
+      TabOrder = 6
+    end
+    object RemManualDev: TButton
+      Left = 40
+      Top = 260
+      Width = 34
+      Height = 17
+      Caption = '-'
+      TabOrder = 5
+      OnClick = RemManualDevClick
+    end
   end
   object OkBtn: TButton
     Left = 8
-    Top = 264
+    Top = 325
     Width = 75
     Height = 25
     Caption = #1054#1050
@@ -100,7 +144,7 @@ object Settings: TSettings
   end
   object CancelBtn: TButton
     Left = 88
-    Top = 264
+    Top = 325
     Width = 75
     Height = 25
     Caption = #1054#1090#1084#1077#1085#1072
@@ -108,12 +152,54 @@ object Settings: TSettings
     OnClick = CancelBtnClick
   end
   object AboutBtn: TButton
-    Left = 240
-    Top = 264
+    Left = 504
+    Top = 325
     Width = 25
     Height = 25
     Caption = '?'
     TabOrder = 4
     OnClick = AboutBtnClick
+  end
+  object NotesGB: TGroupBox
+    Left = 272
+    Top = 80
+    Width = 257
+    Height = 54
+    Caption = #1047#1072#1084#1077#1090#1082#1080
+    TabOrder = 5
+    object ImportBtn: TButton
+      Left = 8
+      Top = 20
+      Width = 75
+      Height = 25
+      Caption = #1048#1084#1087#1086#1088#1090
+      TabOrder = 0
+      OnClick = ImportBtnClick
+    end
+    object ExportBtn: TButton
+      Left = 88
+      Top = 20
+      Width = 75
+      Height = 25
+      Caption = #1069#1082#1089#1087#1086#1088#1090
+      TabOrder = 1
+      OnClick = ExportBtnClick
+    end
+  end
+  object AllowedDevsPM: TPopupMenu
+    Left = 24
+    Top = 120
+    object AllowedDevRemBtn: TMenuItem
+      Caption = #1059#1076#1072#1083#1080#1090#1100
+      OnClick = AllowedDevRemBtnClick
+    end
+  end
+  object OpenDialog: TOpenDialog
+    Left = 456
+    Top = 96
+  end
+  object SaveDialog: TSaveDialog
+    Left = 488
+    Top = 96
   end
 end
