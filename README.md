@@ -51,7 +51,7 @@ Install "EasyNotes.apk" and enter the reserved permanent IP of your computer. If
 [![](https://user-images.githubusercontent.com/9499881/93085078-14ab5c00-f6a6-11ea-9657-239175a85f24.png)](https://user-images.githubusercontent.com/9499881/93084998-f7768d80-f6a5-11ea-8ed3-b75c1404bc77.png)
 
 ## Download
->Versions for iOS 9+, Android 5+ and Windows 7, 8.1, 10 (with Internet Explorer 11 installed). 
+>Versions for iOS 9+, Android 5.1+ and Windows 7, 8.1, 10 (with Internet Explorer 11 installed). 
 
 **[Download](https://github.com/r57zone/EasyNotes/releases)**
 ## Feedback

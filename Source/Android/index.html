@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html manifest="app.manifest"> 
+<html data-theme="default" manifest="app.manifest">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>EasyNotes</title>
@@ -20,13 +20,60 @@
 <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180x180.png">
 <link rel="apple-touch-startup-image" href="images/launch.png">
 <style type="text/css">
+:root{
+	--background-color: #f8f8f8;
+	--panel-background-color: #017d93;
+    --text-color: #333;
+	
+    --meta-color: #ac5942;
+	--sub-panel-background-color: #e7e7e7;
+	
+	--list-color:black;
+	
+	--items-background-color: #fff;
+	
+	--items-border-color: #ededed;
+	--item-hover-background-color: #ededed;
+	--date-color: #454545;
+	
+	--settings-item-border-color: #dbdbdb;
+	
+	--title-box-color: #333;
+	
+	--notification-border-color: #bdbdbd;
+	
+	--list-right-border-color: #d5d5d5;
+}
+
+/* Dark Theme */
+html[data-theme="dark"] {
+    --background-color: #2a3035;
+	--panel-background-color: #202329;
+	--text-color: white;
+	
+	--meta-color: #787c81;
+	--sub-panel-background-color: #202329;
+	--list-color:#ededef;
+	
+	--items-background-color: #202329;
+	--items-border-color: #3a404a;
+	--item-hover-background-color: #202329;
+	--date-color: #787c81;
+	--settings-item-border-color:#3a404a;
+	
+	--title-box-color: #787c81;
+	--notification-border-color: black;
+	
+	--list-right-border-color: #202329;
+}
+
 html,body{padding:0;margin:0;}
-body{font-family: Arial, sans-serif; font-size:16px; color:#333; background-color:#f8f8f8; -webkit-user-select:none; -webkit-tap-highlight-color:transparent;}
+body{font-family: Arial, sans-serif; font-size:16px; color:var(--text-color); background-color:var(--background-color); -webkit-user-select:none; -webkit-tap-highlight-color:transparent;}
 a{text-decoration:none; color:gray;}
 #wrapper{position:absolute; width:100%; height:100%;}
 
 /* Action bar */
-#panel{position:absolute; display:flex; flex-direction:row; justify-content:space-between; align-items:center; width:inherit; height:45px; overflow:hidden; background-color:#017d93; color:white; text-align:center; cursor:default;}
+#panel{position:absolute; display:flex; flex-direction:row; justify-content:space-between; align-items:center; width:inherit; height:45px; overflow:hidden; background-color:var(--panel-background-color); color:white; text-align:center; cursor:default;}
 #panel-bg{width:inherit; height:45px;}
 #btn{width:45px; height:45px; cursor:pointer;}
 #btn:hover{opacity:0.7;}
@@ -34,37 +81,37 @@ a{text-decoration:none; color:gray;}
 #panel-qr{display:none; position:absolute; width:100%; height:45px; background: rgba(0,0,0,0.5); flex-direction:row; justify-content:space-between; align-items:center;}
 
 /* List of notes */
-#list{width:100%; height:100%; color:black;}
+#list{width:100%; height:100%; color:var(--list-color);}
 #list #items{height:calc(100% - 45px); overflow-y:auto; -webkit-overflow-scrolling:touch;}
-#list #items #note{display:flex; flex-direction:row; justify-content:space-between; align-items:center; cursor:pointer; height:44px; border-bottom:1px solid #ededed; overflow:hidden;}
-#list #items #note:hover{background-color:#ededed;}
+#list #items #note{display:flex; flex-direction:row; justify-content:space-between; align-items:center; cursor:pointer; height:44px; border-bottom:1px solid var(--items-border-color); overflow:hidden;}
+#list #items #note:hover{background-color:var(--item-hover-background-color);}
 #list #items #note #title{margin-left:8px; margin-right:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-#list #items #note #date{margin-right:10px; margin-left:4px; color:#454545; font-size:13px; white-space:nowrap; text-align:right;}
+#list #items #note #date{margin-right:10px; margin-left:4px; color:var(--date-color); font-size:13px; white-space:nowrap; text-align:right;}
 
 /* Note editor */
 #editor{display:none; width:100%; height:100%;}
 #editor #page{height:calc(100% - 90px);}
-#meta{display:flex; flex-direction:row; justify-content:space-between; align-items:center; color:#ac5942; height:32px; width:100%; cursor:default; overflow:hidden; white-space:nowrap;}
+#meta{display:flex; flex-direction:row; justify-content:space-between; align-items:center; color:var(--meta-color); height:32px; width:100%; cursor:default; overflow:hidden; white-space:nowrap;}
 #meta #DaysAgo{margin-left:12px;}
 #meta #DateNote{margin-right:12px;}
 
 #editor #memo{display:block; width:calc(100% - 24px); height:calc(100% - 45px); padding:4px 0; margin:0 auto; background-color:transparent; border:none;}
-textarea{font-weight:normal; font-size:17px; font-family: Arial, sans-serif; color:#333; overflow-y:auto; -webkit-overflow-scrolling:touch; border-radius:0; -webkit-tap-highlight-color:rgba(0,0,0,0);}
+textarea{font-weight:normal; font-size:17px; font-family: Arial, sans-serif; color:var(--text-color); overflow-y:auto; -webkit-overflow-scrolling:touch; resize:none; border-radius:0; -webkit-tap-highlight-color:rgba(0,0,0,0);}
 textarea:focus{outline:none;}
-#sub-panel{display:flex; flex-direction:row; justify-content:space-between; align-items:center; height:45px; overflow:hidden; background-color:#e7e7e7; text-align:center; cursor:default;}
+#sub-panel{display:flex; flex-direction:row; justify-content:space-between; align-items:center; height:45px; overflow:hidden; background-color:var(--sub-panel-background-color); text-align:center; cursor:default;}
 
 /* Settings */
 #settings{display:none; width:100%; height:100%;}
 #settings #page{height:calc(100% - 45px); overflow-y:auto; -webkit-overflow-scrolling:touch;}
 #settings #page #items:first-child{margin-top:3px;}
 #settings #items{padding:10px 0; margin:0 auto; width:92%; overflow:hidden; font-size:14px;}
-#settings #items #item{display:flex; flex-direction:row; justify-content:space-between; align-items:center; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; border:1px solid #dbdbdb; padding:14px 8px;  background-color:#fff; border-top:none; color:black;}
-#settings #items #item:first-child{border-top-left-radius:15px; border-top-right-radius:15px; border:1px solid #dbdbdb;}
+#settings #items #item{display:flex; flex-direction:row; justify-content:space-between; align-items:center; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; border:1px solid var(--settings-item-border-color); padding:14px 8px; background-color:var(--items-background-color); border-top:none; color:var(--text-color);}
+#settings #items #item:first-child{border-top-left-radius:15px; border-top-right-radius:15px; border:1px solid var(--settings-item-border-color);}
 #settings #items #item:last-child{border-bottom-left-radius:15px; border-bottom-right-radius:15px;}
 #settings #items #item .title{margin-left:4px;}
 #settings #items #item #control{text-align:right; margin-right:4px;}
-#settings .titlebox{padding:5px 0; margin:0 auto; width:87%; font-size:14px;}
-#settings input[type="text"],#settings input[type="number"]{border:none; padding:0 7px; width:90%; outline:none; font-size:14px; -webkit-tap-highlight-color:rgba(0,0,0,0); text-align:right;}
+#settings .titlebox{padding:5px 0; margin:0 auto; width:87%; font-size:14px; color:var(--title-box-color);}
+#settings input[type="text"],#settings input[type="number"]{border:none; padding:0 7px; background-color:transparent; width:90%; outline:none; font-size:14px; -webkit-tap-highlight-color:rgba(0,0,0,0); text-align:right; color:var(--text-color);}
 .switch{position:relative; display:inline-block; width:40px; height:20px; background-color:#7e7e7e; border-radius:20px; top:3px;}
 .switch::after{content:''; position:absolute; width:18px; height:18px; border-radius:50%; background-color:white; top:1px; left:1px;}
 .checkbox:checked + .switch::after{left:20px;}
@@ -72,7 +119,7 @@ textarea:focus{outline:none;}
 .checkbox{display:none;}
 
 /* Notification */
-#notification{position:absolute; bottom:0; width:100%; padding: 15px 0; visibility:hidden; font-size:14px; background-color:#e7e7e7; text-align:center; border-top:1px solid #bdbdbd;}
+#notification{position:absolute; bottom:0; width:100%; padding: 15px 0; visibility:hidden; font-size:14px; background-color:var(--sub-panel-background-color); text-align:center; border-top:1px solid var(--notification-border-color);}
 #notification.show{visibility:visible; animation:fadein 0.5s, fadeout 0.5s 3s;}
 @keyframes fadein{from {opacity: 0;} to {opacity: 1;}}
 @keyframes fadeout{from {opacity: 1;} to {opacity: 0;}}
@@ -91,10 +138,14 @@ textarea:focus{outline:none;}
 /* Android tablet mode */
 @media all and (min-width:550px) {
 	#list{display:block; float:left; width:37%;}
-	#list #items{border-right:1px solid #d5d5d5;}
+	#list #items{border-right:1px solid var(--list-right-border-color);}
 	#editor{display:block; float:right; width:63%;}
 	#settings{float:right; width:63%;}
-	.hide-btn img{opacity:0; cursor:pointer;}
+	.hide-btn img{opacity:0; cursor:default;}
+}
+
+@media (prefers-color-scheme: dark) {
+	background-color:red;
 }
 </style>
 <script type="text/javascript" src="cordova.js"></script>
@@ -105,9 +156,8 @@ textarea:focus{outline:none;}
 
 	var NotesDB;
 	var ActionsDB;
-	var SettingsDB;
 	
-	var CurNoteID = -1; //По умолчанию новая заметка
+	var CurNoteID = -1; // По умолчанию новая заметка
 	var LatestNote;
 	var CurNoteDateTime;
 	
@@ -115,52 +165,53 @@ textarea:focus{outline:none;}
 
 	var UpdateDateTime = true;
 	
-	var UsedDarkTheme = false; //для QR (проблемы с CSS)
+	var HideFirstNotifyError = true; // На замену navigator.onLine (постоянно стала возвращать true на Android), для iOS ставим true
 	
+	var UsedDarkTheme = false; // Для QR (проблемы с CSS)
 	
-	//Настройки для Android
+	// Настройки для Android
 	var ServerIP;
 	var ServerPort;
 	var AutoSearchIP = false;
 	
 	var FlashLightEnable = false;
 	
-	//Перевод, по умолчанию English
-	var IDS_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-	var IDS_DAYOFWEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-	var IDS_TODAY = 'Today';
-	var IDS_YESTERDAY = 'Yesterday';
-	var IDS_DAYSAGO = 'days ago';
-	var IDS_NEW_NOTE = 'New note';
-	var IDS_NOTES = 'Notes';
+	// Перевод, по умолчанию English
+	let IDS_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+	let IDS_DAYOFWEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+	let IDS_TODAY = 'Today';
+	let IDS_YESTERDAY = 'Yesterday';
+	let IDS_DAYSAGO = 'days ago';
+	let IDS_NEW_NOTE = 'New note';
+	let IDS_NOTES = 'Notes';
 	
-	//Настройки для Android
-	var IDS_SETTINGS = 'Settings';
-	var IDS_SYNC_IP = 'IP address';
-	var IDS_SYNC_PORT = 'Port';
-	var IDS_AUTOSEARCH_IP = 'Autosearch IP address';
-	var IDS_ABOUT_SYNC = 'IP address and port to sync notes with your PC.';
-	var IDS_AUTO_SYNC = 'Sync at startup';
-	var IDS_ABOUT_AUTO_SYNC = 'Automatically sync on app launch.';
+	// Настройки для Android
+	let IDS_SETTINGS = 'Settings';
+	let IDS_SYNC_IP = 'IP address';
+	let IDS_SYNC_PORT = 'Port';
+	let IDS_AUTOSEARCH_IP = 'Autosearch IP address';
+	let IDS_ABOUT_SYNC = 'IP address and port to sync notes with your PC.';
+	let IDS_AUTO_SYNC = 'Sync at startup';
+	let IDS_ABOUT_AUTO_SYNC = 'Automatically sync on app launch.';
 	
-	//Для всех
-	var IDS_FULL_RESET = 'Full reset';
-	var IDS_CONFIRM_FULL_RESET = 'Do you really want to reset everything? All notes and settings will be deleted.';
-	var IDS_DARK_THEME = 'Dark theme';
-	var IDS_THEME_TIME_DEPENDENT = 'Theme is time dependent';
-	var IDS_ABOUT_THEME_TIME = 'The dark theme turns on automatically from 5:00 pm to 10:00 am.';
-	var IDS_LAST_UPDATE = 'Last update: ';
+	// Для всех
+	let IDS_FULL_RESET = 'Full reset';
+	let IDS_CONFIRM_FULL_RESET = 'Do you really want to reset everything? All notes and settings will be deleted.';
+	let IDS_DARK_THEME = 'Dark theme';
+	let IDS_THEME_TIME_DEPENDENT = 'Theme is time dependent';
+	let IDS_ABOUT_THEME_TIME = 'The dark theme turns on automatically from 5:00 pm to 10:00 am.';
+	let IDS_LAST_UPDATE = 'Last update: ';
 	
-	//Уведомления
-	var IDS_DATE_UPDATE = 'Date will be update';
-	var IDS_DATE_NOT_UPDATE = 'Date will not be update';
-	var IDS_AUTH_REJECT = 'Authorization rejected';
-	var IDS_SYNC_SUCCESSFUL = 'Sync successful';
-	var IDS_SYNC_ERROR = 'Sync error';
-	var IDS_SYNC_NEED_CONNECT = 'Need connect to the network for sync';
-	var IDS_CONNECTION_FAILED = 'Connection failed';
+	// Уведомления
+	let IDS_DATE_UPDATE = 'Date will be update';
+	let IDS_DATE_NOT_UPDATE = 'Date will not be update';
+	let IDS_AUTH_REJECT = 'Authorization rejected';
+	let IDS_SYNC_SUCCESSFUL = 'Sync successful';
+	let IDS_SYNC_ERROR = 'Sync error';
+	let IDS_SYNC_NEED_CONNECT = 'Need connect to the network for sync';
+	let IDS_CONNECTION_FAILED = 'Connection failed';
 	
-	//Русский
+	// Русский
 	if (navigator.language.toLowerCase() == 'ru-ru') { //В iOS языки прописными буквами
 		IDS_MONTHS = ['янв.', 'фев.', 'мар.', 'апр.', 'май', 'июн.', 'июл.', 'авг.', 'сен.', 'окт.', 'ноя.', 'дек.'];
 		IDS_DAYOFWEEK = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'];
@@ -170,7 +221,7 @@ textarea:focus{outline:none;}
 		IDS_NEW_NOTE = 'Новая заметка';
 		IDS_NOTES = 'Заметки';
 		
-		//Настройки для Android
+		// Настройки для Android
 		IDS_SETTINGS = 'Настройки';
 		IDS_SYNC_IP = 'IP адрес';
 		IDS_SYNC_PORT = 'Порт';
@@ -179,7 +230,7 @@ textarea:focus{outline:none;}
 		IDS_AUTO_SYNC = 'Синхронизация при запуске';
 		IDS_ABOUT_AUTO_SYNC = 'Автоматическая синхронизация при запуске приложения.';
 		
-		//Для всех
+		// Для всех
 		IDS_FULL_RESET = 'Полный сброс';
 		IDS_CONFIRM_FULL_RESET = 'Вы действительно хотите сбросить всё? Все заметки и настройки будут удалены.';
 		IDS_DARK_THEME = 'Темная тема';
@@ -187,7 +238,7 @@ textarea:focus{outline:none;}
 		IDS_ABOUT_THEME_TIME = 'Темная тема включается автоматически с 17:00 до 10:00.';
 		IDS_LAST_UPDATE = 'Последнее обновление: ';
 		
-		//Уведомления
+		// Уведомления
 		IDS_DATE_UPDATE = 'Дата обновится';
 		IDS_DATE_NOT_UPDATE = 'Дата не обновится';
 		IDS_AUTH_REJECT = 'Авторизация отклонена';
@@ -197,28 +248,28 @@ textarea:focus{outline:none;}
 		IDS_CONNECTION_FAILED = 'Cоединение не удалось';
 	}
 
-	function GetUTCTimeStamp() //со смещением UTC зоны
+	function GetUTCTimeStamp() // Со смещением UTC зоны
 	{
-		var CurDate = new Date;
+		let CurDate = new Date;
 		return Math.floor(Date.UTC(CurDate.getFullYear(), CurDate.getMonth(), CurDate.getDate(), CurDate.getHours(), CurDate.getMinutes(), CurDate.getSeconds(), CurDate.getMilliseconds()) / 1000);
 	}
 
-	function GetTimeStamp() //UTC +0
+	function GetTimeStamp() // UTC +0 (без смещения)
 	{
 		return Math.floor(new Date() / 1000);
 	}
 	
 	function StrToCharCodes(Str){
-		var NewStr = '';
-		var CharCode = 0;
-		for (var i = 0; i < Str.length; i++)
+		let NewStr = '';
+		let CharCode = 0;
+		for (let i = 0; i < Str.length; i++)
 			NewStr += 'x' + Str.charCodeAt(i);
 			
 		return NewStr;
 	}
 	
 	function CharCodesToStr(Str){
-		var NewStr = '';
+		let NewStr = '';
 		if (Str.length = 0) return '';
 		if (Str[0] != 'x') return '';
 		Str = Str.substring(1, Str.length);
@@ -239,26 +290,25 @@ textarea:focus{outline:none;}
 		ActionsDB.transaction(function (tx) {
 			tx.executeSql('DROP TABLE IF EXISTS Actions');
 		});
-		SettingsDB.transaction(function (tx) {
-			tx.executeSql('DROP TABLE IF EXISTS Settings', [], function(){document.location.reload();}, function(){});
-		});
+		localStorage.clear();
+		document.location.reload();
 	}
 	
-	function NoteDateAgo(TimeStampSec) //Дней прошло
+	function NoteDateAgo(TimeStampSec) // Дней прошло
 	{
 		try {
-			var date = new Date();
-			date.setTime(TimeStampSec * 1000 + date.getTimezoneOffset() * 60000 ); //После присвоения времени добавляется смещение UTC, поэтому вычитаем его.
+			let date = new Date();
+			date.setTime(TimeStampSec * 1000 + date.getTimezoneOffset() * 60000 ); // После присвоения времени добавляется смещение UTC, поэтому вычитаем его.
 
-			var CurDate = new Date(); //Текущее время для сравнения
-			var mTime = '' + date.getHours();
+			let CurDate = new Date(); // Текущее время для сравнения
+			let mTime = '' + date.getHours();
 			if (date.getMinutes() < 10) {mTime += ':0' + date.getMinutes();} else {mTime += ':' + date.getMinutes();}
 			
-			//Даты без времени для точного определения пройденных дней
-			var DCurDate = new Date(CurDate.getFullYear(), CurDate.getMonth(), CurDate.getDate(), 0, 0, 0, 0);
-			var DDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
+			// Даты без времени для точного определения пройденных дней
+			let DCurDate = new Date(CurDate.getFullYear(), CurDate.getMonth(), CurDate.getDate(), 0, 0, 0, 0);
+			let DDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
 			
-			var DaysAgo = Math.floor((DCurDate - DDate) / (1000 * 60 * 60 * 24));
+			let DaysAgo = Math.floor((DCurDate - DDate) / (1000 * 60 * 60 * 24));
 			
 			if (DaysAgo == 0) MyDate = IDS_TODAY;
 			if (DaysAgo == 1) MyDate = IDS_YESTERDAY;
@@ -270,17 +320,17 @@ textarea:focus{outline:none;}
 		}
 	}
 	
-	function NoteDate(TimeStampSec) //Дата в заметке
+	function NoteDate(TimeStampSec) // Дата в заметке
 	{
 		try {
-			var date = new Date();
-			date.setTime(TimeStampSec * 1000 + date.getTimezoneOffset() * 60000 ); //После присвоения времени добавляется смещение UTC, поэтому вычитаем его.
+			let date = new Date();
+			date.setTime(TimeStampSec * 1000 + date.getTimezoneOffset() * 60000 ); // После присвоения времени добавляется смещение UTC, поэтому вычитаем его.
 
-			var CurDate = new Date(); //Текущее время для сравнения
-			var mTime = '' + date.getHours();
+			let CurDate = new Date(); // Текущее время для сравнения
+			let mTime = '' + date.getHours();
 			if (date.getMinutes() < 10) {mTime += ':0' + date.getMinutes();} else {mTime += ':' + date.getMinutes();}
 			
-			var MyDate = date.getDate() + ' ' + IDS_MONTHS[date.getMonth()]; //День, месяц
+			let MyDate = date.getDate() + ' ' + IDS_MONTHS[date.getMonth()]; //День, месяц
 			if (CurDate.getFullYear() != date.getFullYear()) MyDate += ' ' + date.getFullYear() + ','; //Год
 			MyDate += ' ' + mTime;
 			
@@ -290,26 +340,26 @@ textarea:focus{outline:none;}
 		}
 	}
 	
-	function ListDate(TimeStampSec) //Дата в списке
+	function ListDate(TimeStampSec) // Дата в списке
 	{
 		try {
-			var date = new Date();
-			date.setTime(TimeStampSec * 1000 + date.getTimezoneOffset() * 60000 ); //После присвоения времени добавляется смещение UTC, поэтому вычитаем его.
+			let date = new Date();
+			date.setTime(TimeStampSec * 1000 + date.getTimezoneOffset() * 60000 ); // После присвоения времени добавляется смещение UTC, поэтому вычитаем его.
 
-			var CurDate = new Date(); //Текущее время для сравнения
-			var mTime = '' + date.getHours();
+			let CurDate = new Date(); // Текущее время для сравнения
+			let mTime = '' + date.getHours();
 			if (date.getMinutes() < 10) {mTime += ':0' + date.getMinutes();} else {mTime += ':' + date.getMinutes();}
 			
-			var MyDate = date.getDate() + ' ' + IDS_MONTHS[date.getMonth()];
+			let MyDate = date.getDate() + ' ' + IDS_MONTHS[date.getMonth()];
 			if (CurDate.getFullYear() != date.getFullYear()) MyDate += ' ' + date.getFullYear();
 			
-			//Даты без времени для точного определения пройденных дней
-			var DCurDate = new Date(CurDate.getFullYear(), CurDate.getMonth(), CurDate.getDate(), 0, 0, 0, 0);
-			var DDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
+			// Даты без времени для точного определения пройденных дней
+			let DCurDate = new Date(CurDate.getFullYear(), CurDate.getMonth(), CurDate.getDate(), 0, 0, 0, 0);
+			let DDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
 			
-			var DaysAgo = Math.floor((DCurDate - DDate) / (1000 * 60 * 60 * 24));
+			let DaysAgo = Math.floor((DCurDate - DDate) / (1000 * 60 * 60 * 24));
 			
-			var GetCurDay = CurDate.getDay(); 
+			let GetCurDay = CurDate.getDay(); 
 			if (GetCurDay == 0) GetCurDay = 7;
 			
 			if (DaysAgo < GetCurDay) MyDate = IDS_DAYOFWEEK[date.getDay() - 1];
@@ -351,18 +401,19 @@ textarea:focus{outline:none;}
 		if (TabletMode == false)
 			document.getElementById('editor').style.display = 'none';
 		document.getElementById('list').style.display = 'block';
-		var Notes = '';
+		
+		let Notes = '';
 		
 		NotesDB.transaction(function (tx) {
 			tx.executeSql('SELECT * FROM Notes ORDER BY DateTime DESC', [], function (tx, results) {
 
-				for (var i = 0; i < results.rows.length; i++) {
+				for (let i = 0; i < results.rows.length; i++) {
 					Notes += '<div onclick="GetNote(' + results.rows.item(i).ID  + ')" id="note"><div id="title">' + ExtractTitle(CharCodesToStr(results.rows.item(i).Note)) + '</div><div id="date">' + ListDate(results.rows.item(i).DateTime) + '</div></div>';
 					//console.log(results.rows.item(i).ID + ' ' + results.rows.item(i).DateTime + ' ' + ExtractTitle(CharCodesToStr(results.rows.item(i).Note)));
 				}
 
 				document.getElementById('NotesCount').innerHTML = IDS_NOTES + ' (' + results.rows.length + ')';
-				document.getElementById('items').innerHTML = Notes; //Заменяем, чтобы не мерцала пустота
+				document.getElementById('items').innerHTML = Notes; // Заменяем, чтобы не мерцала пустота
 				Notes = '';
 			
 			}, null);
@@ -394,139 +445,61 @@ textarea:focus{outline:none;}
 	}
 	
 	function BackTheme(){
-		var CurrentStyle = document.getElementsByTagName('style')[0].innerHTML;
-		var DarkThemePos = document.getElementsByTagName('style')[0].innerHTML.indexOf('/*DarkTheme*/');
-		if (DarkThemePos !== -1)
-			document.getElementsByTagName('style')[0].innerHTML = CurrentStyle.substring(0, DarkThemePos);
-		document.body.style.backgroundColor='#f8f8f8'; //После QR js фон приоритетный
+		document.documentElement.setAttribute("data-theme", "default");
+		document.body.style.backgroundColor='#f8f8f8'; // После QR js фон приоритетный
 		UsedDarkTheme = false;
 	}
 	
 	function DarkTheme(){
-		document.getElementsByTagName('style')[0].innerHTML +=
-			'/*DarkTheme*/' +
-			'body{background-color:#2a3035;}' +
-
-			'#panel{background-color:#202329;}' +
-			'#meta{color:#787c81;}' +
-			'#sub-panel{background-color:#202329;}' +
-
-			'#list{color:#ededef;}' +
-			'#list #items{border-color:#202329;}' +
-			'#list #items #note{border-bottom:1px solid #3a404a;}' +
-			'#list #items #note:hover{background-color:#202329;}' +
-			'#list #items #note #date{color:#787c81;}' +
-
-			'textarea{color:white;}' +
-
-			'#settings #items #item{background-color:#202329; color:white;}' +
-			'#settings #items #item{border:1px solid #3a404a; border-top:none;}' +
-			'#settings #items #item:first-child{border:1px solid #3a404a;}' +
-			'#settings input[type="text"],#settings input[type="number"]{background-color:#202329;color:white;}' +
-			'#settings .titlebox{color:#787c81;}' +
-
-			'#notification{background-color:#202329; border-top:1px solid black; color:white;}';
-		document.body.style.backgroundColor='#2a3035'; //После QR js фон приоритетный
+		document.documentElement.setAttribute("data-theme", "dark");
+		document.body.style.backgroundColor='#2a3035'; // После QR js фон приоритетный
 		UsedDarkTheme = true;
 	}
 	
 	function SettingsDone()
 	{
-		//IP
-		var NewIP = document.getElementById('ServerIP').value;
-		SettingsDB.transaction(function (tx) {
-			tx.executeSql('SELECT * FROM Settings WHERE Parameter="ServerIP"', [], function (tx, results) {
-				
-				if (results.rows.length == 0) {
-					tx.executeSql('INSERT INTO Settings (Parameter, Value) VALUES ("ServerIP", "' + NewIP + '")');
-					ServerIP = NewIP;
-				} else {
-					tx.executeSql('UPDATE Settings SET Value="' + NewIP + '" WHERE Parameter="ServerIP"');
-					ServerIP = NewIP;
-				}
-			}, null);
-		}); 
+		// IP
+		let NewIP = document.getElementById('ServerIP').value;
+		localStorage.setItem('ServerIP', NewIP);
+		ServerIP = NewIP;
 		
-		//Port
-		var NewPort = document.getElementById('ServerPort').value;
-		SettingsDB.transaction(function (tx) {
-			tx.executeSql('SELECT * FROM Settings WHERE Parameter="ServerPort"', [], function (tx, results) {
-				
-				if (results.rows.length == 0) {
-					tx.executeSql('INSERT INTO Settings (Parameter, Value) VALUES ("ServerPort", "' + NewPort + '")');
-					ServerPort = NewPort;
-				} else {
-					tx.executeSql('UPDATE Settings SET Value="' + NewPort + '" WHERE Parameter="ServerPort"');
-					ServerPort = NewPort;
-				}
-			}, null);
-		}); 
+		// Port
+		let NewPort = document.getElementById('ServerPort').value;
+		localStorage.setItem('ServerPort', NewPort);
+		ServerPort = NewPort;
 		
-		//Auto search IP
-		var AutoSearchIPCB = document.getElementById('AutoSearchIPCB').checked;
-		AutoSearchIP = AutoSearchIPCB;
-		SettingsDB.transaction(function (tx) {
-			tx.executeSql('SELECT * FROM Settings WHERE Parameter="AutoSearchIP"', [], function (tx, results) {
-				
-				if (results.rows.length == 0)
-					tx.executeSql('INSERT INTO Settings (Parameter, Value) VALUES ("AutoSearchIP", "' + AutoSearchIPCB + '")');
-				else
-					tx.executeSql('UPDATE Settings SET Value="' + AutoSearchIPCB + '" WHERE Parameter="AutoSearchIP"');
-			}, null);
-		});
+		// Auto search IP
+		AutoSearchIP = document.getElementById('AutoSearchIPCB').checked; // Глобальная переменная
+		localStorage.setItem('AutoSearchIP', AutoSearchIP);
 		
-		//Auto sync
-		var AutoSyncCB = document.getElementById('AutoSyncCB').checked;
-		SettingsDB.transaction(function (tx) {
-			tx.executeSql('SELECT * FROM Settings WHERE Parameter="AutoSync"', [], function (tx, results) {
-				
-				if (results.rows.length == 0)
-					tx.executeSql('INSERT INTO Settings (Parameter, Value) VALUES ("AutoSync", "' + AutoSyncCB + '")');
-				else
-					tx.executeSql('UPDATE Settings SET Value="' + AutoSyncCB + '" WHERE Parameter="AutoSync"');
-			}, null);
-		});
+		// Auto sync
+		let AutoSyncCB = document.getElementById('AutoSyncCB').checked;
+		localStorage.setItem('AutoSync', AutoSyncCB);
 		
-		//Dark Theme
-		var DarkThemeCB = document.getElementById('DarkThemeCB').checked;
+		// Dark Theme
+		let DarkThemeCB = document.getElementById('DarkThemeCB').checked;
 		
-		//Theme time	
-		var ThemeTimeCB = document.getElementById('ThemeTimeCB').checked;
+		// Theme time	
+		let ThemeTimeCB = document.getElementById('ThemeTimeCB').checked;
 		if (ThemeTimeCB) {
 			DarkThemeCB = false;
 			document.getElementById('DarkThemeCB').checked = false;
-			var date = new Date();
+			let date = new Date();
 			if (date.getHours() <=9 || date.getHours() >= 17) 
 				DarkTheme();
 		}
 		
-		//Dark Theme
+		// Dark Theme
 		if (DarkThemeCB)
 			DarkTheme();
 		else if (ThemeTimeCB == false)
 			BackTheme();
 		
-		//Save dark theme status	
-		SettingsDB.transaction(function (tx) {
-			tx.executeSql('SELECT * FROM Settings WHERE Parameter="DarkTheme"', [], function (tx, results) {
-				
-				if (results.rows.length == 0)
-					tx.executeSql('INSERT INTO Settings (Parameter, Value) VALUES ("DarkTheme", "' + DarkThemeCB + '")');
-				else
-					tx.executeSql('UPDATE Settings SET Value="' + DarkThemeCB + '" WHERE Parameter="DarkTheme"');
-			}, null);
-		});
+		// Save dark theme status
+		localStorage.setItem('DarkTheme', DarkThemeCB);
 		
-		//Theme time status
-		SettingsDB.transaction(function (tx) {
-			tx.executeSql('SELECT * FROM Settings WHERE Parameter="ThemeTime"', [], function (tx, results) {
-				
-				if (results.rows.length == 0)
-					tx.executeSql('INSERT INTO Settings (Parameter, Value) VALUES ("ThemeTime", "' + ThemeTimeCB + '")');
-				else
-					tx.executeSql('UPDATE Settings SET Value="' + ThemeTimeCB + '" WHERE Parameter="ThemeTime"');
-			}, null);
-		});
+		// Theme time status
+		localStorage.setItem('ThemeTime', ThemeTimeCB);
 		
 		GetNote(CurNoteID);
 	}
@@ -560,14 +533,14 @@ textarea:focus{outline:none;}
 	
 	function NoteDone()
 	{
-		var CurTimeStamp = GetTimeStamp();
-		var UTCTimeStamp = GetUTCTimeStamp();
-		var MemoText = document.getElementById('memo').value;
-		var LatestCurNoteID = CurNoteID; //Для мновенного переключения на новую заметку, без ожидания выполнения SQL
+		let CurTimeStamp = GetTimeStamp();
+		let UTCTimeStamp = GetUTCTimeStamp();
+		let MemoText = document.getElementById('memo').value;
+		let LatestCurNoteID = CurNoteID; // Для мновенного переключения на новую заметку, без ожидания выполнения SQL
 		
-		//Новая заметка
+		// Новая заметка
 		if (CurNoteID == '-1') {
-			//Не создаем заметку без текста
+			// Не создаем заметку без текста
 			if (MemoText.trim() != '') { 
 				NotesDB.transaction(function (tx) {
 					tx.executeSql('INSERT INTO Notes (ID, Note, DateTime) VALUES (' + CurTimeStamp + ', "' + StrToCharCodes(MemoText) + '", ' + UTCTimeStamp + ')');
@@ -579,9 +552,9 @@ textarea:focus{outline:none;}
 				
 			}
 			//console.log('Inserted done');
-		} else if (LatestNote.trim() != MemoText.trim()) { //Добавлять только при наличии изменений
+		} else if (LatestNote.trim() != MemoText.trim()) { // Добавлять только при наличии изменений
 
-			if (UpdateDateTime) { //Обновление времени
+			if (UpdateDateTime) { // Обновление времени
 				NotesDB.transaction(function (tx) {
 					tx.executeSql('UPDATE Notes SET Note="' + StrToCharCodes(MemoText) + '", DateTime=' + UTCTimeStamp + ' WHERE ID=' + LatestCurNoteID);
 				});
@@ -589,7 +562,7 @@ textarea:focus{outline:none;}
 				ActionsDB.transaction(function (tx) {
 					tx.executeSql('INSERT INTO Actions (Action, ID, Note, DateTime) VALUES ("update", ' + LatestCurNoteID + ', "' + StrToCharCodes(MemoText) + '",' + UTCTimeStamp + ')');
 				});
-			} else { //Сохранение старого времени
+			} else { // Сохранение старого времени
 				NotesDB.transaction(function (tx) {
 					tx.executeSql('UPDATE Notes SET Note="' + StrToCharCodes(MemoText) + '" WHERE ID=' + LatestCurNoteID);
 				});
@@ -600,7 +573,7 @@ textarea:focus{outline:none;}
 			}
 			//console.log('Updated done');
 		}
-		if (TabletMode) //Новая заметка открывается только в режиме планшета
+		if (TabletMode) // Новая заметка открывается только в режиме планшета
 			NewNote();
 		ShowNotes();
 	}
@@ -611,7 +584,7 @@ textarea:focus{outline:none;}
 		NotesDB.transaction(function (tx) {
 			tx.executeSql('DELETE FROM Notes WHERE ID=' + CurNoteID, [], function (tx, results) {
 				ShowNotes();
-				if (TabletMode) //Новая заметка открывается только в режиме планшета
+				if (TabletMode) // Новая заметка открывается только в режиме планшета
 					NewNote();
 			}, null);
 		});
@@ -622,8 +595,14 @@ textarea:focus{outline:none;}
 	}
 	
 	function Notification(Str){
+		if (HideFirstNotifyError) // На замену navigator.onLine (постоянно стала возвращать true на Android)
+		{
+			HideFirstNotifyError = false;
+			if (Str == IDS_CONNECTION_FAILED)
+				return;
+		}
 		document.getElementById('sync-progress').style.display = 'none';
-		var notifyBlock = document.getElementById("notification");
+		let notifyBlock = document.getElementById("notification");
 		notifyBlock.innerHTML = Str;
 		notifyBlock.className = "show";
 
@@ -634,7 +613,7 @@ textarea:focus{outline:none;}
 	
 	function GetData(URL){
 		return new Promise(function(resolve, reject) {
-			var request = new XMLHttpRequest();
+			let request = new XMLHttpRequest();
 			
 			request.open('GET', URL, true);
 			
@@ -656,7 +635,7 @@ textarea:focus{outline:none;}
 	function SendData(URL, Data){
 		 return new Promise(function(resolve, reject) {
 		 
-			var request = new XMLHttpRequest();
+			let request = new XMLHttpRequest();
 			request.open('POST', URL);
 			request.setRequestHeader('Content-type', 'text/plain');
 			
@@ -678,7 +657,7 @@ textarea:focus{outline:none;}
 	function ShowApp(){
 		document.getElementById('wrapper').style.display = 'block';
 		document.getElementById('panel-qr').style.display = 'none';
-		if (UsedDarkTheme) //Трюк с сохранением текущего цвета не работает из-за css тёмной темы
+		if (UsedDarkTheme) // Трюк с сохранением текущего цвета не работает из-за css тёмной темы
 			document.body.style.backgroundColor = '#2a3035';
 		else
 			document.body.style.backgroundColor = '#f8f8f8';
@@ -726,7 +705,7 @@ textarea:focus{outline:none;}
 	}
 	
 	function GetDeviceID(){
-		var DeviceOS = 'Unknown'
+		let DeviceOS = 'Unknown'
 		if (/Android/i.test(window.navigator.userAgent))
 			DeviceOS = 'Android';
 		else if (/iPhone|iPod|iPad/i.test(window.navigator.userAgent))
@@ -735,13 +714,14 @@ textarea:focus{outline:none;}
 	}
 	
 	function Sync(){
-		if (SyncWait) //Ждем выполнения
+		if (SyncWait) // Ждем выполнения
 			return;
 		
 		if (window.navigator.onLine) {
 			SyncWait = true;
 		
-			document.getElementById('sync-progress').style.display = 'block';
+			if (HideFirstNotifyError == false) // Android, из-за неработающего navigator.onLine
+				document.getElementById('sync-progress').style.display = 'block';
 		
 			function InsertNote(ID, Note, DateTime){
 				NotesDB.transaction(function (tx) {
@@ -763,21 +743,21 @@ textarea:focus{outline:none;}
 			
 			function SyncNotes(){
 									
-				//Первый запуск
+				// Первый запуск
 				if (FirstRun) {
 					//console.log('FirstRun');
 					GetData('http://' + ServerIP + ':' + ServerPort + '/api/auth?id=' + DeviceID).then(function(responseText) {
 						if (responseText == 'auth:ok') {
 							//console.log('auth:ok');
 
-							//Получение всех заметок при первом запуске
-							var XMLDoc = document.createElement('div');
+							// Получение всех заметок при первом запуске
+							let XMLDoc = document.createElement('div');
 							
 							GetData('http://' + ServerIP + ':' + ServerPort + '/api/notes?id=' + DeviceID).then(function(responseNotes) {
 								XMLDoc.innerHTML = responseNotes;
 								
-								var NoteItems = XMLDoc.getElementsByTagName('note');
-								for (var i = 0; i < NoteItems.length; i++)
+								let NoteItems = XMLDoc.getElementsByTagName('note');
+								for (let i = 0; i < NoteItems.length; i++)
 									InsertNote(NoteItems[i].getAttribute('id'), NoteItems[i].innerHTML, NoteItems[i].getAttribute('datetime'));
 						
 								delete XMLDoc;
@@ -786,49 +766,47 @@ textarea:focus{outline:none;}
 								
 								Notification(IDS_SYNC_SUCCESSFUL);
 								
-								//Сохраняем статус успешного первого запуска
-								SettingsDB.transaction(function (tx) {
-									tx.executeSql('INSERT INTO Settings (Parameter, Value) VALUES ("FirstRun", "' + false + '")');
-									FirstRun = false;
-								});
+								// Сохраняем статус успешного первого запуска
+								FirstRun = false;
+								localStorage.setItem('FirstRun', FirstRun);
 								
-								SyncWait = false; //Разрешаем повторную синхронизацию;
+								SyncWait = false; // Разрешаем повторную синхронизацию;
 								
 							}).catch(function() {
-								SyncWait = false; //Разрешаем повторную синхронизацию;
+								SyncWait = false; // Разрешаем повторную синхронизацию;
 								
 								Notification(IDS_CONNECTION_FAILED);
 							});
 
 						} else {
-							SyncWait = false; //Разрешаем повторную синхронизацию;
+							SyncWait = false; // Разрешаем повторную синхронизацию;
 							
 							Notification(IDS_AUTH_REJECT);
 						}
 							
 						//console.log(responseText);
 					}).catch(function() {
-						SyncWait = false; //Разрешаем повторную синхронизацию;
+						SyncWait = false; // Разрешаем повторную синхронизацию;
 						
 						Notification(IDS_CONNECTION_FAILED);
 					});
 						
-				} else { //Второй и последующие запуски
-					//Получение действий
-					var XMLDoc = document.createElement('div');
+				} else { // Второй и последующие запуски
+					// Получение действий
+					let XMLDoc = document.createElement('div');
 					GetData('http://' + ServerIP + ':' + ServerPort + '/api/actions?id=' + DeviceID).then(function(responseNotes) {
 						XMLDoc.innerHTML = responseNotes;
 						
-						//Удаляем действия
+						// Удаляем действия
 						GetData('http://' + ServerIP + ':' + ServerPort + '/api/received?id=' + DeviceID).then(function(responseStatus) {
 						
 							if (responseStatus == 'ok') {
-								var ActionsItems = XMLDoc.getElementsByTagName('*');
-								for (var i = 0; i < ActionsItems.length; i++) { 
+								let ActionsItems = XMLDoc.getElementsByTagName('*');
+								for (let i = 0; i < ActionsItems.length; i++) { 
 
-									var ReceivedNoteID = ActionsItems[i].getAttribute('id');
-									var ReceivedNote = ActionsItems[i].innerHTML;
-									var ReceivedNoteDateTime = ActionsItems[i].getAttribute('datetime');
+									let ReceivedNoteID = ActionsItems[i].getAttribute('id');
+									let ReceivedNote = ActionsItems[i].innerHTML;
+									let ReceivedNoteDateTime = ActionsItems[i].getAttribute('datetime');
 									
 									if (ActionsItems[i].tagName == 'INSERT')
 										InsertNote(ReceivedNoteID, ReceivedNote, ReceivedNoteDateTime);
@@ -847,10 +825,10 @@ textarea:focus{outline:none;}
 							} else
 								Notification(IDS_CONNECTION_FAILED);
 						
-							SyncWait = false; //Разрешаем повторную синхронизацию
+							SyncWait = false; // Разрешаем повторную синхронизацию
 						
 						}).catch(function() {
-							SyncWait = false; //Разрешаем повторную синхронизацию;
+							SyncWait = false; // Разрешаем повторную синхронизацию;
 							
 							Notification(IDS_CONNECTION_FAILED);
 						});
@@ -858,7 +836,7 @@ textarea:focus{outline:none;}
 						delete XMLDoc;
 						
 					}).catch(function() {
-						SyncWait = false; //Разрешаем повторную синхронизацию;
+						SyncWait = false; // Разрешаем повторную синхронизацию;
 						
 						Notification(IDS_CONNECTION_FAILED);
 					});
@@ -866,14 +844,14 @@ textarea:focus{outline:none;}
 				}
 			}	
 				
-			//Генерирация XML действий пользователя и отправка на "сервер"
-			if (FirstRun == false) //При первом запуске отправлять нечего
-				GetData('http://' + ServerIP + ':' + ServerPort + '/api/auth?id=' + DeviceID).then(function(responseText) { //Проверка авторизации
+			// Генерирация XML действий пользователя и отправка на "сервер"
+			if (FirstRun == false) // При первом запуске отправлять нечего
+				GetData('http://' + ServerIP + ':' + ServerPort + '/api/auth?id=' + DeviceID).then(function(responseText) { // Проверка авторизации
 					if (responseText == 'auth:ok') {
 						ActionsDB.transaction(function (tx) {
 							tx.executeSql('SELECT * FROM Actions', [], function (tx, results) {
-								var XMLAPI = '<actions>\n';
-								for (var i = 0; i < results.rows.length; i++) {
+								let XMLAPI = '<actions>\n';
+								for (let i = 0; i < results.rows.length; i++) {
 									if (results.rows.item(i).Action == 'insert')
 										XMLAPI += '\t<insert id="' + results.rows.item(i).ID + '" datetime="' + results.rows.item(i).DateTime + '">' + results.rows.item(i).Note + '</insert>\n';
 									if (results.rows.item(i).Action == 'update')
@@ -883,7 +861,7 @@ textarea:focus{outline:none;}
 								}
 								XMLAPI += '</actions>';
 
-								//Отправка XML на "сервер"
+								// Отправка XML на "сервер"
 								SendData('http://' + ServerIP + ':' + ServerPort + '/api/syncnotes?id=' + DeviceID, XMLAPI).then(function(responseStatus) {
 
 									if (responseStatus == 'ok') {
@@ -893,25 +871,25 @@ textarea:focus{outline:none;}
 										
 										SyncNotes();
 									} else {
-										SyncWait = false; //Разрешаем повторную синхронизацию;
+										SyncWait = false; // Разрешаем повторную синхронизацию;
 										
 										Notification(IDS_CONNECTION_FAILED);
 									}
 								}).catch(function() {
-									SyncWait = false; //Разрешаем повторную синхронизацию;
+									SyncWait = false; // Разрешаем повторную синхронизацию;
 								
 									Notification(IDS_CONNECTION_FAILED);
 								});
 								
 							}, null);
-						}); //Завершение генерации и отправки XML API.
+						}); // Завершение генерации и отправки XML API.
 					} else {
-						SyncWait = false; //Разрешаем повторную синхронизацию;
+						SyncWait = false; // Разрешаем повторную синхронизацию;
 							
 						Notification(IDS_AUTH_REJECT);
 					}
 				}).catch(function() {
-					SyncWait = false; //Разрешаем повторную синхронизацию;
+					SyncWait = false; // Разрешаем повторную синхронизацию;
 							
 					Notification(IDS_CONNECTION_FAILED);
 				});
@@ -926,13 +904,13 @@ textarea:focus{outline:none;}
 	}
 	
 	function SyncWithFoundAddress(){
-		//Проверка доступности IP адреса
-		var FoundIPAddress = false;
+		// Проверка доступности IP адреса
+		let FoundIPAddress = false;
 		function CheckIPStatus(IP){
 			if (FoundIPAddress) return;
 			//console.log('Check ' + IP);
 			try {
-				var xhr = new XMLHttpRequest();
+				let xhr = new XMLHttpRequest();
 				xhr.onreadystatechange = function () {
 					if (xhr.readyState == 4 && xhr.status == 200 && xhr.responseText == 'ok') {
 						ServerIP = IP;
@@ -947,12 +925,12 @@ textarea:focus{outline:none;}
 			} catch {}
 		}
 		
-		//Список наиболее популярных локальных IP адресов
-		var IPS = ["192.168.0.", "192.168.0.", "192.168.1.", "192.168.1.", "192.168.2.", "192.168.3."];
-		var LastAddrs = [     0,            100,          0,            100,          0,            0]; //Начальный адрес
+		// Список наиболее популярных локальных IP адресов
+		let IPS = ["192.168.0.", "192.168.0.", "192.168.1.", "192.168.1.", "192.168.2.", "192.168.3."];
+		let LastAddrs = [     0,            100,          0,            100,          0,            0]; //Начальный адрес
 		
-		for (var i = 0; i < IPS.length; i++)
-			for (var j = 0; j <= 15; j++)
+		for (let i = 0; i < IPS.length; i++)
+			for (let j = 0; j <= 15; j++)
 				CheckIPStatus(IPS[i] + (LastAddrs[i] + j));
 	}
 	
@@ -981,10 +959,10 @@ textarea:focus{outline:none;}
 		CheckTabletMode();
 	}
 	
-	//Инициализация
+	// Инициализация
 	document.addEventListener('DOMContentLoaded', function(){
 		
-		//Перевод
+		// Перевод
 		document.getElementById('NotesCount').innerHTML = IDS_NOTES + ' (0)';
 		document.getElementById('NoteTitle').innerHTML = IDS_NEW_NOTE;
 		document.getElementById('SettingsTitle').innerText = IDS_SETTINGS;
@@ -1003,119 +981,75 @@ textarea:focus{outline:none;}
 		document.getElementById('DaysAgo').innerHTML = NoteDateAgo(GetUTCTimeStamp());
 		document.getElementById('DateNote').innerHTML = NoteDate(GetUTCTimeStamp());
 		
-		//База данных записей
+		// База данных записей
 		NotesDB = openDatabase('NotesDB', '1.0', 'Notes', 2 * 1024 * 1024);
 		NotesDB.transaction(function (tx) {
 			tx.executeSql('CREATE TABLE IF NOT EXISTS Notes (ID, Note, DateTime)');
 		});
 		
-		//База данных действий пользователя
+		// База данных действий пользователя
 		ActionsDB = openDatabase('NotesDB', '1.0', 'Actions', 2 * 1024 * 1024);
 		ActionsDB.transaction(function (tx) {
 			tx.executeSql('CREATE TABLE IF NOT EXISTS Actions (Action, ID, Note, DateTime)');
 		});
 		
-		//База данных настроек
-		SettingsDB = openDatabase('NotesDB', '1.0', 'Settings', 2 * 1024 * 1024);
-		SettingsDB.transaction(function (tx) {
-			tx.executeSql('CREATE TABLE IF NOT EXISTS Settings (Parameter, Value)');
-		});
-		
-		//Настройки, Dark theme
-		SettingsDB.transaction(function (tx) {
-			tx.executeSql('SELECT * FROM Settings WHERE Parameter="DarkTheme"', [], function (tx, results) {
-				if (results.rows.length != 0 && results.rows.item(0).Value == 'true') {
-					document.getElementById('DarkThemeCB').checked = true;
-					DarkTheme();
-				} else {
-				
-					//Theme time
-					SettingsDB.transaction(function (tx) {
-						tx.executeSql('SELECT * FROM Settings WHERE Parameter="ThemeTime"', [], function (tx, results) {
-							if (results.rows.length != 0 && results.rows.item(0).Value == 'true') {
-								document.getElementById('ThemeTimeCB').checked = true;
-								
-								var date = new Date();
-								if (date.getHours() <=9 || date.getHours() >= 17) 
-									DarkTheme();
-							}
-						}, null);
-					});
-				
-				}
-			}, null);
-		});
+		// Настройки, Dark theme
+		if (localStorage.getItem('DarkTheme') != null && localStorage.getItem('DarkTheme') == 'true') {
+			document.getElementById('DarkThemeCB').checked = true;
+			DarkTheme();
+		} else if (localStorage.getItem('ThemeTime') != null && localStorage.getItem('ThemeTime') == 'true') {
+			document.getElementById('ThemeTimeCB').checked = true;
+			
+			let date = new Date();
+			if (date.getHours() <=9 || date.getHours() >= 17) 
+				DarkTheme();
+		}
 
 		CheckTabletMode();
 
 		ShowNotes();
 		
-		//IP
-		SettingsDB.transaction(function (tx) {
-			tx.executeSql('SELECT * FROM Settings WHERE Parameter="ServerIP"', [], function (tx, results) {
-				if (results.rows.length == 0) {
-					ShowSettings();
-				} else {
-					ServerIP = results.rows.item(0).Value;
-					document.getElementById('ServerIP').value = ServerIP;
-				}
-			}, null);
-		});
+		// Настройки, IP
+		if (localStorage.getItem('ServerIP') != null) {
+			ServerIP = localStorage.getItem('ServerIP');
+			document.getElementById('ServerIP').value = ServerIP;
+		} else
+			ShowSettings();
 		
-		//Port
-		SettingsDB.transaction(function (tx) {
-			tx.executeSql('SELECT * FROM Settings WHERE Parameter="ServerPort"', [], function (tx, results) {
-				if (results.rows.length != 0) {
-					ServerPort = results.rows.item(0).Value;
-					document.getElementById('ServerPort').value = ServerPort;
-				}
-			}, null);
-		});
+		// Порт
+		if (localStorage.getItem('ServerPort') != null) {
+			ServerPort = localStorage.getItem('ServerPort');
+			document.getElementById('ServerPort').value = ServerPort;
+		}
 		
-		//Автопоиск IP адреса
-		SettingsDB.transaction(function (tx) {
-			tx.executeSql('SELECT * FROM Settings WHERE Parameter="AutoSearchIP"', [], function (tx, results) {
-				if (results.rows.length != 0 && results.rows.item(0).Value == 'true') {
-					document.getElementById('AutoSearchIPCB').checked = true;
-					AutoSearchIP = true;
-				}
-			}, null);
-		});
+		// Автопоиск IP адреса
+		if (localStorage.getItem('AutoSearchIP') != null && localStorage.getItem('AutoSearchIP') == 'true') {
+			document.getElementById('AutoSearchIPCB').checked = true;
+			AutoSearchIP = true;
+		}
 		
-		//Настройки, первый запуск
-		SettingsDB.transaction(function (tx) {
-			tx.executeSql('SELECT * FROM Settings WHERE Parameter="FirstRun"', [], function (tx, results) {
-				if (results.rows.length == 0)
-					FirstRun = true;
-				else
-					FirstRun = false;
-			}, null);
-		});
+		// Первый запуск
+		if (localStorage.getItem('FirstRun') === null)
+			FirstRun = true;
+		else
+			FirstRun = false;
 		
-		//Настройки, Device ID
-		SettingsDB.transaction(function (tx) {
-			tx.executeSql('SELECT * FROM Settings WHERE Parameter="DeviceID"', [], function (tx, results) {
-				if (results.rows.length == 0) {
-					DeviceID = GetDeviceID();
-					tx.executeSql('INSERT INTO Settings (Parameter, Value) VALUES ("DeviceID", "' + DeviceID + '")');
-				} else
-					DeviceID = results.rows.item(0).Value;
-				
-				document.getElementById('DeviceID').innerHTML = 'ID: ' + DeviceID;
-			}, null);
-		});
+		// Настройки, Device ID
+		if (localStorage.getItem('DeviceID') === null) {
+			DeviceID = GetDeviceID();
+			localStorage.setItem('DeviceID', DeviceID);
+		} else
+			DeviceID = localStorage.getItem('DeviceID');
+		document.getElementById('DeviceID').innerHTML = 'ID: ' + DeviceID;
 		
-		//Настройки, автоматическая синхронизация при запуске
-		SettingsDB.transaction(function (tx) {
-			tx.executeSql('SELECT * FROM Settings WHERE Parameter="AutoSync"', [], function (tx, results) {
-				if (results.rows.length != 0 && results.rows.item(0).Value == 'true') {
-					document.getElementById('AutoSyncCB').checked = true;
-					
-					if (window.navigator.onLine)
-						SyncAdvance();
-				}
-			}, null);
-		});
+		// Настройки, автоматическая синхронизация при запуске
+		if (localStorage.getItem('AutoSync') != null && localStorage.getItem('AutoSync') == 'true') {
+			document.getElementById('AutoSyncCB').checked = true;
+			
+			if (window.navigator.onLine)
+				SyncAdvance();
+		} else
+			HideFirstNotifyError = false; //Android, неработающая navigator.onLine
 		
 	});
 </script>
@@ -1140,7 +1074,7 @@ textarea:focus{outline:none;}
 	
 	<div id="editor">
 		<div id="panel">
-			<div id="btn" class="hide-btn" onclick="ShowNotes()"><img src="images/back.png" /></div>
+			<div id="btn" class="hide-btn" onclick="ShowNotes();"><img src="images/back.png" /></div>
 			<div class="title" id="NoteTitle">Заметка</div>
 			<div id="btn" onclick="NoteDone()"><img src="images/done.png" /></div>
 		</div>
@@ -1217,7 +1151,7 @@ textarea:focus{outline:none;}
 			
 			<div id="AboutThemeTime" class="titlebox"></div>
 			
-			<div class="titlebox" style="text-align:center;"><br>EasyNotes<br><span id="LastUpdate"></span> 27.11.20<br>https://r57zone.github.io<br><br><span id="DeviceID"></span></div>
+			<div class="titlebox" style="text-align:center;"><br>EasyNotes<br><span id="LastUpdate"></span> 12.05.21<br>https://r57zone.github.io<br><br><span id="DeviceID"></span></div>
 			<br>
 			<div id="items">
 				<div id="item">

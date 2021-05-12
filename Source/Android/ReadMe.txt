@@ -1,1 +1,1 @@
-https://build.phonegap.com
+Cordova application
