@@ -1,22 +1,27 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <widget xmlns   = "http://www.w3.org/ns/widgets"
-    xmlns:gap   = "http://phonegap.com/ns/1.0"
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:cdv="http://cordova.apache.org/ns/1.0"
     id          = "com.r57zone.easynotes"
-    versionCode = "15"
-    version     = "1.0.0" >
+    versionCode = "18"
+    version     = "1.0.3" >
 
 	<!-- versionCode is optional and Android only -->
 	<name>EasyNotes</name>
 	<description>App for notes.</description>
 	<platform name="android" />
 	<author href="https://r57zone.github.io" email="r57zone@gmail.com">r57zone</author>
-	<icon src="icon.png" />
+	<icon src="www/res/icon.png"/>
   
 	<access origin="*" />
 	<allow-intent href="*" />
 	<allow-navigation href="*"/>
 	
-	<preference name="android-minSdkVersion" value="21" />
+	<edit-config file="app/src/main/AndroidManifest.xml" mode="merge" target="/manifest/application">
+      <application android:usesCleartextTraffic="true" />
+	</edit-config>
+	
+	<preference name="android-minSdkVersion" value="22" />
 	<preference name="android-targetSdkVersion" value="26" />
 	
     <plugin name="cordova-plugin-whitelist" source="npm" spec="*"/>

@@ -197,7 +197,7 @@ begin
   //јвтоматическое изменение темы от времени суток
   if (UseDarkTheme = false) and (UseThemeTime) then begin
     DecodeTime(Now, CurHour, NilTime, NilTime, NilTime);
-    if (CurHour <= 9) or (CurHour >= 17) then
+    if (CurHour <= 7) or (CurHour >= 18) then
       UseDarkTheme:=true;
   end;
 

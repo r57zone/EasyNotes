@@ -195,7 +195,7 @@ textarea:focus{outline:none;}
 	let IDS_CONFIRM_FULL_RESET = 'Do you really want to reset everything? All notes and settings will be deleted.';
 	let IDS_DARK_THEME = 'Dark theme';
 	let IDS_THEME_TIME_DEPENDENT = 'Theme is time dependent';
-	let IDS_ABOUT_THEME_TIME = 'The dark theme turns on automatically from 5:00 pm to 10:00 am.';
+	let IDS_ABOUT_THEME_TIME = 'The dark theme turns on automatically from 06:00 pm to 08:00 am.';
 	let IDS_LAST_UPDATE = 'Last update: ';
 	
 	// Уведомления
@@ -207,8 +207,8 @@ textarea:focus{outline:none;}
 	let IDS_SYNC_NEED_CONNECT = 'Need connect to the network for sync';
 	let IDS_CONNECTION_FAILED = 'Connection failed';
 	
-	// Русский
-	if (navigator.language.toLowerCase() == 'ru-ru') { //В iOS языки прописными буквами
+	// Русский язык
+	if (navigator.language.toLowerCase() == 'ru-ru' || navigator.language == 'ru') { // В iOS языки прописными буквами, вторая проверка нужна для Edge
 		IDS_MONTHS = ['янв.', 'фев.', 'мар.', 'апр.', 'май', 'июн.', 'июл.', 'авг.', 'сен.', 'окт.', 'ноя.', 'дек.'];
 		IDS_DAYOFWEEK = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'];
 		IDS_TODAY = 'Сегодня';
@@ -231,7 +231,7 @@ textarea:focus{outline:none;}
 		IDS_CONFIRM_FULL_RESET = 'Вы действительно хотите сбросить всё? Все заметки и настройки будут удалены.';
 		IDS_DARK_THEME = 'Темная тема';
 		IDS_THEME_TIME_DEPENDENT = 'Тема в зависимости от времени';
-		IDS_ABOUT_THEME_TIME = 'Темная тема включается автоматически с 17:00 до 10:00.';
+		IDS_ABOUT_THEME_TIME = 'Темная тема включается автоматически с 18:00 до 08:00.';
 		IDS_LAST_UPDATE = 'Последнее обновление: ';
 		
 		// Уведомления
@@ -280,14 +280,21 @@ textarea:focus{outline:none;}
 	function FullReset()
 	{
 		if (!confirm(IDS_CONFIRM_FULL_RESET)) return;
+		
 		NotesDB.transaction(function (tx) {
-			tx.executeSql('DROP TABLE IF EXISTS Notes');
+			tx.executeSql('DROP TABLE IF EXISTS Notes', [], function (tx, results) {
+
+				ActionsDB.transaction(function (tx) {
+					tx.executeSql('DROP TABLE IF EXISTS Actions', [], function (tx, results) {
+						localStorage.clear();
+						document.location.reload();
+					}, null);
+					
+				});
+
+			}, null);
+			
 		});
-		ActionsDB.transaction(function (tx) {
-			tx.executeSql('DROP TABLE IF EXISTS Actions');
-		});
-		localStorage.clear();
-		document.location.reload();
 	}
 	
 	function NoteDateAgo(TimeStampSec) // Дней прошло
@@ -416,7 +423,7 @@ textarea:focus{outline:none;}
 		});
 	}
 	
-	function NewNote()
+	function NewNote(MemoFocus)
 	{
 		CurNoteID = '-1';
 		if (TabletMode == false)
@@ -425,7 +432,8 @@ textarea:focus{outline:none;}
 		document.getElementById('editor').style.display = 'block';
 		
 		document.getElementById('memo').value = '';
-		document.getElementById('memo').select();
+		if (MemoFocus)
+			document.getElementById('memo').select();
 		document.getElementById('NoteTitle').innerHTML = IDS_NEW_NOTE;
 		
 		document.getElementById('DaysAgo').innerHTML = NoteDateAgo(GetUTCTimeStamp());
@@ -481,7 +489,7 @@ textarea:focus{outline:none;}
 			DarkThemeCB = false;
 			document.getElementById('DarkThemeCB').checked = false;
 			let date = new Date();
-			if (date.getHours() <=9 || date.getHours() >= 17) 
+			if (date.getHours() <=7 || date.getHours() >= 18) 
 				DarkTheme();
 		}
 		
@@ -504,7 +512,7 @@ textarea:focus{outline:none;}
 	{	
 		if (NoteID == -1)
 		{
-			NewNote()
+			NewNote(false)
 			return;
 		}
 		UpdateDateTime = true;
@@ -570,7 +578,7 @@ textarea:focus{outline:none;}
 			//console.log('Updated done');
 		}
 		if (TabletMode) // Новая заметка открывается только в режиме планшета
-			NewNote();
+			NewNote(true);
 		ShowNotes();
 	}
 	
@@ -578,16 +586,16 @@ textarea:focus{outline:none;}
 	{
 		if (CurNoteID == '-1') {ShowNotes(); return;}
 		NotesDB.transaction(function (tx) {
-			tx.executeSql('DELETE FROM Notes WHERE ID=' + CurNoteID, [], function (tx, results) {
-				ShowNotes();
-				if (TabletMode) // Новая заметка открывается только в режиме планшета
-					NewNote();
-			}, null);
+			tx.executeSql('DELETE FROM Notes WHERE ID=' + CurNoteID);
 		});
 		ActionsDB.transaction(function (tx) {
-			tx.executeSql('INSERT INTO Actions (Action, ID, Note, DateTime) VALUES ("delete", ' + CurNoteID + ', "", 0)');
-		});
+			tx.executeSql('INSERT INTO Actions (Action, ID, Note, DateTime) VALUES ("delete", ' + CurNoteID + ', "", 0)', [], function (tx, results) {
+				ShowNotes();
+				if (TabletMode) // Новая заметка открывается только в режиме планшета
+					NewNote(false);
+			}, null);
 		//console.log('Deleted ' + CurNoteID);
+		});
 	}
 	
 	function Notification(Str){
@@ -706,6 +714,9 @@ textarea:focus{outline:none;}
 			DeviceOS = 'Android';
 		else if (/iPhone|iPod|iPad/i.test(window.navigator.userAgent))
 			DeviceOS = 'iOS';
+		if (/Edg/.test(navigator.userAgent))
+			DeviceOS = 'Windows';
+			
 		return DeviceOS + '_' + Math.random().toString(36).substr(2, 9);
 	}
 	
@@ -813,6 +824,8 @@ textarea:focus{outline:none;}
 								}
 								
 								ShowNotes();
+								if (TabletMode) // Новая заметка открывается только в режиме планшета, нужно для того, чтобы старая заметка не оставалась в интерфейсе, если сервер её удалил
+									NewNote(false);
 							
 								Notification(IDS_SYNC_SUCCESSFUL);
 							} else if (responseStatus == 'auth:denied') {
@@ -997,7 +1010,7 @@ textarea:focus{outline:none;}
 			document.getElementById('ThemeTimeCB').checked = true;
 			
 			let date = new Date();
-			if (date.getHours() <=9 || date.getHours() >= 17) 
+			if (date.getHours() <=7 || date.getHours() >= 18) 
 				DarkTheme();
 		}
 
@@ -1056,7 +1069,7 @@ textarea:focus{outline:none;}
 		<div id="panel">
 			<div id="btn" onclick="SyncAdvance()"><img src="images/sync.png" /></div>
 			<div class="title" id="NotesCount">Заметки (0)</div>
-			<div id="btn" onclick="NewNote()"><img src="images/new.png" /></div>
+			<div id="btn" onclick="NewNote(true)"><img src="images/new.png" /></div>
 		</div>
 		<div id="panel-bg"></div>
 		
@@ -1147,7 +1160,7 @@ textarea:focus{outline:none;}
 			
 			<div id="AboutThemeTime" class="titlebox"></div>
 			
-			<div class="titlebox" style="text-align:center;"><br>EasyNotes<br><span id="LastUpdate"></span> 12.05.21<br>https://r57zone.github.io<br><br><span id="DeviceID"></span></div>
+			<div class="titlebox" style="text-align:center;"><br>EasyNotes<br><span id="LastUpdate"></span> 23.11.21<br>https://r57zone.github.io<br><br><span id="DeviceID"></span></div>
 			<br>
 			<div id="items">
 				<div id="item">
