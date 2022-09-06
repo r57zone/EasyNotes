@@ -3,8 +3,8 @@
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:cdv="http://cordova.apache.org/ns/1.0"
     id          = "com.r57zone.easynotes"
-    versionCode = "18"
-    version     = "1.0.3" >
+    versionCode = "19"
+    version     = "1.0.4" >
 
 	<!-- versionCode is optional and Android only -->
 	<name>EasyNotes</name>

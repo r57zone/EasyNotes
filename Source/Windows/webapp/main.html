@@ -197,29 +197,29 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 }
 </style>
 <script type="text/javascript">
-	var FirstRun = false;
-	var DeviceID;
-	var TabletMode = false;
+	let FirstRun = false;
+	let DeviceID;
+	let TabletMode = false;
 
-	var NotesDB;
-	var ActionsDB;
+	let NotesDB;
+	let ActionsDB;
 	
-	var CurNoteID = -1; // По умолчанию новая заметка
-	var LatestNote;
-	var CurNoteDateTime;
+	let CurNoteID = -1; // По умолчанию новая заметка
+	let LatestNote;
+	let CurNoteDateTime;
 	
-	var SyncWait = false;
+	let SyncWait = false;
 
-	var UpdateDateTime = true;
+	let UpdateDateTime = true;
 	
-	var UsedDarkTheme = false; // Для QR (проблемы с CSS)
+	let UsedDarkTheme = false; // Для QR (проблемы с CSS)
 	
 	// Настройки для Android
-	var ServerIP;
-	var ServerPort;
-	var AutoSearchIP = false;
+	let ServerAddress;
+	let ServerPort;
+	let AutoSearchIP = false;
 	
-	var FlashLightEnable = false;
+	let FlashLightEnable = false;
 	
 	// Перевод, по умолчанию English
 	let IDS_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -232,10 +232,10 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 	
 	// Настройки для Android
 	let IDS_SETTINGS = 'Settings';
-	let IDS_SYNC_IP = 'IP address';
+	let IDS_SYNC_ADDRESS = 'IP or domain';
 	let IDS_SYNC_PORT = 'Port';
 	let IDS_AUTOSEARCH_IP = 'Autosearch IP address';
-	let IDS_ABOUT_SYNC = 'IP address and port to sync notes with your PC.';
+	let IDS_ABOUT_SYNC = 'IP and port or domain to sync notes with your PC or web server.';
 	let IDS_AUTO_SYNC = 'Sync at startup';
 	let IDS_ABOUT_AUTO_SYNC = 'Automatically sync on app launch.';
 	
@@ -268,10 +268,10 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 		
 		// Настройки для Android
 		IDS_SETTINGS = 'Настройки';
-		IDS_SYNC_IP = 'IP адрес';
+		IDS_SYNC_ADDRESS = 'IP или домен';
 		IDS_SYNC_PORT = 'Порт';
 		IDS_AUTOSEARCH_IP = 'Автопоиск IP адреса';
-		IDS_ABOUT_SYNC = 'IP адрес и порт для синхронизации заметок с вашим ПК.';
+		IDS_ABOUT_SYNC = 'IP адрес и порт или домен для синхронизации заметок, с вашим ПК или веб-сервером.';
 		IDS_AUTO_SYNC = 'Синхронизация при запуске';
 		IDS_ABOUT_AUTO_SYNC = 'Автоматическая синхронизация при запуске приложения.';
 		
@@ -509,6 +509,14 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 		UsedDarkTheme = true;
 	}
 	
+	function IsDomain(Str){
+		Str = Str.toLowerCase();
+		if (Str.indexOf('http://') == 0 || Str.indexOf('https://') == 0)
+			return true;
+		else
+			return false;
+	}
+	
 	function SettingsDone()
 	{
 		// Auto sync
@@ -693,7 +701,7 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 			DeviceOS = 'Android';
 		else if (/iPhone|iPod|iPad/i.test(window.navigator.userAgent))
 			DeviceOS = 'iOS';
-		if (/Edg/.test(navigator.userAgent))
+		else if (/Edg/.test(navigator.userAgent))
 			DeviceOS = 'Windows';
 			
 		return DeviceOS + '_' + Math.random().toString(36).substr(2, 9);
@@ -899,6 +907,7 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 			document.getElementsByTagName('style')[0].innerHTML +=
 			'#list{display:block; float:left; width:37%;}' +
 			'#list #items{border-right:1px solid var(--list-right-border-color);}' +
+			'#sub-panel{background-color:var(--background-color);}' +
 			'#editor{display:block; float:right; width:63%;}' +
 			'#settings{float:right; width:63%;}' +
 			'.hide-btn img{opacity:0;}';
@@ -962,7 +971,7 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 		document.getElementById('NotesCount').innerHTML = IDS_NOTES + ' (0)';
 		document.getElementById('NoteTitle').innerHTML = IDS_NEW_NOTE;
 		document.getElementById('SettingsTitle').innerText = IDS_SETTINGS;
-		//document.getElementById('SyncIP').innerText = IDS_SYNC_IP;
+		//document.getElementById('SyncAddress').innerText = IDS_SYNC_ADDRESS;
 		//document.getElementById('SyncPort').innerText = IDS_SYNC_PORT;
 		//document.getElementById('AutoSearchIP').innerText = IDS_AUTOSEARCH_IP;
 		//document.getElementById('AboutSync').innerText = IDS_ABOUT_SYNC;
@@ -1109,7 +1118,7 @@ body,textarea{font-family:'-apple-system', Helvetica, HelveticaNeue;}
 			
 			<div id="AboutThemeTime" class="titlebox"></div>
 			
-			<div class="titlebox" style="text-align:center;"><br>EasyNotes<br><span id="LastUpdate"></span> 23.11.21<br>https://r57zone.github.io<br><br><span id="DeviceID"></span></div>
+			<div class="titlebox" style="text-align:center;"><br>EasyNotes<br><span id="LastUpdate"></span> 06.09.22<br>https://r57zone.github.io<br><br><span id="DeviceID"></span></div>
 			<br>
 			<div id="items">
 				<div id="item">

@@ -139,6 +139,7 @@ textarea:focus{outline:none;}
 @media all and (min-width:550px) {
 	#list{display:block; float:left; width:37%;}
 	#list #items{border-right:1px solid var(--list-right-border-color);}
+	#sub-panel{background-color:var(--background-color);}
 	#editor{display:block; float:right; width:63%;}
 	#settings{float:right; width:63%;}
 	.hide-btn img{opacity:0; cursor:default;}
@@ -146,31 +147,31 @@ textarea:focus{outline:none;}
 </style>
 <script type="text/javascript" src="cordova.js"></script>
 <script type="text/javascript">
-	var FirstRun = false;
-	var DeviceID;
-	var TabletMode = false;
+	let FirstRun = false;
+	let DeviceID;
+	let TabletMode = false;
 
-	var NotesDB;
-	var ActionsDB;
+	let NotesDB;
+	let ActionsDB;
 	
-	var CurNoteID = -1; // По умолчанию новая заметка
-	var LatestNote;
-	var CurNoteDateTime;
+	let CurNoteID = -1; // По умолчанию новая заметка
+	let LatestNote;
+	let CurNoteDateTime;
 	
-	var SyncWait = false;
+	let SyncWait = false;
 
-	var UpdateDateTime = true;
+	let UpdateDateTime = true;
 	
-	var HideFirstNotifyError = true; // На замену navigator.onLine (постоянно стала возвращать true на Android), для iOS ставим true
+	let HideFirstNotifyError = true; // На замену navigator.onLine (постоянно стала возвращать true на Android), для iOS ставим true
 	
-	var UsedDarkTheme = false; // Для QR (проблемы с CSS)
+	let UsedDarkTheme = false; // Для QR (проблемы с CSS)
 	
 	// Настройки для Android
-	var ServerIP;
-	var ServerPort;
-	var AutoSearchIP = false;
+	let ServerAddress;
+	let ServerPort;
+	let AutoSearchIP = false;
 	
-	var FlashLightEnable = false;
+	let FlashLightEnable = false;
 	
 	// Перевод, по умолчанию English
 	let IDS_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -183,10 +184,10 @@ textarea:focus{outline:none;}
 	
 	// Настройки для Android
 	let IDS_SETTINGS = 'Settings';
-	let IDS_SYNC_IP = 'IP address';
+	let IDS_SYNC_ADDRESS = 'IP or domain';
 	let IDS_SYNC_PORT = 'Port';
 	let IDS_AUTOSEARCH_IP = 'Autosearch IP address';
-	let IDS_ABOUT_SYNC = 'IP address and port to sync notes with your PC.';
+	let IDS_ABOUT_SYNC = 'IP and port or domain to sync notes with your PC or web server.';
 	let IDS_AUTO_SYNC = 'Sync at startup';
 	let IDS_ABOUT_AUTO_SYNC = 'Automatically sync on app launch.';
 	
@@ -219,10 +220,10 @@ textarea:focus{outline:none;}
 		
 		// Настройки для Android
 		IDS_SETTINGS = 'Настройки';
-		IDS_SYNC_IP = 'IP адрес';
+		IDS_SYNC_ADDRESS = 'IP или домен';
 		IDS_SYNC_PORT = 'Порт';
 		IDS_AUTOSEARCH_IP = 'Автопоиск IP адреса';
-		IDS_ABOUT_SYNC = 'IP адрес и порт для синхронизации заметок с вашим ПК.';
+		IDS_ABOUT_SYNC = 'IP адрес и порт или домен для синхронизации заметок, с вашим ПК или веб-сервером.';
 		IDS_AUTO_SYNC = 'Синхронизация при запуске';
 		IDS_ABOUT_AUTO_SYNC = 'Автоматическая синхронизация при запуске приложения.';
 		
@@ -460,12 +461,23 @@ textarea:focus{outline:none;}
 		UsedDarkTheme = true;
 	}
 	
+	function IsDomain(Str){
+		Str = Str.toLowerCase();
+		if (Str.indexOf('http://') == 0 || Str.indexOf('https://') == 0)
+			return true;
+		else
+			return false;
+	}
+	
 	function SettingsDone()
 	{
 		// IP
-		let NewIP = document.getElementById('ServerIP').value;
-		localStorage.setItem('ServerIP', NewIP);
-		ServerIP = NewIP;
+		let NewAddress = document.getElementById('ServerAddress').value;
+		localStorage.setItem('ServerAddress', NewAddress);
+		if (IsDomain(NewAddress))
+			ServerAddress = NewAddress;
+		else
+			ServerAddress = 'http://' + NewAddress;
 		
 		// Port
 		let NewPort = document.getElementById('ServerPort').value;
@@ -714,7 +726,7 @@ textarea:focus{outline:none;}
 			DeviceOS = 'Android';
 		else if (/iPhone|iPod|iPad/i.test(window.navigator.userAgent))
 			DeviceOS = 'iOS';
-		if (/Edg/.test(navigator.userAgent))
+		else if (/Edg/.test(navigator.userAgent))
 			DeviceOS = 'Windows';
 			
 		return DeviceOS + '_' + Math.random().toString(36).substr(2, 9);
@@ -753,14 +765,14 @@ textarea:focus{outline:none;}
 				// Первый запуск
 				if (FirstRun) {
 					//console.log('FirstRun');
-					GetData('http://' + ServerIP + ':' + ServerPort + '/api/auth?id=' + DeviceID).then(function(responseText) {
+					GetData(ServerAddress + ':' + ServerPort + '/api/auth?id=' + DeviceID).then(function(responseText) {
 						if (responseText == 'auth:ok') {
 							//console.log('auth:ok');
 
 							// Получение всех заметок при первом запуске
 							let XMLDoc = document.createElement('div');
 							
-							GetData('http://' + ServerIP + ':' + ServerPort + '/api/notes?id=' + DeviceID).then(function(responseNotes) {
+							GetData(ServerAddress + ':' + ServerPort + '/api/notes?id=' + DeviceID).then(function(responseNotes) {
 								XMLDoc.innerHTML = responseNotes;
 								
 								let NoteItems = XMLDoc.getElementsByTagName('note');
@@ -801,11 +813,11 @@ textarea:focus{outline:none;}
 				} else { // Второй и последующие запуски
 					// Получение действий
 					let XMLDoc = document.createElement('div');
-					GetData('http://' + ServerIP + ':' + ServerPort + '/api/actions?id=' + DeviceID).then(function(responseNotes) {
+					GetData(ServerAddress + ':' + ServerPort + '/api/actions?id=' + DeviceID).then(function(responseNotes) {
 						XMLDoc.innerHTML = responseNotes;
 						
 						// Удаляем действия
-						GetData('http://' + ServerIP + ':' + ServerPort + '/api/received?id=' + DeviceID).then(function(responseStatus) {
+						GetData(ServerAddress + ':' + ServerPort + '/api/received?id=' + DeviceID).then(function(responseStatus) {
 						
 							if (responseStatus == 'ok') {
 								let ActionsItems = XMLDoc.getElementsByTagName('*');
@@ -855,7 +867,7 @@ textarea:focus{outline:none;}
 				
 			// Генерирация XML действий пользователя и отправка на "сервер"
 			if (FirstRun == false) // При первом запуске отправлять нечего
-				GetData('http://' + ServerIP + ':' + ServerPort + '/api/auth?id=' + DeviceID).then(function(responseText) { // Проверка авторизации
+				GetData(ServerAddress + ':' + ServerPort + '/api/auth?id=' + DeviceID).then(function(responseText) { // Проверка авторизации
 					if (responseText == 'auth:ok') {
 						ActionsDB.transaction(function (tx) {
 							tx.executeSql('SELECT * FROM Actions', [], function (tx, results) {
@@ -871,7 +883,7 @@ textarea:focus{outline:none;}
 								XMLAPI += '</actions>';
 
 								// Отправка XML на "сервер"
-								SendData('http://' + ServerIP + ':' + ServerPort + '/api/syncnotes?id=' + DeviceID, XMLAPI).then(function(responseStatus) {
+								SendData(ServerAddress + ':' + ServerPort + '/api/syncnotes?id=' + DeviceID, XMLAPI).then(function(responseStatus) {
 
 									if (responseStatus == 'ok') {
 										ActionsDB.transaction(function (tx) {
@@ -918,29 +930,23 @@ textarea:focus{outline:none;}
 		function CheckIPStatus(IP){
 			if (FoundIPAddress) return;
 			//console.log('Check ' + IP);
-			try {
-				let xhr = new XMLHttpRequest();
-				xhr.onreadystatechange = function () {
-					if (xhr.readyState == 4 && xhr.status == 200 && xhr.responseText == 'ok') {
-						ServerIP = IP;
-						Sync();
-						FoundIPAddress = true;
-						//console.log('WORK ' + ServerIP);
-					}
-				};
-				xhr.open('GET', 'http://' + IP + ':' + ServerPort + '/api/connecttest', true);
-				xhr.timeout = 500;
-				xhr.send();
-			} catch {}
+			GetData('http://' + IP + ':' + ServerPort + '/api/connecttest').then(function(responseText) { // Проверка IP адреса
+				if (responseText == 'ok') {
+					ServerAddress = 'http://' + IP;
+					FoundIPAddress = true;
+					Sync();
+				}
+			}).catch(function() {
+			});
 		}
 		
 		// Список наиболее популярных локальных IP адресов
-		let IPS = ["192.168.0.", "192.168.0.", "192.168.1.", "192.168.1.", "192.168.2.", "192.168.3."];
-		let LastAddrs = [     0,            100,          0,            100,          0,            0]; //Начальный адрес
+		let IPs = ['192.168.0.', '192.168.0.', '192.168.1.', '192.168.1.', '192.168.2.', '192.168.3.'];
+		let LastAddrs = [     0,            100,          0,            100,          0,            0]; // Начальный адрес
 		
-		for (let i = 0; i < IPS.length; i++)
+		for (let i = 0; i < IPs.length; i++)
 			for (let j = 0; j <= 15; j++)
-				CheckIPStatus(IPS[i] + (LastAddrs[i] + j));
+				CheckIPStatus(IPs[i] + (LastAddrs[i] + j));
 	}
 	
 	function SyncAdvance(){
@@ -975,7 +981,7 @@ textarea:focus{outline:none;}
 		document.getElementById('NotesCount').innerHTML = IDS_NOTES + ' (0)';
 		document.getElementById('NoteTitle').innerHTML = IDS_NEW_NOTE;
 		document.getElementById('SettingsTitle').innerText = IDS_SETTINGS;
-		document.getElementById('SyncIP').innerText = IDS_SYNC_IP;
+		document.getElementById('SyncAddress').innerText = IDS_SYNC_ADDRESS;
 		document.getElementById('SyncPort').innerText = IDS_SYNC_PORT;
 		document.getElementById('AutoSearchIP').innerText = IDS_AUTOSEARCH_IP;
 		document.getElementById('AboutSync').innerText = IDS_ABOUT_SYNC;
@@ -1019,9 +1025,11 @@ textarea:focus{outline:none;}
 		ShowNotes();
 		
 		// Настройки, IP
-		if (localStorage.getItem('ServerIP') != null) {
-			ServerIP = localStorage.getItem('ServerIP');
-			document.getElementById('ServerIP').value = ServerIP;
+		if (localStorage.getItem('ServerAddress') != null) {
+			ServerAddress = localStorage.getItem('ServerAddress');
+			document.getElementById('ServerAddress').value = ServerAddress;
+			if (IsDomain(ServerAddress) == false)
+				ServerAddress = 'http://' + ServerAddress;
 		} else
 			ShowSettings();
 		
@@ -1038,7 +1046,7 @@ textarea:focus{outline:none;}
 		}
 		
 		// Первый запуск
-		if (localStorage.getItem('FirstRun') === null)
+		if (localStorage.getItem('FirstRun') == null)
 			FirstRun = true;
 		else
 			FirstRun = false;
@@ -1058,7 +1066,7 @@ textarea:focus{outline:none;}
 			if (window.navigator.onLine)
 				SyncAdvance();
 		} else
-			HideFirstNotifyError = false; //Android, неработающая navigator.onLine
+			HideFirstNotifyError = false; // Android, неработающая navigator.onLine
 		
 	});
 </script>
@@ -1112,8 +1120,8 @@ textarea:focus{outline:none;}
 		<div id="page">
 			<div id="items">
 				<div id="item">
-					<div class="title" id="SyncIP">IP адрес</div>
-					<div id="control"><input type="text" id="ServerIP" value="192.168.0.1" placeholder="192.168.0.1"></div>
+					<div class="title" id="SyncAddress">IP или домен</div>
+					<div id="control"><input type="text" id="ServerAddress" oninput="if (IsDomain(this.value)) document.getElementById('ServerPort').value='80';" value="192.168.0.1" placeholder="192.168.0.1"></div>
 				</div>
 				<div id="item">
 					<div class="title" id="SyncPort">Порт</div>
@@ -1160,7 +1168,7 @@ textarea:focus{outline:none;}
 			
 			<div id="AboutThemeTime" class="titlebox"></div>
 			
-			<div class="titlebox" style="text-align:center;"><br>EasyNotes<br><span id="LastUpdate"></span> 23.11.21<br>https://r57zone.github.io<br><br><span id="DeviceID"></span></div>
+			<div class="titlebox" style="text-align:center;"><br>EasyNotes<br><span id="LastUpdate"></span> 06.09.22<br>https://r57zone.github.io<br><br><span id="DeviceID"></span></div>
 			<br>
 			<div id="items">
 				<div id="item">
