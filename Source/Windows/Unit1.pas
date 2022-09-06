@@ -6,7 +6,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, OleCtrls, ExtCtrls, StdCtrls, SQLite3, SQLiteTable3, SHDocVw, ActiveX,
+  Dialogs, OleCtrls, ExtCtrls, StdCtrls, SQLite3, SQLite3Wrap, SHDocVw, ActiveX,
   DateUtils, IniFiles, IdBaseComponent, IdComponent, IdTCPServer, IdCustomHTTPServer,
   IdHTTPServer, XMLDoc, XMLIntf, Registry, Menus, ClipBrd, MSHTML, XPMan;
 
@@ -44,13 +44,15 @@ type
     procedure MessageHandler(var Msg: TMsg; var Handled: Boolean);
     { Private declarations }
   public
+    function SQLDBTableExists(TableName: string): boolean;
+	  function SQLTBCount(TableName: string): integer;
     { Public declarations }
   end;
 
 var
   Main: TMain;
   CloseDuplicate: boolean;
-  SQLDB: TSQLiteDatabase;
+  SQLDB: TSQLite3Database;
   DBFileName: string;
 
   OldWidth, OldHeight: integer;
@@ -165,6 +167,35 @@ begin
   Result:=pcLCA;
 end;
 
+function TMain.SQLDBTableExists(TableName: string): boolean;
+var
+  SQLTB: TSQLite3Statement;
+begin
+  Result:=false;
+  SQLTB:=SQLDB.Prepare('SELECT * FROM sqlite_master WHERE name = "' + TableName + '" LIMIT 1');
+  try
+    if SQLTB.Step = SQLITE_ROW then
+      Result:=true;
+  finally
+    SQLTB.Free;
+  end;
+end;
+
+function TMain.SQLTBCount(TableName: string): integer;
+var
+  SQLTB: TSQLite3Statement;
+begin
+  Result:=0;
+  SQLTB:=SQLDB.Prepare('SELECT * FROM ' + TableName);
+  try
+    while SQLTB.Step = SQLITE_ROW do begin
+      Inc(Result);
+    end;
+  finally
+    SQLTB.Free;
+  end;
+end;
+
 procedure TMain.FormCreate(Sender: TObject);
 var
   Ini: TIniFile;
@@ -176,7 +207,7 @@ var
 
   i: integer;
 
-  SQLTB: TSQLiteTable;
+  SQLTB: TSQLite3Statement;
 begin
   //Предотвращение повторого запуска
   WND:=FindWindow('TMain', AppName);
@@ -225,7 +256,7 @@ begin
     ID_YESTERDAY:='Вчера';
     ID_DAYSAGO:='дн. назад';
     ID_SYNC:='Синхронизация';
-    ID_DEV_SYNC_CONFIRM:='Устройство %s запрашивает разрешение на синхронизацию. Разрешить?';
+    ID_DEV_SYNC_CONFIRM:='Устройство "%s" запрашивает разрешение на синхронизацию. Разрешить?';
     ID_CUT:='Вырезать';
     ID_COPY:='Копировать';
     ID_PASTE:='Вставить';
@@ -255,7 +286,7 @@ begin
     ID_YESTERDAY:='Yesterday';
     ID_DAYSAGO:='days ago';
     ID_SYNC:='Sync';
-    ID_DEV_SYNC_CONFIRM:='The %s device requests permission to sync. Allow it?';
+    ID_DEV_SYNC_CONFIRM:='The "%s" device requests permission to sync. Allow it?';
     ID_CUT:='Cut';
     ID_COPY:='Copy';
     ID_PASTE:='Paste';
@@ -294,9 +325,11 @@ begin
       break;
     end;
 
-  SQLDB:=TSQLiteDatabase.Create(DBFileName);
-  if not SQLDB.TableExists('Notes') then
-    SQLDB.ExecSQL('CREATE TABLE Notes (ID TIMESTAMP, Note TEXT, DateTime TIMESTAMP)');
+
+  SQLDB:=TSQLite3Database.Create;
+  SQLDB.Open(DBFileName);
+
+  SQLDB.Execute('CREATE TABLE IF NOT EXISTS Notes (ID TIMESTAMP, Note TEXT, DateTime TIMESTAMP)');
 
   //Ограничение IP адресов для синхронизации
   AllowedIPs:=TStringList.Create;
@@ -305,12 +338,13 @@ begin
 
   //Авторизованные устройства
   AuthorizedDevices:=TStringList.Create;
-  SQLTB:=SQLDB.GetTable('SELECT name FROM sqlite_master WHERE name <> "Notes"');
-  for i:=0 to SQLTB.Count - 1 do begin
-    AuthorizedDevices.Add(Copy(SQLTB.FieldAsString(0), 9, Length(SQLTB.FieldAsString(0)))); //Actions_ не берем
-    SQLTB.Next;
+  SQLTB:=SQLDB.Prepare('SELECT name FROM sqlite_master WHERE name <> "Notes"');
+  try
+    while SQLTB.Step = SQLITE_ROW do
+      AuthorizedDevices.Add(Copy(SQLTB.ColumnText(0), 9, Length(SQLTB.ColumnText(0)))); //Actions_ не берем
+  finally
+    SQLTB.Free;
   end;
-  SQLTB.Free;
 
   //Экспорт, импорт
   for i:=1 to ParamCount do begin
@@ -324,10 +358,11 @@ end;
 
 function ExtractTitle(Str: string): string;
 begin
+  Str:=Trim(Str);
   if Pos(#10, Str) > 0 then
     Str:=Copy(Str, 1, Pos(#10, Str) - 1);
   if Length(Str) > 150 then
-    Str:=Copy(Str, 1, 150);
+    Str:=Copy(Str, 1, 150) + '...';
   Result:=Str;
 end;
 
@@ -375,18 +410,20 @@ end;
 
 procedure TMain.LoadNotes;
 var
-  i: integer; SQLTB: TSQLiteTable;
+  i, NotesCount: integer; SQLTB: TSQLite3Statement;
 begin
-  SQLTB:=SQLDB.GetTable('SELECT * FROM Notes ORDER BY DateTime DESC');
+  SQLTB:=SQLDB.Prepare('SELECT * FROM Notes ORDER BY DateTime DESC');
   try
-    WebView.OleObject.Document.getElementById('NotesCount').innerHTML:=ID_NOTES + ' (' + IntToStr(SQLTB.Count) + ')';
+    NotesCount:=0;
+    WebView.OleObject.Document.getElementById('NotesCount').innerHTML:=ID_NOTES + ' (0)';
     WebView.OleObject.Document.getElementById('items').innerHTML:='';
-    for i:=0 to SQLTB.Count - 1 do begin
+    while SQLTB.Step = SQLITE_ROW do begin
       WebView.OleObject.Document.getElementById('items').innerHTML:=WebView.OleObject.Document.getElementById('items').innerHTML +
-      '<div onclick="document.location=''#note' + SQLTB.FieldAsString(0) + ''';" id="note"><div id="title">' + ExtractTitle(CharCodesToStr(SQLTB.FieldAsString(1))) + '</div><div id="date">' + ListDateTime(SQLTB.FieldAsString(2))  + '</div></div>';
-      SQLTB.Next;
+      '<div onclick="document.location=''#note' + SQLTB.ColumnText(0) + ''';" id="note"><div id="title">' + ExtractTitle(CharCodesToStr(SQLTB.ColumnText(1))) + '</div><div id="date">' + ListDateTime(SQLTB.ColumnText(2))  + '</div></div>';
+      Inc(NotesCount);
     end;
   finally
+    WebView.OleObject.Document.getElementById('NotesCount').innerHTML:=ID_NOTES + ' (' + IntToStr(NotesCount) + ')';
     SQLTB.Free;
   end;
 end;
@@ -399,33 +436,33 @@ begin
   if (NoteIndex <> -1) and ( Trim(LatestNote) <> Trim(WebView.OleObject.Document.getElementById('memo').innerHTML) ) then begin
 
     if (GetAsyncKeyState(VK_LSHIFT) <> 0) or (GetAsyncKeyState(VK_RSHIFT) <> 0) then begin //Если нажат Shift, то не обновляем дату
-      SQLDB.ExecSQL('UPDATE Notes SET Note="' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '" WHERE ID=' + IntToStr(NoteIndex));
+      SQLDB.Execute('UPDATE Notes SET Note="' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '" WHERE ID=' + IntToStr(NoteIndex));
 
       //Добавляем действие во все таблицы авторизованных устройств. Проверка доступности нужна для использования иных баз данных
       for i:=0 to AuthorizedDevices.Count - 1 do
-        if SQLDB.TableExists('Actions_' + AuthorizedDevices.Strings[i]) then
-          SQLDB.ExecSQL('INSERT INTO Actions_' + AuthorizedDevices.Strings[i] + ' (Action, ID, Note, DateTime) values("UPDATE", "' + IntToStr(NoteIndex) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", "' + IntToStr(NoteTimeStamp) + '")');
+        if SQLDBTableExists('Actions_' + AuthorizedDevices.Strings[i]) then
+          SQLDB.Execute('INSERT INTO Actions_' + AuthorizedDevices.Strings[i] + ' (Action, ID, Note, DateTime) values("UPDATE", "' + IntToStr(NoteIndex) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", "' + IntToStr(NoteTimeStamp) + '")');
 
     end else begin //По умолчанию (обновление текста и даты)
-	    SQLDB.ExecSQL('UPDATE Notes SET Note="' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", DateTime="' + IntToStr(DateTimeToUnix(Now)) + '" WHERE ID=' + IntToStr(NoteIndex));
+	    SQLDB.Execute('UPDATE Notes SET Note="' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", DateTime="' + IntToStr(DateTimeToUnix(Now)) + '" WHERE ID=' + IntToStr(NoteIndex));
 
       //Добавляем действие во все таблицы авторизованных устройств. Проверка доступности нужна для использования иных баз данных
       for i:=0 to AuthorizedDevices.Count - 1 do
-        if SQLDB.TableExists('Actions_' + AuthorizedDevices.Strings[i]) then
-          SQLDB.ExecSQL('INSERT INTO Actions_' + AuthorizedDevices.Strings[i] + ' (Action, ID, Note, DateTime) values("UPDATE", "' + IntToStr(NoteIndex) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", "' + IntToStr(DateTimeToUnix(Now)) + '")');
+        if SQLDBTableExists('Actions_' + AuthorizedDevices.Strings[i]) then
+          SQLDB.Execute('INSERT INTO Actions_' + AuthorizedDevices.Strings[i] + ' (Action, ID, Note, DateTime) values("UPDATE", "' + IntToStr(NoteIndex) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", "' + IntToStr(DateTimeToUnix(Now)) + '")');
     end;
   end;
 
   //Add, обязательно под Update, потому что обновляется текущий NoteIndex
   if (NoteIndex = -1) and (Trim(WebView.OleObject.Document.getElementById('memo').innerHTML) <> '') then begin
 	  CurTimeStamp:=GetTimeStamp;
-	  SQLDB.ExecSQL('INSERT INTO Notes (ID, Note, DateTime) values("' + IntToStr(CurTimeStamp) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", "' + IntToStr(DateTimeToUnix(Now)) + '")');
+	  SQLDB.Execute('INSERT INTO Notes (ID, Note, DateTime) values("' + IntToStr(CurTimeStamp) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", "' + IntToStr(DateTimeToUnix(Now)) + '")');
 	  NoteIndex:=CurTimeStamp; //Для того, чтобы последняя запись не создавалась снова и снова
 
     //Добавляем действие во все базы авторизованных устройств. Проверка доступности нужна для использования иных баз данных
     for i:=0 to AuthorizedDevices.Count - 1 do
-      if SQLDB.TableExists('Actions_' + AuthorizedDevices.Strings[i]) then
-        SQLDB.ExecSQL('INSERT INTO Actions_' + AuthorizedDevices.Strings[i] + ' (Action, ID, Note, DateTime) values("INSERT", "' + IntToStr(CurTimeStamp) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", "' + IntToStr(DateTimeToUnix(Now)) + '")');
+      if SQLDBTableExists('Actions_' + AuthorizedDevices.Strings[i]) then
+        SQLDB.Execute('INSERT INTO Actions_' + AuthorizedDevices.Strings[i] + ' (Action, ID, Note, DateTime) values("INSERT", "' + IntToStr(CurTimeStamp) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", "' + IntToStr(DateTimeToUnix(Now)) + '")');
   end;
 
   if UpdateList = 0 then begin
@@ -441,7 +478,7 @@ var
   sUrl: string;
   i, DaysAgo: integer;
   NoteDate, sDate: string;
-  SQLTB: TSQLiteTable;
+  SQLTB: TSQLite3Statement;
 begin
   sUrl:=ExtractFileName(StringReplace(Url, '/', '\', [rfReplaceAll]));
 
@@ -450,34 +487,39 @@ begin
   if Pos('main.html#note', sUrl) > 0 then begin
     Delete(sUrl, 1, Pos('#note', sUrl) + 4);
     NoteIndex:=StrToIntDef(sUrl, 0);
-    SQLTB:=SQLDB.GetTable('SELECT ID, Note, DateTime FROM Notes WHERE ID=' + sURL);
+    SQLTB:=SQLDB.Prepare('SELECT * FROM Notes WHERE ID=' + sUrl);
 
-    WebView.OleObject.Document.getElementById('NoteTitle').innerHTML:=ExtractTitle(CharCodesToStr(SQLTB.FieldAsString(1)));
-    LatestNote:=CharCodesToStr(SQLTB.FieldAsString(1));
+    if SQLTB.Step = SQLITE_ROW then
+      try
+        WebView.OleObject.Document.getElementById('NoteTitle').innerHTML:=ExtractTitle(CharCodesToStr(SQLTB.ColumnText(1)));
+        LatestNote:=CharCodesToStr(SQLTB.ColumnText(1));
 
-    NoteTimeStamp:=StrToInt64(SQLTB.FieldAsString(2)); //Запомнить для синхронизации
+        NoteTimeStamp:=StrToInt64(SQLTB.ColumnText(2)); //Запомнить для синхронизации
 
-    sDate:=DateTimeToStr(UNIXToDateTime(StrToInt64(SQLTB.FieldAsString(2)))); //Перевод TimeStamp в DateTimeStr
-    NoteDate:=Copy(sDate, 1, Pos(' ', sDate) - 1);
-    DaysAgo:=DaysBetween(StrToDate(NoteDate), Date);
+        sDate:=DateTimeToStr(UNIXToDateTime(StrToInt64(SQLTB.ColumnText(2)))); //Перевод TimeStamp в DateTimeStr
+        NoteDate:=Copy(sDate, 1, Pos(' ', sDate) - 1);
+        DaysAgo:=DaysBetween(StrToDate(NoteDate), Date);
 
-    if ID_DAYSAGO='дн. назад' then begin
-      if DaysAgo mod 10 = 1 then NoteDate:=IntToStr(DaysAgo) + ' день назад';
+        if ID_DAYSAGO='дн. назад' then begin
+          if DaysAgo mod 10 = 1 then NoteDate:=IntToStr(DaysAgo) + ' день назад';
 
-      if (DaysAgo mod 10 >= 2) and (DaysAgo mod 10 <= 4) then
-        NoteDate:=IntToStr(DaysAgo) + ' дня назад';
+          if (DaysAgo mod 10 >= 2) and (DaysAgo mod 10 <= 4) then
+            NoteDate:=IntToStr(DaysAgo) + ' дня назад';
 
-      if ( (DaysAgo mod 10 >= 5) and (DaysAgo mod 10 <= 9) ) or (DaysAgo mod 10 = 0) then
-        NoteDate:=IntToStr(DaysAgo) + ' дней назад';
-    end else
-      NoteDate:=IntToStr(DaysAgo) + ' ' + ID_DAYSAGO;
+          if ( (DaysAgo mod 10 >= 5) and (DaysAgo mod 10 <= 9) ) or (DaysAgo mod 10 = 0) then
+            NoteDate:=IntToStr(DaysAgo) + ' дней назад';
+        end else
+          NoteDate:=IntToStr(DaysAgo) + ' ' + ID_DAYSAGO;
 
-    if DaysAgo = 0 then NoteDate:=ID_TODAY;
-    if DaysAgo = 1 then NoteDate:=ID_YESTERDAY;
+        if DaysAgo = 0 then NoteDate:=ID_TODAY;
+        if DaysAgo = 1 then NoteDate:=ID_YESTERDAY;
 
-    WebView.OleObject.Document.getElementById('DaysAgo').innerHTML:=NoteDate;
-    WebView.OleObject.Document.getElementById('DateNote').innerHTML:=NoteDateTime(SQLTB.FieldAsString(2));
-    WebView.OleObject.Document.getElementById('memo').innerHTML:=CharCodesToStr(SQLTB.FieldAsString(1));
+        WebView.OleObject.Document.getElementById('DaysAgo').innerHTML:=NoteDate;
+        WebView.OleObject.Document.getElementById('DateNote').innerHTML:=NoteDateTime(SQLTB.ColumnText(2));
+        WebView.OleObject.Document.getElementById('memo').innerHTML:=CharCodesToStr(SQLTB.ColumnText(1));
+      finally
+        SQLTB.Free;
+      end;
 
   end;
 
@@ -493,12 +535,12 @@ begin
   //Удаляем
   if (sUrl = 'main.html#rem') and (NoteIndex <> -1) then begin
     WebView.OleObject.Document.getElementById('memo').innerHTML:='';
-    SQLDB.ExecSQL('DELETE FROM Notes WHERE ID=' + IntToStr(NoteIndex));
+    SQLDB.Execute('DELETE FROM Notes WHERE ID=' + IntToStr(NoteIndex));
 
     //Добавляем действие во все доступные таблицы авторизованных устройств. Проверка доступности нужна для использования иных баз данных
     for i:=0 to AuthorizedDevices.Count - 1 do
-      if SQLDB.TableExists('Actions_' + AuthorizedDevices.Strings[i]) then
-        SQLDB.ExecSQL('INSERT INTO Actions_' +  AuthorizedDevices.Strings[i] + ' (Action, ID) values("DELETE", "' + IntToStr(NoteIndex) + '")');
+      if SQLDBTableExists('Actions_' + AuthorizedDevices.Strings[i]) then
+        SQLDB.Execute('INSERT INTO Actions_' +  AuthorizedDevices.Strings[i] + ' (Action, ID) values("DELETE", "' + IntToStr(NoteIndex) + '")');
 
     LoadNotes;
     NewNote(false);
@@ -560,14 +602,11 @@ begin
     Handled := False;
     Exit;
   end;
-  Handled := (IsDialogMessage(WebView.Handle, Msg) = True);
-  if (Handled) and (not WebView.Busy) then
-  begin
-    if FOleInPlaceActiveObject = nil then
-    begin
+  Handled := (IsDialogMessage(WebView.Handle, Msg) = true);
+  if (Handled) and (not WebView.Busy) then begin
+    if FOleInPlaceActiveObject = nil then begin
       Dispatch := WebView.Application;
-      if Dispatch <> nil then
-      begin
+      if Dispatch <> nil then begin
         Dispatch.QueryInterface(IOleInPlaceActiveObject, iOIPAO);
         if iOIPAO <> nil then
           FOleInPlaceActiveObject:=iOIPAO;
@@ -612,7 +651,7 @@ const
   SuccessStatus = 'ok';
   ErrorStatus = 'error';
 var
-  i, j: integer; SQLTB: TSQLiteTable;
+  i, j: integer; SQLTB: TSQLite3Statement;
   XMLDoc: IXMLDocument;
   XMLNode: IXMLNode;
   RequestDocument: string;
@@ -643,8 +682,7 @@ begin
                 AuthorizedDevices.Add(AuthDeviceID);
                 AResponseInfo.ContentText:=AuthorizationSuccessfulStatus;
 
-                if not SQLDB.TableExists('Actions_' + AuthDeviceID) then
-                  SQLDB.ExecSQL('CREATE TABLE Actions_' + AuthDeviceID + ' (Action TEXT, ID TIMESTAMP, Note TEXT, DateTime TIMESTAMP)');
+                SQLDB.Execute('CREATE TABLE IF NOT EXISTS Actions_' + AuthDeviceID + ' (Action TEXT, ID TIMESTAMP, Note TEXT, DateTime TIMESTAMP)');
 
             end;
           7: AResponseInfo.ContentText:=AuthorizationDeniedStatus;
@@ -665,20 +703,18 @@ begin
   if (AuthDeviceID <> '') and (ARequestInfo.Document = '/api/actions') then begin
 
     if Pos(AuthDeviceID + #13#10, AuthorizedDevices.Text) > 0 then begin
-      SQLTB:=SQLDB.GetTable('SELECT * FROM Actions_' + AuthDeviceID);
+      SQLTB:=SQLDB.Prepare('SELECT * FROM Actions_' + AuthDeviceID);
       try
         AResponseInfo.ContentText:='<actions>' + #13#10;
-        for i:=0 to SQLTB.Count - 1 do begin
-          if SQLTB.FieldAsString(0) = 'INSERT' then
-            AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<insert id="' + SQLTB.FieldAsString(1) + '" datetime="' + SQLTB.FieldAsString(3) + '">' + StrToWideCharCodes( CharCodesToStr(SQLTB.FieldAsString(2)) ) + '</insert>' + #13#10;
+        while SQLTB.Step = SQLITE_ROW do begin
+          if SQLTB.ColumnText(0) = 'INSERT' then
+            AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<insert id="' + SQLTB.ColumnText(1) + '" datetime="' + SQLTB.ColumnText(3) + '">' + StrToWideCharCodes( CharCodesToStr(SQLTB.ColumnText(2)) ) + '</insert>' + #13#10;
 
-          if SQLTB.FieldAsString(0) = 'UPDATE' then
-            AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<update id="' + SQLTB.FieldAsString(1) + '" datetime="' + SQLTB.FieldAsString(3) + '">' + StrToWideCharCodes( CharCodesToStr(SQLTB.FieldAsString(2)) ) + '</update>' + #13#10;
+          if SQLTB.ColumnText(0) = 'UPDATE' then
+            AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<update id="' + SQLTB.ColumnText(1) + '" datetime="' + SQLTB.ColumnText(3) + '">' + StrToWideCharCodes( CharCodesToStr(SQLTB.ColumnText(2)) ) + '</update>' + #13#10;
 
-          if SQLTB.FieldAsString(0) = 'DELETE' then
-              AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<delete id="' + SQLTB.FieldAsString(1) + '"></delete>' + #13#10;
-
-          SQLTB.Next;
+          if SQLTB.ColumnText(0) = 'DELETE' then
+              AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<delete id="' + SQLTB.ColumnText(1) + '"></delete>' + #13#10;
         end;
       finally
         AResponseInfo.ContentText:=AResponseInfo.ContentText + '</actions>';
@@ -694,7 +730,7 @@ begin
   //Удаление полученных действий
   if (AuthDeviceID <> '') and (ARequestInfo.Document = '/api/received') then begin
     if Pos(AuthDeviceID + #13#10, AuthorizedDevices.Text) > 0 then begin
-      SQLDB.ExecSQL('DELETE FROM Actions_' + AuthDeviceID);
+      SQLDB.Execute('DELETE FROM Actions_' + AuthDeviceID);
       AResponseInfo.ContentText:=SuccessStatus;
     end else
       AResponseInfo.ContentText:=AuthorizationDeniedStatus;
@@ -706,13 +742,11 @@ begin
   if (AuthDeviceID <> '') and (ARequestInfo.Document = '/api/notes') then begin
 
     if Pos(AuthDeviceID + #13#10, AuthorizedDevices.Text) > 0 then begin
-      SQLTB:=SQLDB.GetTable('SELECT * FROM Notes ORDER BY DateTime DESC');
+      SQLTB:=SQLDB.Prepare('SELECT * FROM Notes ORDER BY DateTime DESC');
       try
         AResponseInfo.ContentText:='<notes>' + #13#10;
-        for i:=0 to SQLTB.Count - 1 do begin
-          AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<note id="' + SQLTB.FieldAsString(0) + '" datetime="' + SQLTB.FieldAsString(2) + '">' + StrToWideCharCodes( CharCodesToStr(SQLTB.FieldAsString(1)) ) + '</note>' + #13#10;
-          SQLTB.Next;
-        end;
+        while SQLTB.Step = SQLITE_ROW do
+          AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<note id="' + SQLTB.ColumnText(0) + '" datetime="' + SQLTB.ColumnText(2) + '">' + StrToWideCharCodes( CharCodesToStr(SQLTB.ColumnText(1)) ) + '</note>' + #13#10;
       finally
         AResponseInfo.ContentText:=AResponseInfo.ContentText + '</notes>';
         SQLTB.Free;
@@ -746,29 +780,29 @@ begin
     for i:=0 to XMLNode.ChildNodes.Count - 1 do
       try
         if (XMLNode.ChildNodes[i].NodeName = 'insert') and (Trim( StrToCharCodes( WideCharCodesToStr(XMLNode.ChildNodes[i].NodeValue) ) ) <> '') then begin
-          SQLDB.ExecSQL('INSERT INTO Notes (ID, Note, DateTime) values("' + XMLNode.ChildNodes[i].Attributes['id'] + '", "' + StrToCharCodes( WideCharCodesToStr(XMLNode.ChildNodes[i].NodeValue) ) + '", "' + XMLNode.ChildNodes[i].Attributes['datetime'] + '")');
+          SQLDB.Execute('INSERT INTO Notes (ID, Note, DateTime) values("' + XMLNode.ChildNodes[i].Attributes['id'] + '", "' + StrToCharCodes( WideCharCodesToStr(XMLNode.ChildNodes[i].NodeValue) ) + '", "' + XMLNode.ChildNodes[i].Attributes['datetime'] + '")');
 
           //Добавляем действие во все таблицы авторизованных устройств. Проверка доступности нужна для использования иных баз данных
           for j:=0 to AuthorizedDevices.Count - 1 do
-            if (AuthorizedDevices.Strings[j] <> AuthDeviceID) and (SQLDB.TableExists('Actions_' + AuthorizedDevices.Strings[j])) then //Исключаем устройств отправляющее действие
-              SQLDB.ExecSQL('INSERT INTO Actions_' + AuthorizedDevices.Strings[j] + ' (Action, ID, Note, DateTime) values("INSERT", "' + XMLNode.ChildNodes[i].Attributes['id'] + '", "' + StrToCharCodes( WideCharCodesToStr(XMLNode.ChildNodes[i].NodeValue) ) + '", "' + XMLNode.ChildNodes[i].Attributes['datetime'] + '")');
+            if (AuthorizedDevices.Strings[j] <> AuthDeviceID) and (SQLDBTableExists('Actions_' + AuthorizedDevices.Strings[j])) then //Исключаем устройств отправляющее действие
+              SQLDB.Execute('INSERT INTO Actions_' + AuthorizedDevices.Strings[j] + ' (Action, ID, Note, DateTime) values("INSERT", "' + XMLNode.ChildNodes[i].Attributes['id'] + '", "' + StrToCharCodes( WideCharCodesToStr(XMLNode.ChildNodes[i].NodeValue) ) + '", "' + XMLNode.ChildNodes[i].Attributes['datetime'] + '")');
         end;
 
         if XMLNode.ChildNodes[i].NodeName = 'update' then begin
-          SQLDB.ExecSQL('UPDATE Notes SET Note="' + StrToCharCodes( WideCharCodesToStr(XMLNode.ChildNodes[i].NodeValue) ) + '", DateTime="' + XMLNode.ChildNodes[i].Attributes['datetime'] + '" WHERE ID=' + XMLNode.ChildNodes[i].Attributes['id']);
+          SQLDB.Execute('UPDATE Notes SET Note="' + StrToCharCodes( WideCharCodesToStr(XMLNode.ChildNodes[i].NodeValue) ) + '", DateTime="' + XMLNode.ChildNodes[i].Attributes['datetime'] + '" WHERE ID=' + XMLNode.ChildNodes[i].Attributes['id']);
 
           //Добавляем действие во все таблицы авторизованных устройств. Проверка доступности нужна для использования иных баз данных
           for j:=0 to AuthorizedDevices.Count - 1 do
-           if (AuthorizedDevices.Strings[j] <> AuthDeviceID) and (SQLDB.TableExists('Actions_' + AuthorizedDevices.Strings[j])) then //Исключаем устройств отправляющее действие
-              SQLDB.ExecSQL('INSERT INTO Actions_' + AuthorizedDevices.Strings[j] + ' (Action, ID, Note, DateTime) values("UPDATE", "' + XMLNode.ChildNodes[i].Attributes['id'] + '", "' + StrToCharCodes( WideCharCodesToStr(XMLNode.ChildNodes[i].NodeValue) ) + '", "' + XMLNode.ChildNodes[i].Attributes['datetime'] + '")');
+           if (AuthorizedDevices.Strings[j] <> AuthDeviceID) and (SQLDBTableExists('Actions_' + AuthorizedDevices.Strings[j])) then //Исключаем устройств отправляющее действие
+              SQLDB.Execute('INSERT INTO Actions_' + AuthorizedDevices.Strings[j] + ' (Action, ID, Note, DateTime) values("UPDATE", "' + XMLNode.ChildNodes[i].Attributes['id'] + '", "' + StrToCharCodes( WideCharCodesToStr(XMLNode.ChildNodes[i].NodeValue) ) + '", "' + XMLNode.ChildNodes[i].Attributes['datetime'] + '")');
         end;
 
         if XMLNode.ChildNodes[i].NodeName = 'delete' then begin
-          SQLDB.ExecSQL('DELETE FROM Notes WHERE ID=' + XMLNode.ChildNodes[i].Attributes['id']);
+          SQLDB.Execute('DELETE FROM Notes WHERE ID=' + XMLNode.ChildNodes[i].Attributes['id']);
           //Добавляем действие во все доступные таблицы авторизованных устройств. Проверка доступности нужна для использования иных баз данных
           for j:=0 to AuthorizedDevices.Count - 1 do
-            if (AuthorizedDevices.Strings[j] <> AuthDeviceID) and (SQLDB.TableExists('Actions_' + AuthorizedDevices.Strings[j])) then //Исключаем устройств отправляющее действие
-              SQLDB.ExecSQL('INSERT INTO Actions_' +  AuthorizedDevices.Strings[j] + ' (Action, ID) values("DELETE", "' + XMLNode.ChildNodes[i].Attributes['id'] + '")');
+            if (AuthorizedDevices.Strings[j] <> AuthDeviceID) and (SQLDBTableExists('Actions_' + AuthorizedDevices.Strings[j])) then //Исключаем устройств отправляющее действие
+              SQLDB.Execute('INSERT INTO Actions_' +  AuthorizedDevices.Strings[j] + ' (Action, ID) values("DELETE", "' + XMLNode.ChildNodes[i].Attributes['id'] + '")');
         end;
       except
       end;
@@ -848,15 +882,13 @@ end;
 
 procedure TMain.ExportNotes(FileName: string);
 var
-  i: integer; SQLTB: TSQLiteTable; Notes: TStringList;
+  i: integer; SQLTB: TSQLite3Statement; Notes: TStringList;
 begin
   Notes:=TStringList.Create;
-  SQLTB:=SQLDB.GetTable('SELECT * FROM Notes ORDER BY DateTime DESC');
+  SQLTB:=SQLDB.Prepare('SELECT * FROM Notes ORDER BY DateTime DESC');
   try
-    for i:=0 to SQLTB.Count - 1 do begin
-      Notes.Text:=Notes.Text + DateTimeToStr(UNIXToDateTime(StrToInt64(SQLTB.FieldAsString(2)))) + #9 + SQLTB.FieldAsString(2) + #9 + StringReplace( CharCodesToStr(SQLTB.FieldAsString(1)), #10, ' \n ', [rfReplaceAll]) + #13#10;
-      SQLTB.Next;
-    end;
+    while SQLTB.Step = SQLITE_ROW do
+      Notes.Text:=Notes.Text + DateTimeToStr(UNIXToDateTime(StrToInt64(SQLTB.ColumnText(2)))) + #9 + SQLTB.ColumnText(2) + #9 + StringReplace( CharCodesToStr(SQLTB.ColumnText(1)), #10, ' \n ', [rfReplaceAll]) + #13#10;
   finally
     SQLTB.Free;
   end;
@@ -884,7 +916,7 @@ begin
     end;
 
     if (Trim(ImportNoteDateTime) <> '') and (Trim(ImportNoteText) <> '') then
-      SQLDB.ExecSQL('INSERT INTO Notes (ID, Note, DateTime) values("' + ImportNoteDateTime + '", "' + StrToCharCodes(ImportNoteText) + '", "' + ImportNoteDateTime + '")');
+      SQLDB.Execute('INSERT INTO Notes (ID, Note, DateTime) values("' + ImportNoteDateTime + '", "' + StrToCharCodes(ImportNoteText) + '", "' + ImportNoteDateTime + '")');
   end;
 
   Notes.Free;

@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, IniFiles, Menus, SQLite3, SQLiteTable3;
+  Dialogs, StdCtrls, IniFiles, Menus, SQLite3, SQLite3Wrap;
 
 type
   TSettings = class(TForm)
@@ -112,8 +112,8 @@ end;
 
 procedure TSettings.AboutBtnClick(Sender: TObject);
 begin
-  Application.MessageBox(PChar(Main.Caption + ' 1.0.1' + #13#10 +
-    IDS_LAST_UPDATE + ' 23.11.21' + #13#10 +
+  Application.MessageBox(PChar(Main.Caption + ' 1.0.4' + #13#10 +
+    IDS_LAST_UPDATE + ' 06.09.22' + #13#10 +
     'https://r57zone.github.io' + #13#10 +
     'r57zone@gmail.com'), PChar(Main.Caption), MB_ICONINFORMATION);
 end;
@@ -162,8 +162,7 @@ end;
 procedure TSettings.AllowedDevRemBtnClick(Sender: TObject);
 begin
   if AllowedDevsLB.ItemIndex <> -1 then begin
-    if SQLDB.TableExists('Actions_' + AllowedDevsLB.Items[AllowedDevsLB.ItemIndex]) then
-      SQLDB.ExecSQL('DROP TABLE Actions_' + AllowedDevsLB.Items[AllowedDevsLB.ItemIndex]);
+    SQLDB.Execute('DROP TABLE IF EXISTS Actions_' + AllowedDevsLB.Items[AllowedDevsLB.ItemIndex]);
 
     AllowedDevsLB.Items.Delete(AllowedDevsLB.ItemIndex);
     AuthorizedDevices.Text:=AllowedDevsLB.Items.Text;
@@ -185,19 +184,23 @@ end;
 procedure TSettings.AllowedDevsLBKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 var
-  i: integer; SQLTB: TSQLiteTable; TablesNames: string;
+  i, ActionTablesCount: integer; SQLTB: TSQLite3Statement; TablesNames: string;
 begin
   if (Key = VK_DELETE) or (Key = VK_DECIMAL) then
     AllowedDevRemBtn.Click;
 
   if (Key = VK_F7) then begin
-    SQLTB:=SQLDB.GetTable('SELECT name FROM sqlite_master WHERE name <> "Notes"');
-    for i:=0 to SQLTB.Count - 1 do begin
-      TablesNames:=TablesNames + SQLTB.FieldAsString(0) + #13#10;
-      SQLTB.Next;
+    ActionTablesCount:=0;
+    SQLTB:=SQLDB.Prepare('SELECT name FROM sqlite_master WHERE name <> "Notes"');
+    try
+      while SQLTB.Step = SQLITE_ROW do begin
+        TablesNames:=TablesNames + SQLTB.ColumnText(0) + #13#10;
+        Inc(ActionTablesCount);
+      end;
+    finally
+      SQLTB.Free;
     end;
-    SQLTB.Free;
-    Application.MessageBox(PChar('Tables: ' + IntToStr(SQLTB.Count) + #13#10 + Trim(TablesNames)), PChar(Main.Caption), MB_ICONINFORMATION);
+    Application.MessageBox(PChar('Tables: ' + IntToStr(ActionTablesCount) + #13#10 + Trim(TablesNames)), PChar(Main.Caption), MB_ICONINFORMATION);
   end;
 end;
 
@@ -209,8 +212,8 @@ begin
     AllowedDevsLB.Items.Add(AllowDeviceName);
     AuthorizedDevices.Text:=AllowedDevsLB.Items.Text;
 
-    if not SQLDB.TableExists('Actions_' + AllowDeviceName) then
-      SQLDB.ExecSQL('CREATE TABLE Actions_' + AllowDeviceName + ' (Action TEXT, ID TIMESTAMP, Note TEXT, DateTime TIMESTAMP)');
+    if not Main.SQLDBTableExists('Actions_' + AllowDeviceName) then
+      SQLDB.Execute('CREATE TABLE Actions_' + AllowDeviceName + ' (Action TEXT, ID TIMESTAMP, Note TEXT, DateTime TIMESTAMP)');
   end;
 end;
 
