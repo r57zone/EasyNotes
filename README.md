@@ -17,14 +17,11 @@ Full tablet support is also present.
 
 The Android version has a QR code scanner.
 
-## Setup P2P sync
-### Sync of the mobile apps
+## Setup
+### Sync of the mobile apps via P2P
 1. Reserve a permanent IP address for a computer with a Windows application. This is done in the settings of the Wi-Fi router in the "DHCP" section.
 2. Reserve the permanent IP address of the mobile device and add it, if it is missing, in the Windows application settings. You can also open access to all IP addresses (not secure). Delete unnecessary IP addresses if necessary.
 3. Check Windows Firewall to see if incoming connections are allowed on your network type (private) and allow if disabled.
-
-## Setup web sync
-Follow the instructions described [here](https://github.com/r57zone/EasyNotes/tree/master/Source/Web).
 
 ### iOS
 For iOS 12 and above, go to Settings -> Safari -> Advanced -> Experimental Features and uncheck the "Disable Web SQL" checkbox.
@@ -34,8 +31,15 @@ Next, go to Safari on your mobile device and enter there "http://IP:735/webapp",
 
 
 To update, you need to synchronize, then go to the "Safari" settings and delete history and data, after which you can add the application again.
+
 ### Android
 Install "EasyNotes.apk" and enter the reserved permanent IP of your computer. If your router assigns the following IP addresses: `192.168.0.0/15`, `192.168.0.100/115`, `192.168.1.0/15`, `192.168.1.100/115`, `192.168.2.0/15`, `192.168.3.0/15`, then you can just enable auto-search for IP addresses and the app will find your computer itself.
+
+### Windows
+For Windows, there are 2 applications, one is a server application that is a P2P sync hub and the other is a client application that syncs with a P2P or web server.
+
+### Setup web sync
+Follow the instructions described [here](https://github.com/r57zone/EasyNotes/tree/master/Source/Web).
 
 ## Screenshots
 ### Windows
