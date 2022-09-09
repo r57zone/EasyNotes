@@ -43,8 +43,8 @@ Follow the instructions described [here](https://github.com/r57zone/EasyNotes/tr
 
 ## Screenshots
 ### Windows
-[![](https://user-images.githubusercontent.com/9499881/93087169-4114a780-f6a9-11ea-8711-cf8e0f828fcc.PNG)](https://user-images.githubusercontent.com/9499881/54879005-a89fbd00-4e4d-11e9-8278-62a3f7b52955.PNG)
-[![](https://user-images.githubusercontent.com/9499881/93087166-407c1100-f6a9-11ea-953f-cebb36dd0198.PNG)](https://user-images.githubusercontent.com/9499881/93085231-4de3cc00-f6a6-11ea-824c-0496d8e7f4de.PNG)
+[![](https://user-images.githubusercontent.com/9499881/189445412-0452a2c0-55c8-46ea-8cdf-95ea8e0cece0.PNG)](https://user-images.githubusercontent.com/9499881/54879005-a89fbd00-4e4d-11e9-8278-62a3f7b52955.PNG)
+[![](https://user-images.githubusercontent.com/9499881/189445462-10f1fc9e-f213-48c3-b41e-fccfbdf371f6.PNG)](https://user-images.githubusercontent.com/9499881/93085231-4de3cc00-f6a6-11ea-824c-0496d8e7f4de.PNG)
 
 ### iOS
 ![](https://user-images.githubusercontent.com/9499881/54878988-66767b80-4e4d-11e9-941b-696836b3cb46.PNG)
@@ -58,7 +58,7 @@ Follow the instructions described [here](https://github.com/r57zone/EasyNotes/tr
 [![](https://user-images.githubusercontent.com/9499881/93085078-14ab5c00-f6a6-11ea-9657-239175a85f24.png)](https://user-images.githubusercontent.com/9499881/93084998-f7768d80-f6a5-11ea-8ed3-b75c1404bc77.png)
 
 ## Download
->Versions for iOS 9+, Android 5.1+ and Windows 7, 8.1, 10 (with Internet Explorer 11 installed). 
+>Versions for iOS 9+, Android 5.1+ and Windows 7+ (with Internet Explorer 11 installed). 
 
 **[Download](https://github.com/r57zone/EasyNotes/releases)**
 ## Feedback
