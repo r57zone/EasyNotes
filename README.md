@@ -3,7 +3,7 @@
 # EasyNotes
 ![](https://user-images.githubusercontent.com/9499881/100446367-1cd14000-30c8-11eb-8e82-335f134a8c95.png)
 
-Apps notes for Windows, iOS and Android, with direct local sync. The server is a Windows application so you need to run it for sync. View API can be [here](https://github.com/r57zone/EasyNotes/blob/master/API.md).
+Notes apps for Windows, iOS and Android, with direct local sync or web server sync. The server can be either a Windows application (you need to run it for synchronization) or your web server. View API can be [here](https://github.com/r57zone/EasyNotes/blob/master/API.md).
 
 ## Features
 If you want to leave the old date when editing a note then on mobile phones you need to click on the date and on the PC hold down the "Shift" key when you click on the done button.
@@ -17,11 +17,14 @@ Full tablet support is also present.
 
 The Android version has a QR code scanner.
 
-## Setup
+## Setup P2P sync
 ### Sync of the mobile apps
 1. Reserve a permanent IP address for a computer with a Windows application. This is done in the settings of the Wi-Fi router in the "DHCP" section.
 2. Reserve the permanent IP address of the mobile device and add it, if it is missing, in the Windows application settings. You can also open access to all IP addresses (not secure). Delete unnecessary IP addresses if necessary.
 3. Check Windows Firewall to see if incoming connections are allowed on your network type (private) and allow if disabled.
+
+## Setup web sync
+Follow the instructions described [here](https://github.com/r57zone/EasyNotes/blob/master/Source/Web/ReadMe.txt).
 
 ### iOS
 For iOS 12 and above, go to Settings -> Safari -> Advanced -> Experimental Features and uncheck the "Disable Web SQL" checkbox.
