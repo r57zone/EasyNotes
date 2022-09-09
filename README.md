@@ -24,7 +24,7 @@ The Android version has a QR code scanner.
 3. Check Windows Firewall to see if incoming connections are allowed on your network type (private) and allow if disabled.
 
 ## Setup web sync
-Follow the instructions described [here](https://github.com/r57zone/EasyNotes/blob/master/Source/Web/ReadMe.txt).
+Follow the instructions described [here](https://github.com/r57zone/EasyNotes/tree/master/Source/Web).
 
 ### iOS
 For iOS 12 and above, go to Settings -> Safari -> Advanced -> Experimental Features and uncheck the "Disable Web SQL" checkbox.
