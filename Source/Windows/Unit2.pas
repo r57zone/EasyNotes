@@ -70,27 +70,27 @@ var
 begin
   SetWindowLong(PortEdt.Handle, GWL_STYLE, GetWindowLong(PortEdt.Handle, GWL_STYLE) or ES_NUMBER);
 
-  Caption:=ID_SETTINGS;
-  InterfaceGB.Caption:=ID_INTERFACE;
-  DarkThemeCB.Caption:=ID_DARK_THEME;
+  Caption:=IDS_SETTINGS;
+  InterfaceGB.Caption:=IDS_INTERFACE;
+  DarkThemeCB.Caption:=IDS_DARK_THEME;
   ThemeTimeCB.Caption:=IDS_THEME_TIME;
-  SyncGB.Caption:=ID_SYNCHRONIZATION;
-  PortLbl.Caption:=ID_SYNC_PORT;
-  AllowAnyIPsCB.Caption:=ID_SYNC_WITH_ANY_IPS;
-  AllowedIPSLbl.Caption:=ID_ALLOW_IPS;
-  AllowedDevsLbl.Caption:=ID_ALLOW_DEVS;
-  AllowedDevRemBtn.Caption:=ID_ALLOW_DEV_REM;
-  BlockReqNewDevsCB.Caption:=ID_BLOCK_REQUEST_NEW_DEVS;
+  SyncGB.Caption:=IDS_SYNCHRONIZATION;
+  PortLbl.Caption:=IDS_SYNC_PORT;
+  AllowAnyIPsCB.Caption:=IDS_SYNC_WITH_ANY_IPS;
+  AllowedIPSLbl.Caption:=IDS_ALLOW_IPS;
+  AllowedDevsLbl.Caption:=IDS_ALLOW_DEVS;
+  AllowedDevRemBtn.Caption:=IDS_ALLOW_DEV_REM;
+  BlockReqNewDevsCB.Caption:=IDS_BLOCK_REQUEST_NEW_DEVS;
 
-  NotesGB.Caption:=ID_NOTES;
-  OpenDialog.Filter:=ID_NOTES + ' (*.ntxt)|*.ntxt';
+  NotesGB.Caption:=IDS_NOTES;
+  OpenDialog.Filter:=IDS_NOTES + ' (*.ntxt)|*.ntxt';
   SaveDialog.Filter:=OpenDialog.Filter;
   SaveDialog.DefaultExt:=SaveDialog.Filter;
-  ImportBtn.Caption:=ID_IMPORT;
-  ExportBtn.Caption:=ID_EXPORT;
+  ImportBtn.Caption:=IDS_IMPORT;
+  ExportBtn.Caption:=IDS_EXPORT;
 
-  OkBtn.Caption:=ID_OK;
-  CancelBtn.Caption:=ID_CANCEL;
+  OkBtn.Caption:=IDS_OK;
+  CancelBtn.Caption:=IDS_CANCEL;
 
   Ini:=TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Config.ini');
   PortEdt.Text:=IntToStr(Main.IdHTTPServer.DefaultPort);
@@ -112,8 +112,8 @@ end;
 
 procedure TSettings.AboutBtnClick(Sender: TObject);
 begin
-  Application.MessageBox(PChar(Main.Caption + ' 1.0.4' + #13#10 +
-    IDS_LAST_UPDATE + ' 06.09.22' + #13#10 +
+  Application.MessageBox(PChar(Main.Caption + ' 1.0.5' + #13#10 +
+    IDS_LAST_UPDATE + ' 18.02.24' + #13#10 +
     'https://r57zone.github.io' + #13#10 +
     'r57zone@gmail.com'), PChar(Main.Caption), MB_ICONINFORMATION);
 end;
@@ -208,7 +208,7 @@ procedure TSettings.AddManualDevClick(Sender: TObject);
 var
   AllowDeviceName: string;
 begin
-  if InputQuery(Main.Caption, ID_ENTER_DEV_ID, AllowDeviceName) and (Trim(AllowDeviceName) <> '') then begin
+  if InputQuery(Main.Caption, IDS_ENTER_DEV_ID, AllowDeviceName) and (Trim(AllowDeviceName) <> '') then begin
     AllowedDevsLB.Items.Add(AllowDeviceName);
     AuthorizedDevices.Text:=AllowedDevsLB.Items.Text;
 
@@ -227,7 +227,7 @@ begin
   if OpenDialog.Execute then begin
     Main.ImportNotes(OpenDialog.FileName);
     Main.LoadNotes;
-    Application.MessageBox(PChar(ID_DONE), PChar(Main.Caption), MB_ICONINFORMATION);
+    Application.MessageBox(PChar(IDS_DONE), PChar(Main.Caption), MB_ICONINFORMATION);
   end;
 end;
 
@@ -235,7 +235,7 @@ procedure TSettings.ExportBtnClick(Sender: TObject);
 begin
   if SaveDialog.Execute then begin
     Main.ExportNotes(SaveDialog.FileName);
-    Application.MessageBox(PChar(ID_DONE), PChar(Main.Caption), MB_ICONINFORMATION);
+    Application.MessageBox(PChar(IDS_DONE), PChar(Main.Caption), MB_ICONINFORMATION);
   end;
 end;
 
