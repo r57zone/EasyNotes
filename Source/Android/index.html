@@ -98,7 +98,7 @@ a{text-decoration:none; color:gray;}
 #editor #memo{display:block; width:calc(100% - 24px); height:calc(100% - 45px); padding:4px 0; margin:0 auto; background-color:transparent; border:none;}
 textarea{font-weight:normal; font-size:17px; font-family: Arial, sans-serif; color:var(--text-color); overflow-y:auto; -webkit-overflow-scrolling:touch; resize:none; border-radius:0; -webkit-tap-highlight-color:rgba(0,0,0,0);}
 textarea:focus{outline:none;}
-#sub-panel{display:flex; flex-direction:row; justify-content:space-between; align-items:center; height:45px; overflow:hidden; background-color:var(--sub-panel-background-color); text-align:center; cursor:default;}
+#sub-panel{display:flex; flex-direction:row; justify-content:space-between; align-items:center; height:45px; overflow:hidden; background-color2:var(--sub-panel-background-color); text-align:center; cursor:default;}
 
 /* Settings */
 #settings{display:none; width:100%; height:100%;}
@@ -145,7 +145,7 @@ textarea:focus{outline:none;}
 	.hide-btn img{opacity:0; cursor:default;}
 }
 </style>
-<script type="text/javascript" src="cordova.js"></script>
+<!--<script type="text/javascript" src="cordova.js"></script>-->
 <script type="text/javascript">
 	let FirstRun = false;
 	let DeviceID;
@@ -182,7 +182,7 @@ textarea:focus{outline:none;}
 	let IDS_NEW_NOTE = 'New note';
 	let IDS_NOTES = 'Notes';
 	
-	// Настройки для Android
+	// Настройки
 	let IDS_SETTINGS = 'Settings';
 	let IDS_SYNC_ADDRESS = 'IP or domain';
 	let IDS_SYNC_PORT = 'Port';
@@ -219,7 +219,7 @@ textarea:focus{outline:none;}
 		IDS_NEW_NOTE = 'Новая заметка';
 		IDS_NOTES = 'Заметки';
 		
-		// Настройки для Android
+		// Настройки
 		IDS_SETTINGS = 'Настройки';
 		IDS_SYNC_ADDRESS = 'IP или домен';
 		IDS_SYNC_PORT = 'Порт';
@@ -693,7 +693,7 @@ textarea:focus{outline:none;}
 		});
 	}
 	
-	function ShowApp(){
+	/*function ShowApp(){ // Cordova QR
 		document.getElementById('wrapper').style.display = 'block';
 		document.getElementById('panel-qr').style.display = 'none';
 		if (UsedDarkTheme) // Трюк с сохранением текущего цвета не работает из-за css тёмной темы
@@ -708,7 +708,7 @@ textarea:focus{outline:none;}
 		document.body.style.backgroundColor = 'transparent';
 	}
 	
-	/*function QR() // Cordova QR
+	function QR()
 	{
 		function displayContents(err, text) {
 			if (!err) {
