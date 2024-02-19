@@ -17,7 +17,10 @@ Apps have a dark theme and automatic switching to it in the dark time.
 Full tablet support is also present.
 
 
-The Android version has a QR code scanner.
+Due to WebSQL disabling, we had to switch to local storage in mobile and web versions. Because of this there is a limit of 5 megabytes for notes, you can monitor the amount of available memory in the application settings. 
+
+
+~~The Android version has a QR code scanner.~~ Removed since version 1.0.5.
 
 ## Setup
 ### Sync of the mobile apps via P2P
@@ -26,10 +29,7 @@ The Android version has a QR code scanner.
 3. Check Windows Firewall to see if incoming connections are allowed on your network type (private) and allow if disabled.
 
 ### iOS
-For iOS 12 and above, go to Settings -> Safari -> Advanced -> Experimental Features and uncheck the "Disable Web SQL" checkbox.
-
-
-Next, go to Safari on your mobile device and enter there "http://IP:735/webapp", where IP is the reserved permanent IP of your computer. Next you need to click "Share" -> "On the Home Screen". A shortcut to EasyNotes appears on the desktop.
+Open browser Safari on your mobile device and enter there "http://IP:735/webapp", where IP is the reserved permanent IP of your computer. Next you need to click "Share" -> "On the Home Screen". A shortcut to EasyNotes appears on the desktop.
 
 
 To update, you need to synchronize, then go to the "Safari" settings and delete history and data, after which you can add the application again.
@@ -60,8 +60,9 @@ Follow the instructions described [here](https://github.com/r57zone/EasyNotes/tr
 [![](https://user-images.githubusercontent.com/9499881/93085078-14ab5c00-f6a6-11ea-9657-239175a85f24.png)](https://user-images.githubusercontent.com/9499881/93084998-f7768d80-f6a5-11ea-8ed3-b75c1404bc77.png)
 
 ## Download
->Versions for iOS 9+, Android 5.1+ and Windows 7+ (with Internet Explorer 11 installed). 
+>Versions for Windows 7+ (with Internet Explorer 11 installed), Android 7.1+ and iOS 9+ ([For EU don't work from version 17.4](https://www.macrumors.com/2024/02/15/ios-17-4-web-apps-removed-apple/)). 
 
 **[Download](https://github.com/r57zone/EasyNotes/releases)**
+
 ## Feedback
 `r57zone[at]gmail.com`

@@ -151,8 +151,8 @@ textarea:focus{outline:none;}
 	let DeviceID;
 	let TabletMode = false;
 
-	let NotesDB;
-	let ActionsDB;
+	let NotesAr = [];
+	let ActionsAr = [];
 	
 	let CurNoteID = -1; // По умолчанию новая заметка
 	let LatestNote;
@@ -164,14 +164,14 @@ textarea:focus{outline:none;}
 	
 	let HideFirstNotifyError = true; // На замену navigator.onLine (постоянно стала возвращать true на Android), для iOS ставим true
 	
-	let UsedDarkTheme = false; // Для QR (проблемы с CSS)
+	let UsedDarkTheme = false; // Для Cordova QR (проблемы с CSS)
 	
 	// Настройки для Android
 	let ServerAddress;
 	let ServerPort;
 	let AutoSearchIP = false;
 	
-	let FlashLightEnable = false;
+	//let FlashLightEnable = false; // Cordova QR
 	
 	// Перевод, по умолчанию English
 	let IDS_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -198,6 +198,7 @@ textarea:focus{outline:none;}
 	let IDS_THEME_TIME_DEPENDENT = 'Theme is time dependent';
 	let IDS_ABOUT_THEME_TIME = 'The dark theme turns on automatically from 06:00 pm to 08:00 am.';
 	let IDS_LAST_UPDATE = 'Last update: ';
+	let IDS_LOCAL_STORAGE = 'Local storage: %s of 5000 KB';
 	
 	// Уведомления
 	let IDS_DATE_UPDATE = 'Date will be update';
@@ -234,6 +235,7 @@ textarea:focus{outline:none;}
 		IDS_THEME_TIME_DEPENDENT = 'Тема в зависимости от времени';
 		IDS_ABOUT_THEME_TIME = 'Темная тема включается автоматически с 18:00 до 08:00.';
 		IDS_LAST_UPDATE = 'Последнее обновление: ';
+		IDS_LOCAL_STORAGE = 'Локальное хранилище: %s из 5000 Кб';
 		
 		// Уведомления
 		IDS_DATE_UPDATE = 'Дата обновится';
@@ -281,21 +283,8 @@ textarea:focus{outline:none;}
 	function FullReset()
 	{
 		if (!confirm(IDS_CONFIRM_FULL_RESET)) return;
-		
-		NotesDB.transaction(function (tx) {
-			tx.executeSql('DROP TABLE IF EXISTS Notes', [], function (tx, results) {
-
-				ActionsDB.transaction(function (tx) {
-					tx.executeSql('DROP TABLE IF EXISTS Actions', [], function (tx, results) {
-						localStorage.clear();
-						document.location.reload();
-					}, null);
-					
-				});
-
-			}, null);
-			
-		});
+		localStorage.clear();
+		document.location.reload();
 	}
 	
 	function NoteDateAgo(TimeStampSec) // Дней прошло
@@ -406,22 +395,16 @@ textarea:focus{outline:none;}
 			document.getElementById('editor').style.display = 'none';
 		document.getElementById('list').style.display = 'block';
 		
-		let Notes = '';
+		let NotesStr = '';
 		
-		NotesDB.transaction(function (tx) {
-			tx.executeSql('SELECT * FROM Notes ORDER BY DateTime DESC', [], function (tx, results) {
-
-				for (let i = 0; i < results.rows.length; i++) {
-					Notes += '<div onclick="GetNote(' + results.rows.item(i).ID  + ')" id="note"><div id="title">' + ExtractTitle(CharCodesToStr(results.rows.item(i).Note)) + '</div><div id="date">' + ListDate(results.rows.item(i).DateTime) + '</div></div>';
-					//console.log(results.rows.item(i).ID + ' ' + results.rows.item(i).DateTime + ' ' + ExtractTitle(CharCodesToStr(results.rows.item(i).Note)));
-				}
-
-				document.getElementById('NotesCount').innerHTML = IDS_NOTES + ' (' + results.rows.length + ')';
-				document.getElementById('items').innerHTML = Notes; // Заменяем, чтобы не мерцала пустота
-				Notes = '';
-			
-			}, null);
+		// Вывод
+		NotesAr.forEach(function(Note) {
+			NotesStr += '<div onclick="GetNote(' + Note.ID  + ')" id="note"><div id="title">' + ExtractTitle(CharCodesToStr(Note.Note)) + '</div><div id="date">' + ListDate(Note.DateTime) + '</div></div>';
 		});
+		
+		document.getElementById('NotesCount').innerHTML = IDS_NOTES + ' (' + NotesAr.length + ')';
+		document.getElementById('items').innerHTML = NotesStr; // Заменяем, чтобы не мерцала пустота
+		NotesStr = '';
 	}
 	
 	function NewNote(MemoFocus)
@@ -447,6 +430,7 @@ textarea:focus{outline:none;}
 			document.getElementById('list').style.display = 'none';
 		document.getElementById('editor').style.display = 'none';
 		document.getElementById('settings').style.display = 'block';
+		document.getElementById('localstoragesize').innerHTML = IDS_LOCAL_STORAGE.replace('%s', Math.trunc((new Blob(Object.values(localStorage)).size / 1024)));
 	}
 	
 	function BackTheme(){
@@ -528,22 +512,24 @@ textarea:focus{outline:none;}
 			return;
 		}
 		UpdateDateTime = true;
-		NotesDB.transaction(function (tx) {
-			tx.executeSql('SELECT * FROM Notes WHERE ID=' + NoteID, [], function (tx, results) {
-				document.getElementById('memo').value = CharCodesToStr(results.rows.item(0).Note);
-				LatestNote = document.getElementById('memo').value;
-				document.getElementById('NoteTitle').innerHTML = ExtractTitle(CharCodesToStr(results.rows.item(0).Note));
-				document.getElementById('DaysAgo').innerHTML = NoteDateAgo(results.rows.item(0).DateTime);
-				document.getElementById('DateNote').innerHTML = NoteDate(results.rows.item(0).DateTime); 
-				CurNoteID = results.rows.item(0).ID;
-				CurNoteDateTime = results.rows.item(0).DateTime;
-				if (TabletMode == false)
-					document.getElementById('list').style.display = 'none';
-				document.getElementById('settings').style.display = 'none';
-				document.getElementById('editor').style.display = 'block';
-			}, null);
-			
+		
+		const CurNote = NotesAr.find(function(Note) {
+			return Note.ID === NoteID;
 		});
+		
+		if (CurNote) {
+			document.getElementById('memo').value = CharCodesToStr(CurNote.Note);
+			LatestNote = document.getElementById('memo').value;
+			document.getElementById('NoteTitle').innerHTML = ExtractTitle(CharCodesToStr(CurNote.Note));
+			document.getElementById('DaysAgo').innerHTML = NoteDateAgo(CurNote.DateTime);
+			document.getElementById('DateNote').innerHTML = NoteDate(CurNote.DateTime); 
+			CurNoteID = CurNote.ID;
+			CurNoteDateTime = CurNote.DateTime;
+			if (TabletMode == false)
+				document.getElementById('list').style.display = 'none';
+			document.getElementById('settings').style.display = 'none';
+			document.getElementById('editor').style.display = 'block';
+		}
 		//console.log('GetNote ' + NoteID);
 	}
 	
@@ -553,42 +539,69 @@ textarea:focus{outline:none;}
 		let UTCTimeStamp = GetUTCTimeStamp();
 		let MemoText = document.getElementById('memo').value;
 		let LatestCurNoteID = CurNoteID; // Для мновенного переключения на новую заметку, без ожидания выполнения SQL
+		let NotesChanded = false;
 		
 		// Новая заметка
 		if (CurNoteID == '-1') {
 			// Не создаем заметку без текста
-			if (MemoText.trim() != '') { 
-				NotesDB.transaction(function (tx) {
-					tx.executeSql('INSERT INTO Notes (ID, Note, DateTime) VALUES (' + CurTimeStamp + ', "' + StrToCharCodes(MemoText) + '", ' + UTCTimeStamp + ')');
+			if (MemoText.trim() != '') {
+				NotesAr.push({
+					ID: CurTimeStamp,
+					DateTime: UTCTimeStamp,
+					Note: StrToCharCodes(MemoText)
 				});
 				
-				ActionsDB.transaction(function (tx) {
-					tx.executeSql('INSERT INTO Actions (Action, ID, Note, DateTime) VALUES ("insert", ' + CurTimeStamp + ', "' + StrToCharCodes(MemoText) + '",' + UTCTimeStamp + ')');
+				ActionsAr.push({
+					Name: 'insert',
+					ID: CurTimeStamp,
+					DateTime: UTCTimeStamp,
+					Note: StrToCharCodes(MemoText)
 				});
-				
+				NotesChanded = true;
 			}
 			//console.log('Inserted done');
 		} else if (LatestNote.trim() != MemoText.trim()) { // Добавлять только при наличии изменений
+			
+			const CurNote = NotesAr.find(function(Note) {
+				return Note.ID === LatestCurNoteID;
+			});
 
 			if (UpdateDateTime) { // Обновление времени
-				NotesDB.transaction(function (tx) {
-					tx.executeSql('UPDATE Notes SET Note="' + StrToCharCodes(MemoText) + '", DateTime=' + UTCTimeStamp + ' WHERE ID=' + LatestCurNoteID);
+				CurNote.DateTime = UTCTimeStamp;
+				CurNote.Note = StrToCharCodes(MemoText);
+				
+				ActionsAr.push({
+					Name: 'update',
+					ID: LatestCurNoteID,
+					DateTime: UTCTimeStamp,
+					Note: StrToCharCodes(MemoText)
 				});
-			
-				ActionsDB.transaction(function (tx) {
-					tx.executeSql('INSERT INTO Actions (Action, ID, Note, DateTime) VALUES ("update", ' + LatestCurNoteID + ', "' + StrToCharCodes(MemoText) + '",' + UTCTimeStamp + ')');
-				});
+
 			} else { // Сохранение старого времени
-				NotesDB.transaction(function (tx) {
-					tx.executeSql('UPDATE Notes SET Note="' + StrToCharCodes(MemoText) + '" WHERE ID=' + LatestCurNoteID);
+				CurNote.Note = StrToCharCodes(MemoText);
+				
+				ActionsAr.push({
+					Name: 'update',
+					ID: LatestCurNoteID,
+					DateTime: CurNoteDateTime,
+					Note: StrToCharCodes(MemoText)
 				});
-			
-				ActionsDB.transaction(function (tx) {
-					tx.executeSql('INSERT INTO Actions (Action, ID, Note, DateTime) VALUES ("update", ' + LatestCurNoteID + ', "' + StrToCharCodes(MemoText) + '",' + CurNoteDateTime + ')');
-				});
+				
 			}
+			
+			NotesChanded = true;
 			//console.log('Updated done');
 		}
+		
+		
+		if (NotesChanded) { // Если заметка добавлена / обновлена
+			// Сортировка по времени
+			NotesAr.sort(function(a, b) { return b.DateTime - a.DateTime; }); 
+			
+			localStorage.setItem('Notes', JSON.stringify(NotesAr));
+			localStorage.setItem('Actions', JSON.stringify(ActionsAr));
+		}
+		
 		if (TabletMode) // Новая заметка открывается только в режиме планшета
 			NewNote(true);
 		ShowNotes();
@@ -597,17 +610,27 @@ textarea:focus{outline:none;}
 	function RemNote()
 	{
 		if (CurNoteID == '-1') {ShowNotes(); return;}
-		NotesDB.transaction(function (tx) {
-			tx.executeSql('DELETE FROM Notes WHERE ID=' + CurNoteID);
+		
+		let IndexToRemove = NotesAr.findIndex(Note => Note.ID === CurNoteID);
+		if (IndexToRemove !== -1)
+			NotesAr.splice(IndexToRemove, 1);
+		
+		ActionsAr.push({
+			Name: 'delete',
+			ID: CurNoteID,
+			DateTime: 0,
+			Note: ''
 		});
-		ActionsDB.transaction(function (tx) {
-			tx.executeSql('INSERT INTO Actions (Action, ID, Note, DateTime) VALUES ("delete", ' + CurNoteID + ', "", 0)', [], function (tx, results) {
-				ShowNotes();
-				if (TabletMode) // Новая заметка открывается только в режиме планшета
-					NewNote(false);
-			}, null);
+		
+		localStorage.setItem('Notes', JSON.stringify(NotesAr));
+		localStorage.setItem('Actions', JSON.stringify(ActionsAr));
+		
+		ShowNotes();
+		if (TabletMode) // Новая заметка открывается только в режиме планшета
+			NewNote(false);
+		
+		
 		//console.log('Deleted ' + CurNoteID);
-		});
 	}
 	
 	function Notification(Str){
@@ -618,12 +641,12 @@ textarea:focus{outline:none;}
 				return;
 		}
 		document.getElementById('sync-progress').style.display = 'none';
-		let notifyBlock = document.getElementById("notification");
+		let notifyBlock = document.getElementById('notification');
 		notifyBlock.innerHTML = Str;
-		notifyBlock.className = "show";
+		notifyBlock.className = 'show';
 
 		setTimeout(function(){
-			notifyBlock.className = notifyBlock.className.replace("show", ""); 
+			notifyBlock.className = notifyBlock.className.replace('show', ''); 
 		}, 3000);
 	}
 	
@@ -685,7 +708,7 @@ textarea:focus{outline:none;}
 		document.body.style.backgroundColor = 'transparent';
 	}
 	
-	function QR()
+	/*function QR() // Cordova QR
 	{
 		function displayContents(err, text) {
 			if (!err) {
@@ -718,7 +741,7 @@ textarea:focus{outline:none;}
 	
 	function QRFlashLight(){
 		if(FlashLightEnable == false) {QRScanner.enableLight(); FlashLightEnable=true;} else {QRScanner.disableLight(); FlashLightEnable=false;}
-	}
+	}*/
 	
 	function GetDeviceID(){
 		let DeviceOS = 'Unknown'
@@ -741,24 +764,6 @@ textarea:focus{outline:none;}
 		
 			if (HideFirstNotifyError == false) // Android, из-за неработающего navigator.onLine
 				document.getElementById('sync-progress').style.display = 'block';
-		
-			function InsertNote(ID, Note, DateTime){
-				NotesDB.transaction(function (tx) {
-					tx.executeSql('INSERT INTO Notes (ID, Note, DateTime) VALUES (' + ID + ', "' + Note + '", ' + DateTime + ')');
-				});
-			}
-			
-			function UpdateNote(ID, Note, DateTime){
-				NotesDB.transaction(function (tx) {
-					tx.executeSql('Update Notes SET Note = "' + Note + '", DateTime =' + DateTime + ' WHERE ID=' + ID);
-				});
-			}
-			
-			function RemoveNote(ID){
-				NotesDB.transaction(function (tx) {
-					tx.executeSql('DELETE FROM Notes WHERE ID=' + ID);
-				});
-			}
 			
 			function SyncNotes(){
 									
@@ -777,7 +782,14 @@ textarea:focus{outline:none;}
 								
 								let NoteItems = XMLDoc.getElementsByTagName('note');
 								for (let i = 0; i < NoteItems.length; i++)
-									InsertNote(NoteItems[i].getAttribute('id'), NoteItems[i].innerHTML, NoteItems[i].getAttribute('datetime'));
+									NotesAr.push({
+										ID: parseInt(NoteItems[i].getAttribute('id')),
+										DateTime: parseInt(NoteItems[i].getAttribute('datetime')),
+										Note: NoteItems[i].innerHTML
+									});
+									//InsertNote(NoteItems[i].getAttribute('id'), NoteItems[i].innerHTML, NoteItems[i].getAttribute('datetime'));
+						
+								localStorage.setItem('Notes', JSON.stringify(NotesAr));
 						
 								delete XMLDoc;
 								
@@ -823,17 +835,36 @@ textarea:focus{outline:none;}
 								let ActionsItems = XMLDoc.getElementsByTagName('*');
 								for (let i = 0; i < ActionsItems.length; i++) { 
 
-									let ReceivedNoteID = ActionsItems[i].getAttribute('id');
+									let ReceivedNoteID = parseInt(ActionsItems[i].getAttribute('id'));
+									let ReceivedNoteDateTime = parseInt(ActionsItems[i].getAttribute('datetime'));
 									let ReceivedNote = ActionsItems[i].innerHTML;
-									let ReceivedNoteDateTime = ActionsItems[i].getAttribute('datetime');
 									
 									if (ActionsItems[i].tagName == 'INSERT')
-										InsertNote(ReceivedNoteID, ReceivedNote, ReceivedNoteDateTime);
-									if (ActionsItems[i].tagName == 'UPDATE')
-										UpdateNote(ReceivedNoteID, ReceivedNote, ReceivedNoteDateTime);
-									if (ActionsItems[i].tagName == 'DELETE')
-										RemoveNote(ReceivedNoteID);
+										NotesAr.push({
+											ID: ReceivedNoteID,
+											DateTime: ReceivedNoteDateTime,
+											Note: ReceivedNote
+										});
+										
+									if (ActionsItems[i].tagName == 'UPDATE') {
+										const UpdateNote = NotesAr.find(function(Note) {
+											return Note.ID === ReceivedNoteID;
+										});
+										UpdateNote.DateTime = ReceivedNoteDateTime;
+										UpdateNote.Note = ReceivedNote;
+									}
+										
+									if (ActionsItems[i].tagName == 'DELETE') {
+										let IndexToRemove = NotesAr.findIndex(Note => Note.ID === ReceivedNoteID);
+										if (IndexToRemove !== -1)
+											NotesAr.splice(IndexToRemove, 1);
+									}
 								}
+								
+								// Сортировка по времени
+								NotesAr.sort(function(a, b) { return b.DateTime - a.DateTime; }); 
+								
+								localStorage.setItem('Notes', JSON.stringify(NotesAr));
 								
 								ShowNotes();
 								if (TabletMode) // Новая заметка открывается только в режиме планшета, нужно для того, чтобы старая заметка не оставалась в интерфейсе, если сервер её удалил
@@ -865,45 +896,46 @@ textarea:focus{outline:none;}
 				}
 			}	
 				
-			// Генерирация XML действий пользователя и отправка на "сервер"
+			// Генерация XML действий пользователя и отправка на "сервер"
 			if (FirstRun == false) // При первом запуске отправлять нечего
 				GetData(ServerAddress + ':' + ServerPort + '/api/auth?id=' + DeviceID).then(function(responseText) { // Проверка авторизации
 					if (responseText == 'auth:ok') {
-						ActionsDB.transaction(function (tx) {
-							tx.executeSql('SELECT * FROM Actions', [], function (tx, results) {
-								let XMLAPI = '<actions>\n';
-								for (let i = 0; i < results.rows.length; i++) {
-									if (results.rows.item(i).Action == 'insert')
-										XMLAPI += '\t<insert id="' + results.rows.item(i).ID + '" datetime="' + results.rows.item(i).DateTime + '">' + results.rows.item(i).Note + '</insert>\n';
-									if (results.rows.item(i).Action == 'update')
-										XMLAPI += '\t<update id="' + results.rows.item(i).ID + '" datetime="' + results.rows.item(i).DateTime + '">' + results.rows.item(i).Note + '</update>\n';
-									if (results.rows.item(i).Action == 'delete')
-										XMLAPI += '\t<delete id="' + results.rows.item(i).ID + '"></delete>\n';
-								}
-								XMLAPI += '</actions>';
 
-								// Отправка XML на "сервер"
-								SendData(ServerAddress + ':' + ServerPort + '/api/syncnotes?id=' + DeviceID, XMLAPI).then(function(responseStatus) {
+						let XMLAPI = '<actions>\n';
 
-									if (responseStatus == 'ok') {
-										ActionsDB.transaction(function (tx) {
-											tx.executeSql('DELETE FROM Actions');
-										});
-										
-										SyncNotes();
-									} else {
-										SyncWait = false; // Разрешаем повторную синхронизацию;
-										
-										Notification(IDS_CONNECTION_FAILED);
-									}
-								}).catch(function() {
-									SyncWait = false; // Разрешаем повторную синхронизацию;
+						ActionsAr.forEach(function(Action) {
+							if (Action.Name == 'insert')
+								XMLAPI += '\t<insert id="' + Action.ID + '" datetime="' + Action.DateTime + '">' + Action.Note + '</insert>\n';
+							if (Action.Name == 'update')
+								XMLAPI += '\t<update id="' + Action.ID + '" datetime="' + Action.DateTime + '">' + Action.Note + '</update>\n';
+							if (Action.Name == 'delete')
+								XMLAPI += '\t<delete id="' + Action.ID + '"></delete>\n';
+						});
+						
+						XMLAPI += '</actions>';
+						
+						//alert(XMLAPI);
+
+						// Отправка XML на "сервер"
+						SendData(ServerAddress + ':' + ServerPort + '/api/syncnotes?id=' + DeviceID, XMLAPI).then(function(responseStatus) {
+
+							if (responseStatus == 'ok') {
+								ActionsAr = [];
+								localStorage.setItem('Actions', '');
 								
-									Notification(IDS_CONNECTION_FAILED);
-								});
+								SyncNotes();
+							} else {
+								SyncWait = false; // Разрешаем повторную синхронизацию;
 								
-							}, null);
-						}); // Завершение генерации и отправки XML API.
+								Notification(IDS_CONNECTION_FAILED);
+							}
+						}).catch(function() {
+							SyncWait = false; // Разрешаем повторную синхронизацию;
+						
+							Notification(IDS_CONNECTION_FAILED);
+						});
+								
+						// Завершение генерации и отправки XML API.
 					} else {
 						SyncWait = false; // Разрешаем повторную синхронизацию;
 							
@@ -996,17 +1028,11 @@ textarea:focus{outline:none;}
 		document.getElementById('DaysAgo').innerHTML = NoteDateAgo(GetUTCTimeStamp());
 		document.getElementById('DateNote').innerHTML = NoteDate(GetUTCTimeStamp());
 		
-		// База данных записей
-		NotesDB = openDatabase('NotesDB', '1.0', 'Notes', 2 * 1024 * 1024);
-		NotesDB.transaction(function (tx) {
-			tx.executeSql('CREATE TABLE IF NOT EXISTS Notes (ID, Note, DateTime)');
-		});
-		
-		// База данных действий пользователя
-		ActionsDB = openDatabase('NotesDB', '1.0', 'Actions', 2 * 1024 * 1024);
-		ActionsDB.transaction(function (tx) {
-			tx.executeSql('CREATE TABLE IF NOT EXISTS Actions (Action, ID, Note, DateTime)');
-		});
+		// Заметки и события
+		if (localStorage.getItem('Notes') != '' && localStorage.getItem('Notes') != null)
+			NotesAr = JSON.parse(localStorage.getItem('Notes'));
+		if (localStorage.getItem('Actions') != '' && localStorage.getItem('Actions') != null)
+			ActionsAr = JSON.parse(localStorage.getItem('Actions'));
 		
 		// Настройки, Dark theme
 		if (localStorage.getItem('DarkTheme') != null && localStorage.getItem('DarkTheme') == 'true') {
@@ -1105,7 +1131,7 @@ textarea:focus{outline:none;}
 		</div>
 		<div id="sub-panel">
 			<div id="btn" onclick="RemNote()"><img src="images/rm.png" /></div>
-			<div id="btn" onclick="QR()"><img src="images/qr.png" /></div>
+			<!--<div id="btn" onclick="QR()"><img src="images/qr.png" /></div>-->
 			<div id="btn" onclick="ShowSettings()"><img src="images/settings.png" /></div>
 		</div>
 	</div>
@@ -1168,7 +1194,7 @@ textarea:focus{outline:none;}
 			
 			<div id="AboutThemeTime" class="titlebox"></div>
 			
-			<div class="titlebox" style="text-align:center;"><br>EasyNotes<br><span id="LastUpdate"></span> 06.09.22<br>https://r57zone.github.io<br><br><span id="DeviceID"></span></div>
+			<div class="titlebox" style="text-align:center;"><br><span id="DeviceID"></span><br><span id="localstoragesize">-</span><br><br>EasyNotes<br><span id="LastUpdate"></span> 15.02.24<br>https://r57zone.github.io</div>
 			<br>
 			<div id="items">
 				<div id="item">
@@ -1183,9 +1209,9 @@ textarea:focus{outline:none;}
 	<div id="notification" onclick="this.className='';"></div>
 	<div id="sync-progress"></div>
 </div>
-<div id="panel-qr">
+<!--<div id="panel-qr">
 	<div id="btn" onclick="QRClose()"><img src="images/close.png" /></div>
 	<div id="btn" onclick="QRFlashLight()"><img src="images/flashlight.png" /></div>
-</div>
+</div>-->
 </body>
 </html>
