@@ -60,7 +60,7 @@ Follow the instructions described [here](https://github.com/r57zone/EasyNotes/tr
 [![](https://user-images.githubusercontent.com/9499881/93085078-14ab5c00-f6a6-11ea-9657-239175a85f24.png)](https://user-images.githubusercontent.com/9499881/93084998-f7768d80-f6a5-11ea-8ed3-b75c1404bc77.png)
 
 ## Download
->Versions for Windows 7+ (with Internet Explorer 11 installed), Android 7.1+ and iOS 9+. 
+>Versions for Android 7.1, iOS 9+ & Windows 7+ (with Internet Explorer 11 installed). 
 
 **[Download](https://github.com/r57zone/EasyNotes/releases)**
 
