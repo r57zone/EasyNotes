@@ -58,7 +58,7 @@
 [![](https://user-images.githubusercontent.com/9499881/93085759-1b869e80-f6a7-11ea-9868-07929effdac8.png)](https://user-images.githubusercontent.com/9499881/93085569-cea2c800-f6a6-11ea-96f9-2425c14b7aa7.png)
 
 ## Загрузка
->Версии для Windows 7+ (с установленным Internet Explorer 11), Android 7.1, и iOS 9+ ([Для ЕС не работает с версии 17.4](https://dtf.ru/mobile/2494899-apple-podtverdila-chto-otklyuchit-podderzhku-veb-prilozhenii-v-ios-dlya-polzovatelei-iz-es)).
+>Версии для Windows 7+ (с установленным Internet Explorer 11), Android 7.1, и iOS 9+.
 
 **[Загрузить](https://github.com/r57zone/EasyNotes/releases)**
 
