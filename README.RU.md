@@ -58,7 +58,7 @@
 [![](https://user-images.githubusercontent.com/9499881/93085759-1b869e80-f6a7-11ea-9868-07929effdac8.png)](https://user-images.githubusercontent.com/9499881/93085569-cea2c800-f6a6-11ea-96f9-2425c14b7aa7.png)
 
 ## Загрузка
->Версии для Android 7.1, iOS 9+ и Windows 7+ (с установленным Internet Explorer 11).
+>Версии для Android 7.1+, iOS 9+ и Windows 7+ (с установленным Internet Explorer 11).
 
 **[Загрузить](https://github.com/r57zone/EasyNotes/releases)**
 
