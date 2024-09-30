@@ -5,7 +5,7 @@
 # EasyNotes
 ![](https://user-images.githubusercontent.com/9499881/100446367-1cd14000-30c8-11eb-8e82-335f134a8c95.png)
 
-Notes apps for Windows, iOS and Android, with direct local sync or web server sync. The server can be either a Windows application (you need to run it for synchronization) or your web server. View API can be [here](https://github.com/r57zone/EasyNotes/blob/master/API.md).
+Notes apps for Windows, Android and iOS (up to 13, solution is being sought), with direct local sync or web server sync. The server can be either a Windows application (you need to run it for synchronization) or your web server. View API can be [here](https://github.com/r57zone/EasyNotes/blob/master/API.md).
 
 ## Features
 If you want to leave the old date when editing a note then on mobile phones you need to click on the date and on the PC hold down the "Shift" key when you click on the done button.
@@ -60,7 +60,7 @@ Follow the instructions described [here](https://github.com/r57zone/EasyNotes/tr
 [![](https://user-images.githubusercontent.com/9499881/93085078-14ab5c00-f6a6-11ea-9657-239175a85f24.png)](https://user-images.githubusercontent.com/9499881/93084998-f7768d80-f6a5-11ea-8ed3-b75c1404bc77.png)
 
 ## Download
->Versions for Android 7.1+, iOS 9+ and Windows 7+ (with Internet Explorer 11 installed). 
+>Versions for Android 7.1+, iOS 9 - 12.5 and Windows 7+ (with Internet Explorer 11 installed). 
 
 **[Download](https://github.com/r57zone/EasyNotes/releases)**
 
