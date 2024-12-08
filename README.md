@@ -12,7 +12,7 @@ The following languages ​​are supported: English, Russian, Chinese (Traditio
 
 ![flag-united-kingdom](https://github.com/user-attachments/assets/8c03c9b8-d154-466f-b9c4-6ea60278d537)
 ![flag-russia](https://user-images.githubusercontent.com/9499881/27683795-5b0fbac6-5cd8-11e7-929c-057833e01fb1.png)
-![flag-chine](https://github.com/user-attachments/assets/16848591-2baf-4300-893b-b95d5249a34e)
+![flag-china](https://github.com/user-attachments/assets/16848591-2baf-4300-893b-b95d5249a34e)
 ![flag-spanish](https://github.com/user-attachments/assets/a892b7ce-d83f-4914-9c54-9ba16c9c9e38)
 ![flag-brazil](https://github.com/user-attachments/assets/f2544579-81df-43b4-94c5-59c569828182)
 ![flag-french](https://github.com/user-attachments/assets/57f54331-32a3-4146-823c-4aa85a4c6669)
