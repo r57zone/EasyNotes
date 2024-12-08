@@ -77,9 +77,9 @@
 [![](https://github.com/user-attachments/assets/868fa151-ce97-447a-b87e-a8b435e8b29b)](https://github.com/user-attachments/assets/33a7e206-ae5a-438d-b1c2-92a2b95070a5)
 
 ### Android / iOS
-![UI](https://github.com/user-attachments/assets/3e241777-79cf-4cdc-ab20-b322a0d2f099)
-![HTML Viewer Q](https://github.com/user-attachments/assets/6496fda0-4566-4eae-80d6-0fb7fa1ae880)
-![PWA / HTML app](https://github.com/user-attachments/assets/4cec5cb1-4bf8-4f9a-98e8-ce646bab1998)
+[![UI](https://github.com/user-attachments/assets/3e241777-79cf-4cdc-ab20-b322a0d2f099)](https://github.com/user-attachments/assets/3e241777-79cf-4cdc-ab20-b322a0d2f099)
+[![HTML Viewer Q](https://github.com/user-attachments/assets/6496fda0-4566-4eae-80d6-0fb7fa1ae880)](https://github.com/user-attachments/assets/6496fda0-4566-4eae-80d6-0fb7fa1ae880)
+[![PWA / HTML app](https://github.com/user-attachments/assets/4cec5cb1-4bf8-4f9a-98e8-ce646bab1998)](https://github.com/user-attachments/assets/4cec5cb1-4bf8-4f9a-98e8-ce646bab1998)
 
 >На втором изображении показана установка приложения для iOS с офлайн работой и синхронизацией, с помощью стороннего приложения HTML Viewer Q. 
 

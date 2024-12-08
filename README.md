@@ -79,9 +79,9 @@ Follow the instructions described [here](https://github.com/r57zone/EasyNotes/tr
 [![](https://github.com/user-attachments/assets/2fd0aed4-fddf-433b-8fe7-78a6759261bb)](https://github.com/user-attachments/assets/21b2a33c-13cd-44fd-a501-1be23a3d7d57)
 
 ### Android / iOS
-![UI](https://github.com/user-attachments/assets/bbb6e01a-abe3-4b72-bcba-0817f3d88c06)
-![HTML Viewer Q](https://github.com/user-attachments/assets/a6988b94-1d23-4497-b5f6-6b46dc8e8115)
-![PWA / HTML app](https://github.com/user-attachments/assets/f56a9649-6220-405e-a0e0-a021280c613b)
+[![UI](https://github.com/user-attachments/assets/bbb6e01a-abe3-4b72-bcba-0817f3d88c06)](https://github.com/user-attachments/assets/bbb6e01a-abe3-4b72-bcba-0817f3d88c06)
+[![HTML Viewer Q](https://github.com/user-attachments/assets/a6988b94-1d23-4497-b5f6-6b46dc8e8115)](https://github.com/user-attachments/assets/a6988b94-1d23-4497-b5f6-6b46dc8e8115)
+[![PWA / HTML app](https://github.com/user-attachments/assets/f56a9649-6220-405e-a0e0-a021280c613b)](https://github.com/user-attachments/assets/f56a9649-6220-405e-a0e0-a021280c613b)
 
 >The second image shows the installation of an iOS app with offline work and synchronization, using a third-party application HTML Viewer Q.
 
