@@ -73,11 +73,6 @@ Next, for Windows, Android and iOS 13+ apps, you can enable automatic IP address
 ### Setup web sync
 Follow the instructions described [here](https://github.com/r57zone/EasyNotes/tree/master/Source/Web).
 
-## Download
->Versions for Android 7.1+, iOS 9+ and Windows 7+ (with Internet Explorer 11 installed). 
-
-**[Download](https://github.com/r57zone/EasyNotes/releases)**
-
 ## Screenshots
 ### Windows
 [![](https://github.com/user-attachments/assets/9195f448-6e8e-4e64-bf9d-7d346bb27d59)](https://github.com/user-attachments/assets/928a044c-921e-4780-aa4b-81c1ab86d89b)
@@ -87,6 +82,16 @@ Follow the instructions described [here](https://github.com/r57zone/EasyNotes/tr
 ![UI](https://github.com/user-attachments/assets/bbb6e01a-abe3-4b72-bcba-0817f3d88c06)
 ![HTML Viewer Q](https://github.com/user-attachments/assets/a6988b94-1d23-4497-b5f6-6b46dc8e8115)
 ![PWA / HTML app](https://github.com/user-attachments/assets/f56a9649-6220-405e-a0e0-a021280c613b)
+
+>The second image shows the installation of an iOS app with offline work and synchronization, using a third-party application HTML Viewer Q.
+
+
+>The third image shows the installation of a PWA or HTML app. PWA can only synchronize with https servers. HTML apps can work offline only up to iOS 13, starting from iOS 13, for offline work you will need to use the previous method.
+
+## Download
+>Versions for Android 7.1+, iOS 9+ and Windows 7+ (with Internet Explorer 11 installed). 
+
+**[Download](https://github.com/r57zone/EasyNotes/releases)**
 
 ## Feedback
 `r57zone[at]gmail.com`

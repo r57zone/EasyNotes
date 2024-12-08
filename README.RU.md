@@ -71,11 +71,6 @@
 ### Настройка веб-синхронизации
 Следуйте инструкциям описанном [здесь](https://github.com/r57zone/EasyNotes/tree/master/Source/Web).
 
-## Загрузка
->Версии для Android 7.1+, iOS 9+ и Windows 7+ (с установленным Internet Explorer 11).
-
-**[Загрузить](https://github.com/r57zone/EasyNotes/releases)**
-
 ## Скриншоты
 ### Windows
 [![](https://github.com/user-attachments/assets/8c27ae18-10ae-49f0-9be2-bad14172166c)](https://github.com/user-attachments/assets/36da3bcd-ac0d-474c-a733-dc70f4b035f7)
@@ -85,6 +80,16 @@
 ![UI](https://github.com/user-attachments/assets/3e241777-79cf-4cdc-ab20-b322a0d2f099)
 ![HTML Viewer Q](https://github.com/user-attachments/assets/6496fda0-4566-4eae-80d6-0fb7fa1ae880)
 ![PWA / HTML app](https://github.com/user-attachments/assets/4cec5cb1-4bf8-4f9a-98e8-ce646bab1998)
+
+>На втором изображении показана установка приложения для iOS с офлайн работой и синхронизацией, с помощью стороннего приложения HTML Viewer Q. 
+
+
+>На третьем изображении показана установка PWA или HTML приложения. PWA может синхронизироваться только с https серверами. HTML приложения могут работать офлайн только до iOS 13, начиная с iOS 13 для офлайн работы нужно будет использовать предыдущий метод.
+
+## Загрузка
+>Версии для Android 7.1+, iOS 9+ и Windows 7+ (с установленным Internet Explorer 11).
+
+**[Загрузить](https://github.com/r57zone/EasyNotes/releases)**
 
 ## Обратная связь
 `r57zone[собака]gmail.com`
