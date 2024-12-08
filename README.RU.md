@@ -21,7 +21,7 @@
 ![flag-united-arab-emirates](https://github.com/user-attachments/assets/81d3b610-a2f4-44c9-b2ad-20e4d7cfb2b2)
 ![flag-italy](https://github.com/user-attachments/assets/692490d6-bc53-446f-99b8-bf2becb8ec0d)
 ![flag-north-korea](https://github.com/user-attachments/assets/5b315a3d-6ce0-4cbb-b7a3-133ef2bcb2c5)
-![flag-south-korea](https://github.com/user-attachments/assets/ed3d3778-9193-444a-85fd-ac5dd7bc91c6).
+![flag-south-korea](https://github.com/user-attachments/assets/ed3d3778-9193-444a-85fd-ac5dd7bc91c6)
 
 
 Приложения имеют тёмную тему и автоматические переключение на неё в тёмное время суток.
@@ -33,10 +33,7 @@
 Если необходимо оставить старую дату, при редактировани заметки, то на мобильных телефонах нужно нажать на дату, а на ПК зажать клавишу "Shift", при нажатии на кнопку готово.
 
 
-Из-за отключения WebSQL пришлось перейти на локальное хранилище в мобильных и веб-версиях. Из-за этого имеется ограничение на 5 мегабайт для заметок, следить за объёмом доступной памяти можно в настройках приложения. 
-
-
-~~В Android версии присутствует QR сканер кодов.~~ Начиная с версии 1.0.5 удалено.
+Имеется ограничение на 5 мегабайт для заметок, следить за объёмом доступной памяти можно в настройках приложения.
 
 ## Настройка
 ### Windows
@@ -84,16 +81,10 @@
 [![](https://github.com/user-attachments/assets/8c27ae18-10ae-49f0-9be2-bad14172166c)](https://github.com/user-attachments/assets/36da3bcd-ac0d-474c-a733-dc70f4b035f7)
 [![](https://github.com/user-attachments/assets/868fa151-ce97-447a-b87e-a8b435e8b29b)](https://github.com/user-attachments/assets/33a7e206-ae5a-438d-b1c2-92a2b95070a5)
 
-### iOS
-![](https://user-images.githubusercontent.com/9499881/54878998-87d76780-4e4d-11e9-89ae-bd15ea494f73.PNG)
-![](https://user-images.githubusercontent.com/9499881/54879001-9887dd80-4e4d-11e9-9618-5993cb06e93a.PNG)
-![Setup](https://user-images.githubusercontent.com/9499881/54852962-d2e76280-4d07-11e9-841a-06d50fafb3c4.gif)
-
-### Android
-![](https://github.com/user-attachments/assets/bbb6e01a-abe3-4b72-bcba-0817f3d88c06)
-![HTML Viewer Q](https://github.com/user-attachments/assets/cd478895-b055-4bde-b4c2-2915b2befa8e)
-![PWA](https://github.com/user-attachments/assets/6f089292-137f-4baf-ab16-a6fb2eb67b9c)
-![HTML app](https://github.com/user-attachments/assets/3157a9d2-9640-455f-b3cb-34b6389dcc9a)
+### Android / iOS
+![UI](https://github.com/user-attachments/assets/3e241777-79cf-4cdc-ab20-b322a0d2f099)
+![HTML Viewer Q](https://github.com/user-attachments/assets/6496fda0-4566-4eae-80d6-0fb7fa1ae880)
+![PWA / HTML app](https://github.com/user-attachments/assets/4cec5cb1-4bf8-4f9a-98e8-ce646bab1998)
 
 ## Обратная связь
 `r57zone[собака]gmail.com`

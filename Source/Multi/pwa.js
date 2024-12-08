@@ -19,8 +19,8 @@ const PRECACHE_URLS = [
   'images/sync.png',
   'pwa.js',
   'manifest.json',
-  'res/icon.png',
-  'res/icon-180.png'
+  'icons/icon.png',
+  'icons/icon-180.png'
 ];
 
 // The install handler takes care of precaching the resources we always need.

@@ -23,7 +23,7 @@ The following languages ​​are supported: English, Russian, Chinese (Traditio
 ![flag-united-arab-emirates](https://github.com/user-attachments/assets/81d3b610-a2f4-44c9-b2ad-20e4d7cfb2b2)
 ![flag-italy](https://github.com/user-attachments/assets/692490d6-bc53-446f-99b8-bf2becb8ec0d)
 ![flag-north-korea](https://github.com/user-attachments/assets/5b315a3d-6ce0-4cbb-b7a3-133ef2bcb2c5)
-![flag-south-korea](https://github.com/user-attachments/assets/ed3d3778-9193-444a-85fd-ac5dd7bc91c6).
+![flag-south-korea](https://github.com/user-attachments/assets/ed3d3778-9193-444a-85fd-ac5dd7bc91c6)
 
 
 Apps have a dark theme and automatic switching to it in the dark time.
@@ -35,10 +35,7 @@ There is full support for tablets.
 If you want to leave the old date when editing a note then on mobile phones you need to click on the date and on the PC hold down the "Shift" key when you click on the done button.
 
 
-Due to WebSQL disabling, we had to switch to local storage in mobile and web versions. Because of this there is a limit of 5 megabytes for notes, you can monitor the amount of available memory in the application settings. 
-
-
-~~The Android version has a QR code scanner.~~ Removed since version 1.0.5.
+There is a 5 megabyte limit for notes, you can monitor the amount of available memory in the application settings.
 
 ## Setup
 ### Windows
@@ -86,14 +83,10 @@ Follow the instructions described [here](https://github.com/r57zone/EasyNotes/tr
 [![](https://github.com/user-attachments/assets/9195f448-6e8e-4e64-bf9d-7d346bb27d59)](https://github.com/user-attachments/assets/928a044c-921e-4780-aa4b-81c1ab86d89b)
 [![](https://github.com/user-attachments/assets/2fd0aed4-fddf-433b-8fe7-78a6759261bb)](https://github.com/user-attachments/assets/21b2a33c-13cd-44fd-a501-1be23a3d7d57)
 
-### iOS
-![](https://github.com/user-attachments/assets/bbb6e01a-abe3-4b72-bcba-0817f3d88c06)
-![HTML Viewer Q](https://github.com/user-attachments/assets/cd478895-b055-4bde-b4c2-2915b2befa8e)
-![PWA](https://github.com/user-attachments/assets/6f089292-137f-4baf-ab16-a6fb2eb67b9c)
-![HTML app](https://github.com/user-attachments/assets/3157a9d2-9640-455f-b3cb-34b6389dcc9a)
-
-### Android
-![](https://github.com/user-attachments/assets/7a5f3e71-05f5-48f8-b5b0-910732b08ece)
+### Android / iOS
+![UI](https://github.com/user-attachments/assets/bbb6e01a-abe3-4b72-bcba-0817f3d88c06)
+![HTML Viewer Q](https://github.com/user-attachments/assets/a6988b94-1d23-4497-b5f6-6b46dc8e8115)
+![PWA / HTML app](https://github.com/user-attachments/assets/f56a9649-6220-405e-a0e0-a021280c613b)
 
 ## Feedback
 `r57zone[at]gmail.com`
