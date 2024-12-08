@@ -1,43 +1,41 @@
-unit Unit1;
+п»їunit Unit1;
 
 interface
 
-{EasyNotes https://github.com/r57zone/EasyNotes}
-
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, OleCtrls, ExtCtrls, StdCtrls, SQLite3, SQLite3Wrap, SHDocVw, ActiveX,
-  DateUtils, IniFiles, IdBaseComponent, IdComponent, IdTCPServer, IdCustomHTTPServer,
-  IdHTTPServer, XMLDoc, XMLIntf, Registry, Menus, ClipBrd, MSHTML, XPMan;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.OleCtrls, SHDocVw, IdContext,
+  IdCustomHTTPServer, IdBaseComponent, IdComponent, IdCustomTCPServer,
+  IdHTTPServer, SQLite3, SQLite3Wrap, ActiveX, DateUtils, IniFiles, Registry,
+  XMLDoc, XMLIntf, MSHTML, Vcl.StdCtrls, Vcl.Menus, ClipBrd, LangFile;
 
 type
   TMain = class(TForm)
     WebView: TWebBrowser;
     IdHTTPServer: TIdHTTPServer;
     PopupMenu: TPopupMenu;
-    PasteBtn: TMenuItem;
     CutBtn: TMenuItem;
     CopyBtn: TMenuItem;
-    XPManifest: TXPManifest;
+    PasteBtn: TMenuItem;
     procedure FormCreate(Sender: TObject);
-    procedure WebViewBeforeNavigate2(Sender: TObject;
-      const pDisp: IDispatch; var URL, Flags, TargetFrameName, PostData,
-      Headers: OleVariant; var Cancel: WordBool);
-    procedure WebViewDocumentComplete(Sender: TObject;
-      const pDisp: IDispatch; var URL: OleVariant);
-    procedure FormClose(Sender: TObject; var Action: TCloseAction);
-    procedure FormActivate(Sender: TObject);
-    procedure FormDeactivate(Sender: TObject);
-    procedure IdHTTPServerCommandGet(AThread: TIdPeerThread;
-      ARequestInfo: TIdHTTPRequestInfo;
-      AResponseInfo: TIdHTTPResponseInfo);
-    procedure PasteBtnClick(Sender: TObject);
-    procedure CopyBtnClick(Sender: TObject);
-    procedure CutBtnClick(Sender: TObject);
     procedure AddStyle(FileName: string);
     procedure ExportNotes(FileName: string);
     procedure ImportNotes(FileName: string);
-    procedure LoadNotes;
+    procedure ShowNotes(SearchValue: string);
+    procedure ShowCategories;
+    procedure WebViewBeforeNavigate2(ASender: TObject;
+      const pDisp: IDispatch; const URL, Flags, TargetFrameName, PostData,
+      Headers: OleVariant; var Cancel: WordBool);
+    procedure WebViewDocumentComplete(ASender: TObject; const pDisp: IDispatch;
+      const URL: OleVariant);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure FormActivate(Sender: TObject);
+    procedure FormDeactivate(Sender: TObject);
+    procedure IdHTTPServerCommandGet(AContext: TIdContext;
+      ARequestInfo: TIdHTTPRequestInfo; AResponseInfo: TIdHTTPResponseInfo);
+    procedure CutBtnClick(Sender: TObject);
+    procedure CopyBtnClick(Sender: TObject);
+    procedure PasteBtnClick(Sender: TObject);
   private
     procedure NewNote(MemoFocus: boolean);
     procedure NoteDone(UpdateList: integer);
@@ -55,21 +53,21 @@ var
   SQLDB: TSQLite3Database;
   DBFileName: string;
 
-  OldWidth, OldHeight: integer;
+  OldWidth, OldHeight, DarkThemeStartHour, DarkThemeEndHour: integer;
   NoteIndex, NoteTimeStamp: int64; LatestNote: string;
 
   FOleInPlaceActiveObject: IOleInPlaceActiveObject;
   SaveMessageHandler: TMessageEvent;
 
-  IDS_NEW_NOTE, IDS_NOTES, IDS_TODAY, IDS_YESTERDAY, IDS_DAYSAGO, IDS_SYNC: string;
-  IDS_DEV_SYNC_CONFIRM, IDS_CUT, IDS_COPY, IDS_PASTE, IDS_LAST_UPDATE: string;
+  IDS_NEW_NOTE, IDS_NOTES, IDS_TODAY, IDS_YESTERDAY, IDS_DAYSAGO, IDS_SEARCH: string;
+  IDS_SYNC, IDS_DEV_SYNC_CONFIRM, IDS_CUT, IDS_COPY, IDS_PASTE, IDS_LAST_UPDATE: string;
 
-  IDS_SETTINGS, IDS_INTERFACE, IDS_DARK_THEME, IDS_THEME_TIME, IDS_SYNCHRONIZATION,
-  IDS_SYNC_PORT, IDS_SYNC_WITH_ANY_IPS, IDS_ALLOW_IPS, IDS_ALLOW_DEVS, IDS_ALLOW_DEV_REM,
-  IDS_ENTER_DEV_ID, IDS_BLOCK_REQUEST_NEW_DEVS, IDS_IMPORT, IDS_EXPORT, IDS_DONE,
-  IDS_OK, IDS_CANCEL: string;
+  IDS_SETTINGS, IDS_INTERFACE, IDS_DARK_THEME, IDS_THEME_TIME, IDS_DARK_THEME_START, IDS_DARK_THEME_END,
+  IDS_SYNCHRONIZATION, IDS_SYNC_PORT, IDS_SYNC_WITH_ANY_IPS, IDS_ALLOW_IPS, IDS_ALLOW_DEVS,
+  IDS_ALLOW_DEV_REM, IDS_ENTER_DEV_ID, IDS_BLOCK_REQUEST_NEW_DEVS, IDS_IMPORT, IDS_EXPORT, IDS_CATEGORIES,
+  IDS_DONE, IDS_OK, IDS_CANCEL: string;
 
-  AllowedIPs, AuthorizedDevices: TStringList;
+  AllowedIPs, AuthorizedDevices, CategoriesList: TStringList;
   AllowAnyIPs, BlockReqNewDevs: boolean;
   UseDarkTheme, UseThemeTime: boolean;
 
@@ -79,11 +77,11 @@ const
 
 implementation
 
-uses Unit2;
-
 {$R *.dfm}
 
-//TimeStamp по Гринвичу GMT или UTC +0
+uses Unit2;
+
+//TimeStamp РїРѕ Р“СЂРёРЅРІРёС‡Сѓ GMT РёР»Рё UTC +0
 function GetTimeStamp: int64;
 var
  SystemTime: TSystemTime;
@@ -113,47 +111,6 @@ begin
   Str:=Str + 'x';
   while Pos('x', Str) > 0 do begin
     Result:=Result + Chr( StrToIntDef ( Copy( Str, 1, Pos('x', Str) - 1), 0 ) );
-    Delete(Str, 1, Pos('x', Str));
-  end;
-end;
-
-function StringToWideString(const Str: AnsiString; CodePage: Word): WideString;
-var
-  l: integer;
-begin
-  if Str = '' then
-    Result:=''
-  else
-  begin
-    l:=MultiByteToWideChar(CodePage, MB_PRECOMPOSED, PChar(@Str[1]), -1, nil, 0);
-    SetLength(Result, l - 1);
-    if l > 1 then
-      MultiByteToWideChar(CodePage, MB_PRECOMPOSED, PChar(@Str[1]), -1, PWideChar(@Result[1]), l - 1);
-  end;
-end;
-
-function StrToWideCharCodes(Str: string): string;
-var
-  i: integer;
-  WStr: WideString;
-begin
-  Result:='';
-  WStr:=StringToWideString(Str, CP_ACP);
-  for i:=1 to Length(WStr) do
-    Result:=Result + 'x' + IntToStr( Ord( WStr[i] ) );
-end;
-
-function WideCharCodesToStr(Str: string): string;
-var
-  i: integer;
-begin
-  Result:='';
-  if Length(Str) = 0 then Exit;
-  if Str[1] <> 'x' then Exit;
-  Delete(Str, 1, 1);
-  Str:=Str + 'x';
-  while Pos('x', Str) > 0 do begin
-    Result:=Result + WideChar( StrToIntDef ( Copy( Str, 1, Pos('x', Str) - 1), 0 ) );
     Delete(Str, 1, Pos('x', Str));
   end;
 end;
@@ -208,9 +165,11 @@ var
   i: integer;
 
   SQLTB: TSQLite3Statement;
-  LangFile: string;
+  LangFileName: string;
+
+  LangFile: TLangFile;
 begin
-  // Предотвращение повторого запуска
+  // РџСЂРµРґРѕС‚РІСЂР°С‰РµРЅРёРµ РїРѕРІС‚РѕСЂРѕРіРѕ Р·Р°РїСѓСЃРєР°
   WND:=FindWindow('TMain', AppName);
   if (WND <> 0) and (ParamStr(1) <> '-show') then begin
     SetForegroundWindow(WND);
@@ -226,10 +185,16 @@ begin
   UseDarkTheme:=Ini.ReadBool('Main', 'DarkTheme', false);
   UseThemeTime:=Ini.ReadBool('Main', 'ThemeTime', false);
 
-  // Автоматическое изменение темы от времени суток
+  CategoriesList:=TStringList.Create;
+  CategoriesList.Text:=Ini.ReadString('Main', 'Categories', '');
+
+  DarkThemeStartHour:=Ini.ReadInteger('Main', 'DarkThemeStartHour', 18);
+  DarkThemeEndHour:=Ini.ReadInteger('Main', 'DarkThemeEndHour', 8);
+
+  // РђРІС‚РѕРјР°С‚РёС‡РµСЃРєРѕРµ РёР·РјРµРЅРµРЅРёРµ С‚РµРјС‹ РѕС‚ РІСЂРµРјРµРЅРё СЃСѓС‚РѕРє
   if (UseDarkTheme = false) and (UseThemeTime) then begin
     DecodeTime(Now, CurHour, NilTime, NilTime, NilTime);
-    if (CurHour <= 7) or (CurHour >= 18) then
+    if (CurHour < DarkThemeEndHour) or (CurHour >= DarkThemeStartHour) then
       UseDarkTheme:=true;
   end;
 
@@ -251,41 +216,62 @@ begin
 
   IdHTTPServer.Active:=true;
 
-  // Перевод
-  LangFile:=GetLocaleInformation(LOCALE_SENGLANGUAGE) + '.ini';
-  if not FileExists(ExtractFilePath(ParamStr(0)) + 'Languages\' + LangFile) then
-    LangFile:='English.ini';
+  // РџРµСЂРµРІРѕРґ
+  LangFileName:=GetLocaleInformation(LOCALE_SENGLANGUAGE) + '.txt';
+  if not FileExists(ExtractFilePath(ParamStr(0)) + 'Languages\' + LangFileName) then
+    LangFileName:='English.txt';
+  //LangFileName:='English.txt';
+  //LangFileName:='Chinese.txt';
+  //LangFileName:='Spanish.txt';
+  //LangFileName:='Portuguese.txt';
+  //LangFileName:='French.txt';
+  //LangFileName:='German.txt';
+  //LangFileName:='Japanese.txt';
+  //LangFileName:='Italian.txt';
+  //LangFileName:='Korean.txt';
 
-  Ini:=TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Languages\' + LangFile);
-  IDS_NEW_NOTE:=Ini.ReadString('Main', 'ID_NEW_NOTE', '');
-  IDS_NOTES:=Ini.ReadString('Main', 'ID_NOTES', '');
-  IDS_TODAY:=Ini.ReadString('Main', 'ID_TODAY', '');
-  IDS_YESTERDAY:=Ini.ReadString('Main', 'ID_YESTERDAY', '');
-  IDS_DAYSAGO:=Ini.ReadString('Main', 'ID_DAYSAGO', '');
-  IDS_SYNC:=Ini.ReadString('Main', 'ID_SYNC', '');
-  IDS_DEV_SYNC_CONFIRM:=Ini.ReadString('Main', 'ID_DEV_SYNC_CONFIRM', '');
-  IDS_CUT:=Ini.ReadString('Main', 'ID_CUT', '');
-  IDS_COPY:=Ini.ReadString('Main', 'ID_COPY', '');
-  IDS_PASTE:=Ini.ReadString('Main', 'ID_PASTE', '');
-  IDS_LAST_UPDATE:=Ini.ReadString('Main', 'ID_LAST_UPDATE', '');
+  LangFile:=TLangFile.Create(ExtractFilePath(ParamStr(0)) + 'Languages\' + LangFileName);
+  try
+    IDS_NEW_NOTE:=LangFile.GetString('NEW_NOTE', '');
+    IDS_NOTES:=LangFile.GetString('NOTES', '');
+    IDS_TODAY:=LangFile.GetString('TODAY', '');
+    IDS_YESTERDAY:=LangFile.GetString('YESTERDAY', '');
+    IDS_DAYSAGO:=LangFile.GetString('DAYSAGO', '');
+    IDS_SEARCH:=LangFile.GetString('SEARCH', '');
+    IDS_SYNC:=LangFile.GetString('SYNC', '');
+    IDS_DEV_SYNC_CONFIRM:=LangFile.GetString('DEV_SYNC_CONFIRM', '');
+    IDS_CUT:=LangFile.GetString('CUT', '');
+    IDS_COPY:=LangFile.GetString('COPY', '');
+    IDS_PASTE:=LangFile.GetString('PASTE', '');
+    IDS_LAST_UPDATE:=LangFile.GetString('LAST_UPDATE', '');
 
-  IDS_SETTINGS:=Ini.ReadString('Main', 'ID_SETTINGS', '');
-  IDS_INTERFACE:=Ini.ReadString('Main', 'ID_INTERFACE', '');
-  IDS_DARK_THEME:=Ini.ReadString('Main', 'ID_DARK_THEME', '');
-  IDS_THEME_TIME:=Ini.ReadString('Main', 'ID_THEME_TIME', '');
-  IDS_SYNCHRONIZATION:=Ini.ReadString('Main', 'ID_SYNCHRONIZATION', '');
-  IDS_SYNC_PORT:=Ini.ReadString('Main', 'ID_SYNC_PORT', '');
-  IDS_SYNC_WITH_ANY_IPS:=Ini.ReadString('Main', 'ID_SYNC_WITH_ANY_IPS', '');
-  IDS_ALLOW_IPS:=Ini.ReadString('Main', 'ID_ALLOW_IPS', '');
-  IDS_ALLOW_DEVS:=Ini.ReadString('Main', 'ID_ALLOW_DEVS', '');
-  IDS_ALLOW_DEV_REM:=Ini.ReadString('Main', 'ID_ALLOW_DEV_REM', '');
-  IDS_ENTER_DEV_ID:=Ini.ReadString('Main', 'ID_ENTER_DEV_ID', '');
-  IDS_BLOCK_REQUEST_NEW_DEVS:=Ini.ReadString('Main', 'ID_BLOCK_REQUEST_NEW_DEVS', '');
-  IDS_IMPORT:=Ini.ReadString('Main', 'ID_IMPORT', '');
-  IDS_EXPORT:=Ini.ReadString('Main', 'ID_EXPORT', '');
-  IDS_DONE:=Ini.ReadString('Main', 'ID_DONE', '');
-  IDS_OK:=Ini.ReadString('Main', 'ID_OK', '');
-  IDS_CANCEL:=Ini.ReadString('Main', 'ID_CANCEL', '');
+    IDS_SETTINGS:=LangFile.GetString('SETTINGS', '');
+    IDS_INTERFACE:=LangFile.GetString('INTERFACE', '');
+    IDS_DARK_THEME:=LangFile.GetString('DARK_THEME', '');
+    IDS_THEME_TIME:=LangFile.GetString('THEME_TIME', '');
+    IDS_DARK_THEME_START:=LangFile.GetString('DARK_THEME_START', '');
+    IDS_DARK_THEME_END:=LangFile.GetString('DARK_THEME_END', '');
+    IDS_SYNCHRONIZATION:=LangFile.GetString('SYNCHRONIZATION', '');
+    IDS_SYNC_PORT:=LangFile.GetString('SYNC_PORT', '');
+    IDS_SYNC_WITH_ANY_IPS:=LangFile.GetString('SYNC_WITH_ANY_IPS', '');
+    IDS_ALLOW_IPS:=LangFile.GetString('ALLOW_IPS', '');
+    IDS_ALLOW_DEVS:=LangFile.GetString('ALLOW_DEVS', '');
+    IDS_ALLOW_DEV_REM:=LangFile.GetString('ALLOW_DEV_REM', '');
+    IDS_ENTER_DEV_ID:=LangFile.GetString('ENTER_DEV_ID', '');
+    IDS_BLOCK_REQUEST_NEW_DEVS:=LangFile.GetString('BLOCK_REQUEST_NEW_DEVS', '');
+    IDS_IMPORT:=LangFile.GetString('IMPORT', '');
+    IDS_EXPORT:=LangFile.GetString('EXPORT', '');
+    IDS_CATEGORIES:=LangFile.GetString('CATEGORIES', '');
+    IDS_DONE:=LangFile.GetString('DONE', '');
+    IDS_OK:=LangFile.GetString('OK', '');
+    IDS_CANCEL:=LangFile.GetString('CANCEL', '');
+    if CategoriesList.Text = '' then
+      CategoriesList.Text:=LangFile.GetString('USER_CATEGORIES', '');
+  finally
+    LangFile.Free;
+  end;
+
+  CategoriesList.Text:=Trim(StringReplace(CategoriesList.Text, '\n', #13#10, [rfReplaceAll]));
 
   CutBtn.Caption:=IDS_CUT;
   CopyBtn.Caption:=IDS_COPY;
@@ -293,7 +279,7 @@ begin
   Application.Title:=Caption;
   Main.Visible:=false;
   WebView.Silent:=true;
-  WebView.Navigate(ExtractFilePath(ParamStr(0)) + 'style\main.html');
+  WebView.Navigate(ExtractFilePath(ParamStr(0)) + 'UI\main.html');
 
   DBFileName:='Notes.db';
   for i:=1 to ParamCount do
@@ -308,22 +294,22 @@ begin
 
   SQLDB.Execute('CREATE TABLE IF NOT EXISTS Notes (ID TIMESTAMP, Note TEXT, DateTime TIMESTAMP)');
 
-  // Ограничение IP адресов для синхронизации
+  // РћРіСЂР°РЅРёС‡РµРЅРёРµ IP Р°РґСЂРµСЃРѕРІ РґР»СЏ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё
   AllowedIPs:=TStringList.Create;
   if FileExists(ExtractFilePath(ParamStr(0)) + AllowedIPsFile) then
     AllowedIPs.LoadFromFile(ExtractFilePath(ParamStr(0)) + AllowedIPsFile);
 
-  // Авторизованные устройства
+  // РђРІС‚РѕСЂРёР·РѕРІР°РЅРЅС‹Рµ СѓСЃС‚СЂРѕР№СЃС‚РІР°
   AuthorizedDevices:=TStringList.Create;
   SQLTB:=SQLDB.Prepare('SELECT name FROM sqlite_master WHERE name <> "Notes"');
   try
     while SQLTB.Step = SQLITE_ROW do
-      AuthorizedDevices.Add(Copy(SQLTB.ColumnText(0), 9, Length(SQLTB.ColumnText(0)))); //Actions_ не берем
+      AuthorizedDevices.Add(Copy(SQLTB.ColumnText(0), 9, Length(SQLTB.ColumnText(0)))); //Actions_ РЅРµ Р±РµСЂРµРј
   finally
     SQLTB.Free;
   end;
 
-  // Экспорт, импорт
+  // Р­РєСЃРїРѕСЂС‚, РёРјРїРѕСЂС‚
   for i:=1 to ParamCount do begin
     if (LowerCase(ParamStr(i)) = '-export') and (Trim(ParamStr(i + 1)) <> '') then
       ExportNotes(ParamStr(i + 1));
@@ -343,11 +329,11 @@ begin
   Result:=Str;
 end;
 
-function NoteDateTime(sDate: string): string; // Дата в заметке
+function NoteDateTime(sDate: string): string; // Р”Р°С‚Р° РІ Р·Р°РјРµС‚РєРµ
 var
   mTime, nYear: string;
 begin
-  sDate:=DateTimeToStr(UNIXToDateTime(StrToInt64(sDate))); // Перевод TimeStamp в DateTimeStr
+  sDate:=DateTimeToStr(UNIXToDateTime(StrToInt64(sDate))); // РџРµСЂРµРІРѕРґ TimeStamp РІ DateTimeStr
 
   mTime:=Copy(sDate, Pos(' ', sDate) + 1, Length(sDate) - Pos(' ', sDate));
   nYear:=FormatDateTime('yyyy', StrToDate(Copy(sDate, 1, Pos(' ', sDate))));
@@ -362,7 +348,7 @@ function ListDateTime(sDate: string): string;
 var
   mTime, MyDate, nYear: string; DaysAgo: integer;
 begin
-  sDate:=DateTimeToStr(UNIXToDateTime(StrToInt64(sDate))); // Перевод TimeStamp в DateTimeStr
+  sDate:=DateTimeToStr(UNIXToDateTime(StrToInt64(sDate))); // РџРµСЂРµРІРѕРґ TimeStamp РІ DateTimeStr
 
   DaysAgo:=DaysBetween(StrToDate(Copy(sDate, 1, Pos(' ', sDate) - 1)), Date);
 
@@ -385,24 +371,44 @@ begin
   Result:=MyDate;
 end;
 
-procedure TMain.LoadNotes;
+procedure TMain.ShowNotes(SearchValue: string);
 var
-  i, NotesCount: integer; SQLTB: TSQLite3Statement;
+  SQLTB: TSQLite3Statement;
+  NotesCount: integer;
+  NoteStr: string;
 begin
+  //if SearchValue = '' then
   SQLTB:=SQLDB.Prepare('SELECT * FROM Notes ORDER BY DateTime DESC');
+  //else
+    //SQLTB := SQLDB.Prepare('SELECT * FROM Notes WHERE Note LIKE ''%' + StrToCharCodes(Trim(SearchValue)) + '%'' ORDER BY DateTime DESC');
+  SearchValue:=AnsiLowerCase(SearchValue);
   try
     NotesCount:=0;
     WebView.OleObject.Document.getElementById('NotesCount').innerHTML:=IDS_NOTES + ' (0)';
     WebView.OleObject.Document.getElementById('items').innerHTML:='';
     while SQLTB.Step = SQLITE_ROW do begin
+      NoteStr:=CharCodesToStr(SQLTB.ColumnText(1));
+      if (SearchValue <> '') and (Pos(SearchValue, AnsiLowerCase(NoteStr)) = 0) then Continue;
+
       WebView.OleObject.Document.getElementById('items').innerHTML:=WebView.OleObject.Document.getElementById('items').innerHTML +
-      '<div onclick="document.location=''#note' + SQLTB.ColumnText(0) + ''';" id="note"><div id="title">' + ExtractTitle(CharCodesToStr(SQLTB.ColumnText(1))) + '</div><div id="date">' + ListDateTime(SQLTB.ColumnText(2))  + '</div></div>';
+      '<div onclick="document.location=''#note' + SQLTB.ColumnText(0) + ''';HideNoteCategories();" id="note"><div id="title">' + ExtractTitle(NoteStr) + '</div><div id="date">' + ListDateTime(SQLTB.ColumnText(2))  + '</div></div>';
       Inc(NotesCount);
     end;
   finally
     WebView.OleObject.Document.getElementById('NotesCount').innerHTML:=IDS_NOTES + ' (' + IntToStr(NotesCount) + ')';
     SQLTB.Free;
   end;
+end;
+
+procedure TMain.ShowCategories;
+var
+  i: integer;
+begin
+  WebView.OleObject.Document.getElementById('NotesCount').innerHTML:=IDS_CATEGORIES + ' (' + IntToStr(CategoriesList.Count) + ')';
+  WebView.OleObject.Document.getElementById('items').innerHTML:='';
+  for i:=0 to CategoriesList.Count - 1 do
+    WebView.OleObject.Document.getElementById('items').innerHTML:=WebView.OleObject.Document.getElementById('items').innerHTML +
+    '<div onclick="document.location=''#search=' + CategoriesList.Strings[i] + '''" id="note"><div id="title">' + CategoriesList.Strings[i] + '</div></div>';
 end;
 
 procedure TMain.NoteDone(UpdateList: integer);
@@ -412,44 +418,89 @@ begin
   // Update
   if (NoteIndex <> -1) and ( Trim(LatestNote) <> Trim(WebView.OleObject.Document.getElementById('memo').innerHTML) ) then begin
 
-    if (GetAsyncKeyState(VK_LSHIFT) <> 0) or (GetAsyncKeyState(VK_RSHIFT) <> 0) then begin //Если нажат Shift, то не обновляем дату
+    if (GetAsyncKeyState(VK_LSHIFT) <> 0) or (GetAsyncKeyState(VK_RSHIFT) <> 0) then begin //Р•СЃР»Рё РЅР°Р¶Р°С‚ Shift, С‚Рѕ РЅРµ РѕР±РЅРѕРІР»СЏРµРј РґР°С‚Сѓ
       SQLDB.Execute('UPDATE Notes SET Note="' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '" WHERE ID=' + IntToStr(NoteIndex));
 
-      // Добавляем действие во все таблицы авторизованных устройств. Проверка доступности нужна для использования иных баз данных
+      // Р”РѕР±Р°РІР»СЏРµРј РґРµР№СЃС‚РІРёРµ РІРѕ РІСЃРµ С‚Р°Р±Р»РёС†С‹ Р°РІС‚РѕСЂРёР·РѕРІР°РЅРЅС‹С… СѓСЃС‚СЂРѕР№СЃС‚РІ. РџСЂРѕРІРµСЂРєР° РґРѕСЃС‚СѓРїРЅРѕСЃС‚Рё РЅСѓР¶РЅР° РґР»СЏ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ РёРЅС‹С… Р±Р°Р· РґР°РЅРЅС‹С…
       for i:=0 to AuthorizedDevices.Count - 1 do
         if SQLDBTableExists('Actions_' + AuthorizedDevices.Strings[i]) then
           SQLDB.Execute('INSERT INTO Actions_' + AuthorizedDevices.Strings[i] + ' (Action, ID, Note, DateTime) values("UPDATE", "' + IntToStr(NoteIndex) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", "' + IntToStr(NoteTimeStamp) + '")');
 
-    end else begin //По умолчанию (обновление текста и даты)
+    end else begin //РџРѕ СѓРјРѕР»С‡Р°РЅРёСЋ (РѕР±РЅРѕРІР»РµРЅРёРµ С‚РµРєСЃС‚Р° Рё РґР°С‚С‹)
 	    SQLDB.Execute('UPDATE Notes SET Note="' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", DateTime="' + IntToStr(DateTimeToUnix(Now)) + '" WHERE ID=' + IntToStr(NoteIndex));
 
-      //Добавляем действие во все таблицы авторизованных устройств. Проверка доступности нужна для использования иных баз данных
+      //Р”РѕР±Р°РІР»СЏРµРј РґРµР№СЃС‚РІРёРµ РІРѕ РІСЃРµ С‚Р°Р±Р»РёС†С‹ Р°РІС‚РѕСЂРёР·РѕРІР°РЅРЅС‹С… СѓСЃС‚СЂРѕР№СЃС‚РІ. РџСЂРѕРІРµСЂРєР° РґРѕСЃС‚СѓРїРЅРѕСЃС‚Рё РЅСѓР¶РЅР° РґР»СЏ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ РёРЅС‹С… Р±Р°Р· РґР°РЅРЅС‹С…
       for i:=0 to AuthorizedDevices.Count - 1 do
         if SQLDBTableExists('Actions_' + AuthorizedDevices.Strings[i]) then
           SQLDB.Execute('INSERT INTO Actions_' + AuthorizedDevices.Strings[i] + ' (Action, ID, Note, DateTime) values("UPDATE", "' + IntToStr(NoteIndex) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", "' + IntToStr(DateTimeToUnix(Now)) + '")');
     end;
   end;
 
-  // Add, обязательно под Update, потому что обновляется текущий NoteIndex
+  // Add, РѕР±СЏР·Р°С‚РµР»СЊРЅРѕ РїРѕРґ Update, РїРѕС‚РѕРјСѓ С‡С‚Рѕ РѕР±РЅРѕРІР»СЏРµС‚СЃСЏ С‚РµРєСѓС‰РёР№ NoteIndex
   if (NoteIndex = -1) and (Trim(WebView.OleObject.Document.getElementById('memo').innerHTML) <> '') then begin
 	  CurTimeStamp:=GetTimeStamp;
 	  SQLDB.Execute('INSERT INTO Notes (ID, Note, DateTime) values("' + IntToStr(CurTimeStamp) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", "' + IntToStr(DateTimeToUnix(Now)) + '")');
-	  NoteIndex:=CurTimeStamp; //Для того, чтобы последняя запись не создавалась снова и снова
+	  NoteIndex:=CurTimeStamp; //Р”Р»СЏ С‚РѕРіРѕ, С‡С‚РѕР±С‹ РїРѕСЃР»РµРґРЅСЏСЏ Р·Р°РїРёСЃСЊ РЅРµ СЃРѕР·РґР°РІР°Р»Р°СЃСЊ СЃРЅРѕРІР° Рё СЃРЅРѕРІР°
 
-    //Добавляем действие во все базы авторизованных устройств. Проверка доступности нужна для использования иных баз данных
+    //Р”РѕР±Р°РІР»СЏРµРј РґРµР№СЃС‚РІРёРµ РІРѕ РІСЃРµ Р±Р°Р·С‹ Р°РІС‚РѕСЂРёР·РѕРІР°РЅРЅС‹С… СѓСЃС‚СЂРѕР№СЃС‚РІ. РџСЂРѕРІРµСЂРєР° РґРѕСЃС‚СѓРїРЅРѕСЃС‚Рё РЅСѓР¶РЅР° РґР»СЏ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ РёРЅС‹С… Р±Р°Р· РґР°РЅРЅС‹С…
     for i:=0 to AuthorizedDevices.Count - 1 do
       if SQLDBTableExists('Actions_' + AuthorizedDevices.Strings[i]) then
         SQLDB.Execute('INSERT INTO Actions_' + AuthorizedDevices.Strings[i] + ' (Action, ID, Note, DateTime) values("INSERT", "' + IntToStr(CurTimeStamp) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", "' + IntToStr(DateTimeToUnix(Now)) + '")');
   end;
 
   if UpdateList = 0 then begin
-    LoadNotes;
-    NewNote(true); // Новая заметка
+    ShowNotes('');
+    NewNote(true); // РќРѕРІР°СЏ Р·Р°РјРµС‚РєР°
   end;
 end;
 
-procedure TMain.WebViewBeforeNavigate2(Sender: TObject;
-  const pDisp: IDispatch; var URL, Flags, TargetFrameName, PostData,
+function URLDecode(const S: string): string;
+var
+  i, idx: Integer;
+  function WebHexToInt(HexChar: Char): Integer;
+  begin
+    case HexChar of
+      '0'..'9': Result := Ord(HexChar) - Ord('0');
+      'A'..'F': Result := Ord(HexChar) - Ord('A') + 10;
+      'a'..'f': Result := Ord(HexChar) - Ord('a') + 10;
+    else
+      Result := 0; // РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ СЃРёРјРІРѕР», РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ 0
+    end;
+  end;
+begin
+  SetLength(Result, Length(S)); // Р РµР·РµСЂРІРёСЂСѓРµРј РјРµСЃС‚Рѕ РїРѕРґ СЃС‚СЂРѕРєСѓ
+  idx := 0;
+
+  i := 1;
+  while i <= Length(S) do
+  begin
+    case S[i] of
+      '%':
+        if (i + 2 <= Length(S)) then // РџСЂРѕРІРµСЂРєР° РЅР° РІС‹С…РѕРґ Р·Р° РіСЂР°РЅРёС†С‹
+        begin
+          Result[idx + 1] := Chr((WebHexToInt(S[i + 1]) shl 4) or WebHexToInt(S[i + 2]));
+          Inc(idx);
+          Inc(i, 2); // РџСЂРѕРїСѓСЃРєР°РµРј РѕР±СЂР°Р±РѕС‚Р°РЅРЅС‹Рµ СЃРёРјРІРѕР»С‹
+        end;
+      '+':
+        begin
+          Result[idx + 1] := ' ';
+          Inc(idx);
+        end;
+    else
+      begin
+        Result[idx + 1] := S[i];
+        Inc(idx);
+      end;
+    end;
+    Inc(i);
+  end;
+
+  SetLength(Result, idx); // РЈСЂРµР·Р°РµРј СЃС‚СЂРѕРєСѓ РґРѕ С„Р°РєС‚РёС‡РµСЃРєРѕР№ РґР»РёРЅС‹
+end;
+
+procedure TMain.WebViewBeforeNavigate2(ASender: TObject;
+  const pDisp: IDispatch; const URL, Flags, TargetFrameName, PostData,
   Headers: OleVariant; var Cancel: WordBool);
 var
   sUrl: string;
@@ -471,20 +522,20 @@ begin
         WebView.OleObject.Document.getElementById('NoteTitle').innerHTML:=ExtractTitle(CharCodesToStr(SQLTB.ColumnText(1)));
         LatestNote:=CharCodesToStr(SQLTB.ColumnText(1));
 
-        NoteTimeStamp:=StrToInt64(SQLTB.ColumnText(2)); // Запомнить для синхронизации
+        NoteTimeStamp:=StrToInt64(SQLTB.ColumnText(2)); // Р—Р°РїРѕРјРЅРёС‚СЊ РґР»СЏ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё
 
-        sDate:=DateTimeToStr(UNIXToDateTime(StrToInt64(SQLTB.ColumnText(2)))); // Перевод TimeStamp в DateTimeStr
+        sDate:=DateTimeToStr(UNIXToDateTime(StrToInt64(SQLTB.ColumnText(2)))); // РџРµСЂРµРІРѕРґ TimeStamp РІ DateTimeStr
         NoteDate:=Copy(sDate, 1, Pos(' ', sDate) - 1);
         DaysAgo:=DaysBetween(StrToDate(NoteDate), Date);
 
-        if IDS_DAYSAGO='дн. назад' then begin
-          if DaysAgo mod 10 = 1 then NoteDate:=IntToStr(DaysAgo) + ' день назад';
+        if IDS_DAYSAGO='РґРЅ. РЅР°Р·Р°Рґ' then begin
+          if DaysAgo mod 10 = 1 then NoteDate:=IntToStr(DaysAgo) + ' РґРµРЅСЊ РЅР°Р·Р°Рґ';
 
           if (DaysAgo mod 10 >= 2) and (DaysAgo mod 10 <= 4) then
-            NoteDate:=IntToStr(DaysAgo) + ' дня назад';
+            NoteDate:=IntToStr(DaysAgo) + ' РґРЅСЏ РЅР°Р·Р°Рґ';
 
           if ( (DaysAgo mod 10 >= 5) and (DaysAgo mod 10 <= 9) ) or (DaysAgo mod 10 = 0) then
-            NoteDate:=IntToStr(DaysAgo) + ' дней назад';
+            NoteDate:=IntToStr(DaysAgo) + ' РґРЅРµР№ РЅР°Р·Р°Рґ';
         end else
           NoteDate:=IntToStr(DaysAgo) + ' ' + IDS_DAYSAGO;
 
@@ -497,7 +548,6 @@ begin
       finally
         SQLTB.Free;
       end;
-
   end;
 
   if sUrl = 'main.html#new' then
@@ -507,19 +557,19 @@ begin
     Settings.ShowModal;
 
   if sUrl = 'main.html#done' then
-    NoteDone(0); // Добавляем, обновляем, статус "0" обновляет список заметок в интерфейсе
+    NoteDone(0); // Р”РѕР±Р°РІР»СЏРµРј, РѕР±РЅРѕРІР»СЏРµРј, СЃС‚Р°С‚СѓСЃ "0" РѕР±РЅРѕРІР»СЏРµС‚ СЃРїРёСЃРѕРє Р·Р°РјРµС‚РѕРє РІ РёРЅС‚РµСЂС„РµР№СЃРµ
 
-  // Удаляем
+  // РЈРґР°Р»СЏРµРј
   if (sUrl = 'main.html#rem') and (NoteIndex <> -1) then begin
     WebView.OleObject.Document.getElementById('memo').innerHTML:='';
     SQLDB.Execute('DELETE FROM Notes WHERE ID=' + IntToStr(NoteIndex));
 
-    // Добавляем действие во все доступные таблицы авторизованных устройств. Проверка доступности нужна для использования иных баз данных
+    // Р”РѕР±Р°РІР»СЏРµРј РґРµР№СЃС‚РІРёРµ РІРѕ РІСЃРµ РґРѕСЃС‚СѓРїРЅС‹Рµ С‚Р°Р±Р»РёС†С‹ Р°РІС‚РѕСЂРёР·РѕРІР°РЅРЅС‹С… СѓСЃС‚СЂРѕР№СЃС‚РІ. РџСЂРѕРІРµСЂРєР° РґРѕСЃС‚СѓРїРЅРѕСЃС‚Рё РЅСѓР¶РЅР° РґР»СЏ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ РёРЅС‹С… Р±Р°Р· РґР°РЅРЅС‹С…
     for i:=0 to AuthorizedDevices.Count - 1 do
       if SQLDBTableExists('Actions_' + AuthorizedDevices.Strings[i]) then
         SQLDB.Execute('INSERT INTO Actions_' +  AuthorizedDevices.Strings[i] + ' (Action, ID) values("DELETE", "' + IntToStr(NoteIndex) + '")');
 
-    LoadNotes;
+    ShowNotes('');
     NewNote(false);
   end;
 
@@ -529,22 +579,39 @@ begin
     CopyBtn.Enabled:=CutBtn.Enabled;
     PopupMenu.Popup(Mouse.CursorPos.X, Mouse.CursorPos.Y);
   end;
+
+  if sUrl = 'main.html#show-categories' then
+    ShowCategories;
+
+  if Pos('main.html#search=', sUrl) > 0 then begin
+    Delete(sUrl, 1, Pos('#search=', sUrl) + 7);
+    ShowNotes(UrlDecode(sUrl));
+  end;
 end;
 
-procedure TMain.WebViewDocumentComplete(Sender: TObject;
-  const pDisp: IDispatch; var URL: OleVariant);
+procedure TMain.WebViewDocumentComplete(ASender: TObject;
+  const pDisp: IDispatch; const URL: OleVariant);
 var
-  sUrl: string;
+  sUrl: string; i: integer;
 begin
-  sUrl:=ExtractFileName(StringReplace(Url, '/', '\', [rfReplaceAll]));
-  if pDisp=(Sender as TWebBrowser).Application then
+  sUrl := ExtractFileName(StringReplace(Url, '/', '\', [rfReplaceAll]));
+  // РџСЂРѕРІРµСЂСЏРµРј, СЏРІР»СЏРµС‚СЃСЏ Р»Рё pDisp РѕСЃРЅРѕРІРЅС‹Рј РѕР±СЉРµРєС‚РѕРј TWebBrowser
+  if Assigned(pDisp) and (pDisp = (ASender as TWebBrowser).DefaultInterface) then begin
     if sUrl = 'main.html' then begin
-      Main.Visible:=true;
-      LoadNotes;
-      NewNote(true);
+      Main.Visible := True;
+      ShowNotes('');
+      NewNote(True);
+      WebView.OleObject.Document.getElementById('note-categories').innerHTML := '';
+      WebView.OleObject.Document.getElementById('Search').setAttribute('placeholder', IDS_SEARCH);
+
+      for i:=0 to CategoriesList.Count - 1 do
+        WebView.OleObject.Document.getElementById('note-categories').innerHTML:=WebView.OleObject.Document.getElementById('note-categories').innerHTML +
+          '<div onclick="AddNoteCategory(''' + CategoriesList.Strings[i] + ''')" id="item">' + CategoriesList.Strings[i] + '</div>';
+
       if UseDarkTheme then
-        AddStyle(ExtractFilePath(ParamStr(0)) + 'style\darktheme.css');
+        AddStyle(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'UI\darktheme.css');
     end;
+  end;
 end;
 
 procedure TMain.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -560,7 +627,7 @@ begin
     end;
   IdHTTPServer.Active:=false;
 
-  // Добавляем, обновляем, статус "-1" не обновляет список заметок в интерфейсе
+  // Р”РѕР±Р°РІР»СЏРµРј, РѕР±РЅРѕРІР»СЏРµРј, СЃС‚Р°С‚СѓСЃ "-1" РЅРµ РѕР±РЅРѕРІР»СЏРµС‚ СЃРїРёСЃРѕРє Р·Р°РјРµС‚РѕРє РІ РёРЅС‚РµСЂС„РµР№СЃРµ
   NoteDone(-1);
 
   SQLDB.Free;
@@ -568,6 +635,7 @@ begin
   FOleInPlaceActiveObject:=nil;
   AllowedIPs.Free;
   AuthorizedDevices.Free;
+  CategoriesList.Free;
 end;
 
 procedure TMain.MessageHandler(var Msg: TMsg; var Handled: Boolean);
@@ -620,7 +688,7 @@ begin
   LatestNote:='';
 end;
 
-procedure TMain.IdHTTPServerCommandGet(AThread: TIdPeerThread;
+procedure TMain.IdHTTPServerCommandGet(AContext: TIdContext;
   ARequestInfo: TIdHTTPRequestInfo; AResponseInfo: TIdHTTPResponseInfo);
 const
   AuthorizationSuccessfulStatus = 'auth:ok';
@@ -631,15 +699,15 @@ var
   i, j: integer; SQLTB: TSQLite3Statement;
   XMLDoc: IXMLDocument;
   XMLNode: IXMLNode;
-  RequestDocument: string;
+  RequestDocument, RequestFileExt, AuthDeviceID, PostData: string;
 
-  AuthDeviceID: string;
+  PostDataStream: TStringStream;
 begin
   CoInitialize(nil);
 
-  if (AllowAnyIPs = false) and (Pos(AThread.Connection.Socket.Binding.PeerIP, AllowedIPs.Text) = 0) then begin CoUninitialize; Exit; end;
+  if (AllowAnyIPs = false) and (Pos(AContext.Binding.PeerIP, AllowedIPs.Text) = 0) then begin CoUninitialize; Exit; end;
 
-  AResponseInfo.CustomHeaders.Add('Access-Control-Allow-Origin: *'); // Политика безопасности браузеров
+  AResponseInfo.CustomHeaders.Add('Access-Control-Allow-Origin: *'); // РџРѕР»РёС‚РёРєР° Р±РµР·РѕРїР°СЃРЅРѕСЃС‚Рё Р±СЂР°СѓР·РµСЂРѕРІ
 
   AuthDeviceID:='';
   for i:=0 to ARequestInfo.Params.Count - 1 do begin
@@ -647,12 +715,12 @@ begin
       AuthDeviceID:=ARequestInfo.Params.ValueFromIndex[i];
   end;
 
-  // Авторизация
+  // РђРІС‚РѕСЂРёР·Р°С†РёСЏ
   if (AuthDeviceID <> '') and (ARequestInfo.Document = '/api/auth') then begin
 
     if Pos(AuthDeviceID, AuthorizedDevices.Text) = 0 then begin
 
-      //Если блокировка новых устройств отключена
+      // Р•СЃР»Рё Р±Р»РѕРєРёСЂРѕРІРєР° РЅРѕРІС‹С… СѓСЃС‚СЂРѕР№СЃС‚РІ РѕС‚РєР»СЋС‡РµРЅР°
       if BlockReqNewDevs = false then begin
         case MessageBox(Handle, PChar(Format(IDS_DEV_SYNC_CONFIRM, [AuthDeviceID])), PChar(Caption), 35) of
           6: if Pos(AuthDeviceID, AuthorizedDevices.Text) = 0 then begin
@@ -665,30 +733,29 @@ begin
           7: AResponseInfo.ContentText:=AuthorizationDeniedStatus;
         end;
 
-      // Если блокировка новых устройств включена
+      // Р•СЃР»Рё Р±Р»РѕРєРёСЂРѕРІРєР° РЅРѕРІС‹С… СѓСЃС‚СЂРѕР№СЃС‚РІ РІРєР»СЋС‡РµРЅР°
       end else
         AResponseInfo.ContentText:=AuthorizationDeniedStatus;
 
 
-    end else // Успешная авторизация
+    end else // РЈСЃРїРµС€РЅР°СЏ Р°РІС‚РѕСЂРёР·Р°С†РёСЏ
       AResponseInfo.ContentText:=AuthorizationSuccessfulStatus;
 
     RequestDocument:='none';
   end;
 
-  // Новые действия
+  // РќРѕРІС‹Рµ РґРµР№СЃС‚РІРёСЏ
   if (AuthDeviceID <> '') and (ARequestInfo.Document = '/api/actions') then begin
-
     if Pos(AuthDeviceID + #13#10, AuthorizedDevices.Text) > 0 then begin
       SQLTB:=SQLDB.Prepare('SELECT * FROM Actions_' + AuthDeviceID);
       try
         AResponseInfo.ContentText:='<actions>' + #13#10;
         while SQLTB.Step = SQLITE_ROW do begin
           if SQLTB.ColumnText(0) = 'INSERT' then
-            AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<insert id="' + SQLTB.ColumnText(1) + '" datetime="' + SQLTB.ColumnText(3) + '">' + StrToWideCharCodes( CharCodesToStr(SQLTB.ColumnText(2)) ) + '</insert>' + #13#10;
+            AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<insert id="' + SQLTB.ColumnText(1) + '" datetime="' + SQLTB.ColumnText(3) + '">' + SQLTB.ColumnText(2) + '</insert>' + #13#10;
 
           if SQLTB.ColumnText(0) = 'UPDATE' then
-            AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<update id="' + SQLTB.ColumnText(1) + '" datetime="' + SQLTB.ColumnText(3) + '">' + StrToWideCharCodes( CharCodesToStr(SQLTB.ColumnText(2)) ) + '</update>' + #13#10;
+            AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<update id="' + SQLTB.ColumnText(1) + '" datetime="' + SQLTB.ColumnText(3) + '">' + SQLTB.ColumnText(2) + '</update>' + #13#10;
 
           if SQLTB.ColumnText(0) = 'DELETE' then
               AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<delete id="' + SQLTB.ColumnText(1) + '"></delete>' + #13#10;
@@ -704,7 +771,7 @@ begin
     RequestDocument:='none';
   end;
 
-  // Удаление полученных действий
+  // РЈРґР°Р»РµРЅРёРµ РїРѕР»СѓС‡РµРЅРЅС‹С… РґРµР№СЃС‚РІРёР№
   if (AuthDeviceID <> '') and (ARequestInfo.Document = '/api/received') then begin
     if Pos(AuthDeviceID + #13#10, AuthorizedDevices.Text) > 0 then begin
       SQLDB.Execute('DELETE FROM Actions_' + AuthDeviceID);
@@ -715,7 +782,7 @@ begin
     RequestDocument:='none';
   end;
 
-  // Все заметки
+  // Р’СЃРµ Р·Р°РјРµС‚РєРё
   if (AuthDeviceID <> '') and (ARequestInfo.Document = '/api/notes') then begin
 
     if Pos(AuthDeviceID + #13#10, AuthorizedDevices.Text) > 0 then begin
@@ -723,7 +790,7 @@ begin
       try
         AResponseInfo.ContentText:='<notes>' + #13#10;
         while SQLTB.Step = SQLITE_ROW do
-          AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<note id="' + SQLTB.ColumnText(0) + '" datetime="' + SQLTB.ColumnText(2) + '">' + StrToWideCharCodes( CharCodesToStr(SQLTB.ColumnText(1)) ) + '</note>' + #13#10;
+          AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<note id="' + SQLTB.ColumnText(0) + '" datetime="' + SQLTB.ColumnText(2) + '">' + SQLTB.ColumnText(1) + '</note>' + #13#10;
       finally
         AResponseInfo.ContentText:=AResponseInfo.ContentText + '</notes>';
         SQLTB.Free;
@@ -734,19 +801,33 @@ begin
     RequestDocument:='none';
   end;
 
-  // Проверка соединения
+  // РџСЂРѕРІРµСЂРєР° СЃРѕРµРґРёРЅРµРЅРёСЏ
   if ARequestInfo.Document = '/api/connecttest' then begin
     AResponseInfo.ContentText:=SuccessStatus;
     RequestDocument:='none';
   end;
 
-  if (AuthDeviceID <> '') and (Pos(AuthDeviceID, AuthorizedDevices.Text) > 0) and (ARequestInfo.Document = '/api/syncnotes') and (ARequestInfo.Command = 'POST') and (Trim(ARequestInfo.FormParams) <> '') then begin
-    // NoteDone(1); // Сохранение текущий заметки, без обновления списка
+  if (AuthDeviceID <> '') and (Pos(AuthDeviceID, AuthorizedDevices.Text) > 0) and (ARequestInfo.Document = '/api/syncnotes') and (ARequestInfo.CommandType = hcPOST) then begin
+    // NoteDone(1); // РЎРѕС…СЂР°РЅРµРЅРёРµ С‚РµРєСѓС‰РёР№ Р·Р°РјРµС‚РєРё, Р±РµР· РѕР±РЅРѕРІР»РµРЅРёСЏ СЃРїРёСЃРєР°
     Caption:=AppName + ' - ' + IDS_SYNC;
     Application.Title:=Caption;
     XMLDoc:=TXMLDocument.Create(nil);
+
+    PostData:='';
+    PostDataStream:=TStringStream.Create('', TEncoding.UTF8);
     try
-      XMLDoc:=LoadXMLData(ARequestInfo.FormParams);
+      if ARequestInfo.PostStream <> nil then begin
+        // РџРµСЂРµРјРµС‰Р°РµРј РґР°РЅРЅС‹Рµ РёР· PostStream РІ СЃС‚СЂРѕРєСѓ
+        ARequestInfo.PostStream.Position := 0;
+        PostDataStream.LoadFromStream(ARequestInfo.PostStream);
+        PostData:=PostDataStream.DataString;
+      end;
+    finally
+      PostDataStream.Free;
+    end;
+
+    try
+      XMLDoc:=LoadXMLData(PostData);
       XMLDoc.Active:=true;
       AResponseInfo.ContentText:=SuccessStatus;
     except;
@@ -756,36 +837,36 @@ begin
     XMLNode:=XMLDoc.DocumentElement;
     for i:=0 to XMLNode.ChildNodes.Count - 1 do
       try
-        if (XMLNode.ChildNodes[i].NodeName = 'insert') and (Trim( StrToCharCodes( WideCharCodesToStr(XMLNode.ChildNodes[i].NodeValue) ) ) <> '') then begin
-          SQLDB.Execute('INSERT INTO Notes (ID, Note, DateTime) values("' + XMLNode.ChildNodes[i].Attributes['id'] + '", "' + StrToCharCodes( WideCharCodesToStr(XMLNode.ChildNodes[i].NodeValue) ) + '", "' + XMLNode.ChildNodes[i].Attributes['datetime'] + '")');
+        if (XMLNode.ChildNodes[i].NodeName = 'insert') and (Trim( StrToCharCodes( CharCodesToStr(XMLNode.ChildNodes[i].NodeValue) ) ) <> '') then begin
+          SQLDB.Execute('INSERT INTO Notes (ID, Note, DateTime) values("' + XMLNode.ChildNodes[i].Attributes['id'] + '", "' + XMLNode.ChildNodes[i].NodeValue + '", "' + XMLNode.ChildNodes[i].Attributes['datetime'] + '")');
 
-          // Добавляем действие во все таблицы авторизованных устройств. Проверка доступности нужна для использования иных баз данных
+          // Р”РѕР±Р°РІР»СЏРµРј РґРµР№СЃС‚РІРёРµ РІРѕ РІСЃРµ С‚Р°Р±Р»РёС†С‹ Р°РІС‚РѕСЂРёР·РѕРІР°РЅРЅС‹С… СѓСЃС‚СЂРѕР№СЃС‚РІ. РџСЂРѕРІРµСЂРєР° РґРѕСЃС‚СѓРїРЅРѕСЃС‚Рё РЅСѓР¶РЅР° РґР»СЏ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ РёРЅС‹С… Р±Р°Р· РґР°РЅРЅС‹С…
           for j:=0 to AuthorizedDevices.Count - 1 do
-            if (AuthorizedDevices.Strings[j] <> AuthDeviceID) and (SQLDBTableExists('Actions_' + AuthorizedDevices.Strings[j])) then //Исключаем устройств отправляющее действие
-              SQLDB.Execute('INSERT INTO Actions_' + AuthorizedDevices.Strings[j] + ' (Action, ID, Note, DateTime) values("INSERT", "' + XMLNode.ChildNodes[i].Attributes['id'] + '", "' + StrToCharCodes( WideCharCodesToStr(XMLNode.ChildNodes[i].NodeValue) ) + '", "' + XMLNode.ChildNodes[i].Attributes['datetime'] + '")');
+            if (AuthorizedDevices.Strings[j] <> AuthDeviceID) and (SQLDBTableExists('Actions_' + AuthorizedDevices.Strings[j])) then // РСЃРєР»СЋС‡Р°РµРј СѓСЃС‚СЂРѕР№СЃС‚РІ РѕС‚РїСЂР°РІР»СЏСЋС‰РµРµ РґРµР№СЃС‚РІРёРµ
+              SQLDB.Execute('INSERT INTO Actions_' + AuthorizedDevices.Strings[j] + ' (Action, ID, Note, DateTime) values("INSERT", "' + XMLNode.ChildNodes[i].Attributes['id'] + '", "' + XMLNode.ChildNodes[i].NodeValue + '", "' + XMLNode.ChildNodes[i].Attributes['datetime'] + '")');
         end;
 
         if XMLNode.ChildNodes[i].NodeName = 'update' then begin
-          SQLDB.Execute('UPDATE Notes SET Note="' + StrToCharCodes( WideCharCodesToStr(XMLNode.ChildNodes[i].NodeValue) ) + '", DateTime="' + XMLNode.ChildNodes[i].Attributes['datetime'] + '" WHERE ID=' + XMLNode.ChildNodes[i].Attributes['id']);
+          SQLDB.Execute('UPDATE Notes SET Note="' + XMLNode.ChildNodes[i].NodeValue + '", DateTime="' + XMLNode.ChildNodes[i].Attributes['datetime'] + '" WHERE ID=' + XMLNode.ChildNodes[i].Attributes['id']);
 
-          // Добавляем действие во все таблицы авторизованных устройств. Проверка доступности нужна для использования иных баз данных
+          // Р”РѕР±Р°РІР»СЏРµРј РґРµР№СЃС‚РІРёРµ РІРѕ РІСЃРµ С‚Р°Р±Р»РёС†С‹ Р°РІС‚РѕСЂРёР·РѕРІР°РЅРЅС‹С… СѓСЃС‚СЂРѕР№СЃС‚РІ. РџСЂРѕРІРµСЂРєР° РґРѕСЃС‚СѓРїРЅРѕСЃС‚Рё РЅСѓР¶РЅР° РґР»СЏ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ РёРЅС‹С… Р±Р°Р· РґР°РЅРЅС‹С…
           for j:=0 to AuthorizedDevices.Count - 1 do
-           if (AuthorizedDevices.Strings[j] <> AuthDeviceID) and (SQLDBTableExists('Actions_' + AuthorizedDevices.Strings[j])) then //Исключаем устройств отправляющее действие
-              SQLDB.Execute('INSERT INTO Actions_' + AuthorizedDevices.Strings[j] + ' (Action, ID, Note, DateTime) values("UPDATE", "' + XMLNode.ChildNodes[i].Attributes['id'] + '", "' + StrToCharCodes( WideCharCodesToStr(XMLNode.ChildNodes[i].NodeValue) ) + '", "' + XMLNode.ChildNodes[i].Attributes['datetime'] + '")');
+           if (AuthorizedDevices.Strings[j] <> AuthDeviceID) and (SQLDBTableExists('Actions_' + AuthorizedDevices.Strings[j])) then // РСЃРєР»СЋС‡Р°РµРј СѓСЃС‚СЂРѕР№СЃС‚РІ РѕС‚РїСЂР°РІР»СЏСЋС‰РµРµ РґРµР№СЃС‚РІРёРµ
+              SQLDB.Execute('INSERT INTO Actions_' + AuthorizedDevices.Strings[j] + ' (Action, ID, Note, DateTime) values("UPDATE", "' + XMLNode.ChildNodes[i].Attributes['id'] + '", "' + XMLNode.ChildNodes[i].NodeValue + '", "' + XMLNode.ChildNodes[i].Attributes['datetime'] + '")');
         end;
 
         if XMLNode.ChildNodes[i].NodeName = 'delete' then begin
           SQLDB.Execute('DELETE FROM Notes WHERE ID=' + XMLNode.ChildNodes[i].Attributes['id']);
-          // Добавляем действие во все доступные таблицы авторизованных устройств. Проверка доступности нужна для использования иных баз данных
+          // Р”РѕР±Р°РІР»СЏРµРј РґРµР№СЃС‚РІРёРµ РІРѕ РІСЃРµ РґРѕСЃС‚СѓРїРЅС‹Рµ С‚Р°Р±Р»РёС†С‹ Р°РІС‚РѕСЂРёР·РѕРІР°РЅРЅС‹С… СѓСЃС‚СЂРѕР№СЃС‚РІ. РџСЂРѕРІРµСЂРєР° РґРѕСЃС‚СѓРїРЅРѕСЃС‚Рё РЅСѓР¶РЅР° РґР»СЏ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ РёРЅС‹С… Р±Р°Р· РґР°РЅРЅС‹С…
           for j:=0 to AuthorizedDevices.Count - 1 do
-            if (AuthorizedDevices.Strings[j] <> AuthDeviceID) and (SQLDBTableExists('Actions_' + AuthorizedDevices.Strings[j])) then //Исключаем устройств отправляющее действие
+            if (AuthorizedDevices.Strings[j] <> AuthDeviceID) and (SQLDBTableExists('Actions_' + AuthorizedDevices.Strings[j])) then // РСЃРєР»СЋС‡Р°РµРј СѓСЃС‚СЂРѕР№СЃС‚РІ РѕС‚РїСЂР°РІР»СЏСЋС‰РµРµ РґРµР№СЃС‚РІРёРµ
               SQLDB.Execute('INSERT INTO Actions_' +  AuthorizedDevices.Strings[j] + ' (Action, ID) values("DELETE", "' + XMLNode.ChildNodes[i].Attributes['id'] + '")');
         end;
       except
       end;
 
-    // Проблема с мгновенным выводом, поэтому просто обновляем страницу и LoadNotes загружается снова.
-    WebView.Navigate(ExtractFilePath(ParamStr(0)) + 'style\main.html');
+    // РџСЂРѕР±Р»РµРјР° СЃ РјРіРЅРѕРІРµРЅРЅС‹Рј РІС‹РІРѕРґРѕРј, РїРѕСЌС‚РѕРјСѓ РїСЂРѕСЃС‚Рѕ РѕР±РЅРѕРІР»СЏРµРј СЃС‚СЂР°РЅРёС†Сѓ Рё LoadNotes Р·Р°РіСЂСѓР¶Р°РµС‚СЃСЏ СЃРЅРѕРІР°.
+    WebView.Navigate(ExtractFilePath(ParamStr(0)) + 'UI\main.html');
 
     Caption:=AppName;
     Application.Title:=Caption;
@@ -796,17 +877,36 @@ begin
   if (RequestDocument <> 'none') then begin
     RequestDocument:=ExtractFilePath(ParamStr(0)) + '\webapp' + StringReplace(ARequestInfo.Document, '/', '\', [rfReplaceAll]);
     RequestDocument:=StringReplace(RequestDocument, '\\', '\', [rfReplaceAll]);
-
-    if ARequestInfo.Document = '/webapp' then //по webapp отдаем главный файл
-      RequestDocument:=ExtractFilePath(ParamStr(0)) + 'webapp\main.html';
+    if ARequestInfo.Document = '/webapp' then // РїРѕ webapp РѕС‚РґР°РµРј РіР»Р°РІРЅС‹Р№ С„Р°Р№Р»
+      RequestDocument:=ExtractFilePath(ParamStr(0)) + 'webapp\index.html';
 
     if FileExists(RequestDocument) then begin
-      AResponseInfo.ContentType:=IdHTTPServer.MIMETable.GetDefaultFileExt(RequestDocument);
+      RequestFileExt:=AnsiLowerCase(ExtractFileExt(ARequestInfo.Document));
 
-    if ARequestInfo.Document = '/app.manifest' then
-      AResponseInfo.ContentType:='text/cache-manifest';
+      if (RequestFileExt = '.html') or (RequestFileExt = '') then
+        AResponseInfo.ContentType := 'text/html'
+      else if RequestFileExt = '.js' then
+        AResponseInfo.ContentType := 'application/javascript'
+      else if RequestFileExt = '.css' then
+        AResponseInfo.ContentType := 'text/css'
+      else if RequestFileExt = '.png' then
+        AResponseInfo.ContentType := 'image/png'
+      else if RequestFileExt = '.txt' then
+        AResponseInfo.ContentType := 'text/plain'
+      else if ARequestInfo.Document = '/app.manifest' then // РЈСЃС‚Р°СЂРµРІС€РёР№ РјРµС‚РѕРґ, РѕРґРЅР°РєРѕ РєС‚Рѕ-С‚Рѕ РІСЃРµ РµС‰Рµ РјРѕР¶РµС‚ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ СѓСЃС‚СЂРѕР№СЃС‚РІР° РЅР° iOS 12
+        AResponseInfo.ContentType:='text/cache-manifest'
+      else
+        AResponseInfo.ContentType := 'application/octet-stream';
 
-      IdHTTPServer.ServeFile(AThread, AResponseinfo, RequestDocument);
+     AResponseInfo.ContentType:=AResponseInfo.ContentType + '; charset=utf-8';
+
+      // AResponseInfo.ContentType:=IdHTTPServer.MIMETable.GetDefaultFileExt(RequestDocument); РєР°РєРёРµ-С‚Рѕ РїСЂРѕР±Р»РµРјС‹ СЃ РЅРёРј
+
+      //Memo1.Lines.Add(AResponseInfo.ContentType + ' ' + RequestFileExt + ' ' + RequestDocument);
+      try
+        AResponseInfo.ContentStream:=TFileStream.Create(RequestDocument, fmOpenRead or fmShareDenyWrite);
+        except
+        end;
     end else
       AResponseInfo.ContentText:=ErrorStatus;
   end;
@@ -819,7 +919,7 @@ begin
   keybd_event(VK_CONTROL, MapVirtualKey(VK_CONTROL, 0), 0, 0);
   keybd_event(Ord('V'), MapVirtualKey(Ord('V'), 0), 0, 0);
   keybd_event(Ord('V'), MapVirtualKey(Ord('V'), 0), KEYEVENTF_KEYUP, 0);
-  keybd_event(VK_CONTROL, MapVirtualKey(VK_CONTROL, 0), KEYEVENTF_KEYUP, 0)
+  keybd_event(VK_CONTROL, MapVirtualKey(VK_CONTROL, 0), KEYEVENTF_KEYUP, 0);
 end;
 
 procedure TMain.CopyBtnClick(Sender: TObject);
@@ -827,7 +927,7 @@ begin
   keybd_event(VK_CONTROL, MapVirtualKey(VK_CONTROL, 0), 0, 0);
   keybd_event(Ord('C'), MapVirtualKey(Ord('C'), 0), 0, 0);
   keybd_event(Ord('C'), MapVirtualKey(Ord('C'), 0), KEYEVENTF_KEYUP, 0);
-  keybd_event(VK_CONTROL, MapVirtualKey(VK_CONTROL, 0), KEYEVENTF_KEYUP, 0)
+  keybd_event(VK_CONTROL, MapVirtualKey(VK_CONTROL, 0), KEYEVENTF_KEYUP, 0);
 end;
 
 procedure TMain.CutBtnClick(Sender: TObject);
@@ -835,7 +935,7 @@ begin
   keybd_event(VK_CONTROL, MapVirtualKey(VK_CONTROL, 0), 0, 0);
   keybd_event(Ord('X'), MapVirtualKey(Ord('X'), 0), 0, 0);
   keybd_event(Ord('X'), MapVirtualKey(Ord('X'), 0), KEYEVENTF_KEYUP, 0);
-  keybd_event(VK_CONTROL, MapVirtualKey(VK_CONTROL, 0), KEYEVENTF_KEYUP, 0)
+  keybd_event(VK_CONTROL, MapVirtualKey(VK_CONTROL, 0), KEYEVENTF_KEYUP, 0);
 end;
 
 procedure TMain.AddStyle(FileName: string);
@@ -869,19 +969,24 @@ begin
   finally
     SQLTB.Free;
   end;
-  Notes.SaveToFile(FileName);
+  Notes.SaveToFile(FileName, TEncoding.UTF8);
   Notes.Free;
 end;
 
 procedure TMain.ImportNotes(FileName: string);
 var
   Notes: TStringList;
-  i: integer;
+  i, j: integer;
   ImportNote, ImportNoteDateTime, ImportNoteText: string;
 begin
   if not FileExists(FileName) then Exit;
   Notes:=TStringList.Create;
-  Notes.LoadFromFile(FileName);
+
+  try
+    Notes.LoadFromFile(FileName, TEncoding.UTF8);
+  except
+    Notes.LoadFromFile(FileName);
+  end;
 
   for i:=Notes.Count - 1 downto 0 do begin
     ImportNote:=Notes.Strings[i];
@@ -892,8 +997,14 @@ begin
       ImportNoteText:=StringReplace(ImportNote, ' \n ', #10, [rfReplaceAll]);
     end;
 
-    if (Trim(ImportNoteDateTime) <> '') and (Trim(ImportNoteText) <> '') then
+    if (Trim(ImportNoteDateTime) <> '') and (Trim(ImportNoteText) <> '') then begin
       SQLDB.Execute('INSERT INTO Notes (ID, Note, DateTime) values("' + ImportNoteDateTime + '", "' + StrToCharCodes(ImportNoteText) + '", "' + ImportNoteDateTime + '")');
+
+      // Р”РѕР±Р°РІР»СЏРµРј РґРµР№СЃС‚РІРёСЏ РІРѕ РІСЃРµ С‚Р°Р±Р»РёС†С‹ Р°РІС‚РѕСЂРёР·РѕРІР°РЅРЅС‹С… СѓСЃС‚СЂРѕР№СЃС‚РІ. РџСЂРѕРІРµСЂРєР° РґРѕСЃС‚СѓРїРЅРѕСЃС‚Рё РЅСѓР¶РЅР° РґР»СЏ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ РёРЅС‹С… Р±Р°Р· РґР°РЅРЅС‹С…
+      for j:=0 to AuthorizedDevices.Count - 1 do
+        if SQLDBTableExists('Actions_' + AuthorizedDevices.Strings[j]) then
+          SQLDB.Execute('INSERT INTO Actions_' + AuthorizedDevices.Strings[j] + ' (Action, ID, Note, DateTime) values("INSERT", "' + ImportNoteDateTime + '", "' + StrToCharCodes(ImportNoteText) + '", "' + ImportNoteDateTime + '")');
+    end;
   end;
 
   Notes.Free;
@@ -906,4 +1017,3 @@ finalization
  OleUninitialize;
 
 end.
-

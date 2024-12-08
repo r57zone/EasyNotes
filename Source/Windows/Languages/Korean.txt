@@ -1,0 +1,36 @@
+# Main
+NEW_NOTE=새로운 노트
+NOTES=노트
+TODAY=오늘
+YESTERDAY=어제
+DAYSAGO=일 전
+SEARCH=검색...
+SYNC=동기화
+DEV_SYNC_CONFIRM="%s" 장치가 동기화 권한을 요청합니다. 허용하시겠습니까?
+CUT=잘라내기
+COPY=복사
+PASTE=붙여넣기
+LAST_UPDATE=마지막 업데이트:
+
+# Settings
+SETTINGS=설정
+INTERFACE=인터페이스
+DARK_THEME=어두운 테마
+THEME_TIME=테마는 시간에 따라 달라짐
+DARK_THEME_START=어두운 테마 시작:
+DARK_THEME_END=어두운 테마 종료:
+SYNCHRONIZATION=동기화
+SYNC_PORT=포트:
+SYNC_WITH_ANY_IPS=모든 IP와 동기화 (보안되지 않음)
+ALLOW_IPS=허용된 IP 주소:
+ALLOW_DEVS=허용된 장치:
+ALLOW_DEV_REM=장치 제거
+ENTER_DEV_ID=장치 ID 입력
+BLOCK_REQUEST_NEW_DEVS=새로운 장치 요청 차단
+IMPORT=가져오기
+EXPORT=내보내기
+CATEGORIES=카테고리
+USER_CATEGORIES=#쇼핑\n#아이디어\n#일\n#프로젝트\n#가족\n#건강\n#재정\n#학습\n#여행\n#취미\n#개인
+DONE=완료
+OK=확인
+CANCEL=취소

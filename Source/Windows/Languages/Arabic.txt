@@ -1,0 +1,36 @@
+# Main
+NEW_NOTE=ملاحظة جديدة
+NOTES=الملاحظات
+TODAY=اليوم
+YESTERDAY=أمس
+DAYSAGO=منذ أيام
+SEARCH=بحث...
+SYNC=مزامنة
+DEV_SYNC_CONFIRM=الجهاز "%s" يطلب إذن للمزامنة. هل تسمح بذلك؟
+CUT=قص
+COPY=نسخ
+PASTE=لصق
+LAST_UPDATE=آخر تحديث:
+
+# Settings
+SETTINGS=الإعدادات
+INTERFACE=الواجهة
+DARK_THEME=الوضع المظلم
+THEME_TIME=الوضع يعتمد على الوقت
+DARK_THEME_START=بداية الوضع المظلم:
+DARK_THEME_END=نهاية الوضع المظلم:
+SYNCHRONIZATION=المزامنة
+SYNC_PORT=المنفذ:
+SYNC_WITH_ANY_IPS=المزامنة مع أي عنوان IP (غير آمن)
+ALLOW_IPS=العناوين المسموح بها:
+ALLOW_DEVS=الأجهزة المسموح بها:
+ALLOW_DEV_REM=إزالة الجهاز
+ENTER_DEV_ID=أدخل معرّف الجهاز
+BLOCK_REQUEST_NEW_DEVS=حظر الطلبات للأجهزة الجديدة
+IMPORT=استيراد
+EXPORT=تصدير
+CATEGORIES=الفئات
+USER_CATEGORIES=#التسوق\n#أفكار\n#عمل\n#مشاريع\n#عائلة\n#صحة\n#المالية\n#دراسة\n#سفر\n#هوايات\n#شخصي
+DONE=تم
+OK=موافق
+CANCEL=إلغاء

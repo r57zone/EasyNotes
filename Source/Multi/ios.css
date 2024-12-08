@@ -1,0 +1,40 @@
+/* iOS fixes */
+html{-webkit-text-size-adjust: 100%; /* Prevent font scaling in landscape while allowing user zoom */}
+body, textarea {font-family: '-apple-system', Helvetica, HelveticaNeue;}
+#settings #controls #item .title {margin-top: -1px;}
+
+/* 
+/* 	General settings for all models / Общие настройки для всех моделей
+	iPhone SE 2016 - 320x568 
+*/
+
+@media only screen and (min-width: 321px) and (orientation: portrait) {
+    #btn {padding: 0 10px;}
+    #list #items #note #title {margin-left: 18px;}
+    #list #items #note #date {margin-right: 20px;}
+    #notification {padding: 15px 0 25px 0;}
+}
+
+@media only screen and (min-width: 569px) and (orientation: landscape) {
+    #btn {padding: 0 20px;}
+    #list #items #note #title {margin-left: 46px;}
+    #list #items #note #date {margin-right: 48px;}
+    #editor #memo {width: calc(100% - 76px);}
+}
+
+/* iPhone X, XS, 11 Pro, 12 Mini */
+@media only screen and (device-width: 375px) and (device-height: 812px) {}
+
+/* iPhone 12, 12 Pro */
+@media only screen and (device-width: 390px) and (device-height: 844px) {}
+
+/* iPhone XR, 11, iPhone XS Max, 11 Pro Max */
+@media only screen and (device-width: 414px) and (device-height: 896px) {}
+
+/* iPhone 12 Pro Max */
+@media only screen and (device-width: 428px) and (device-height: 926px) {}
+
+/* iPhone 13, 13 Pro, 14, 14 Pro, 15, 15 Pro */
+@media only screen and (device-width: 390px) and (device-height: 844px) { /* iPhone 13 & 14 */ }
+@media only screen and (device-width: 430px) and (device-height: 932px) { /* iPhone 14 Pro Max */ }
+@media only screen and (device-width: 430px) and (device-height: 932px) { /* iPhone 15 & 15 Pro */ }

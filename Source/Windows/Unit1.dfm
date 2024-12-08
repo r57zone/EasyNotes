@@ -1,33 +1,31 @@
 object Main: TMain
-  Left = 199
-  Top = 129
-  Width = 621
-  Height = 462
+  Left = 0
+  Top = 0
+  ClientHeight = 446
+  ClientWidth = 601
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'MS Sans Serif'
+  Font.Height = -12
+  Font.Name = 'Segoe UI'
   Font.Style = []
-  OldCreateOrder = False
   Position = poScreenCenter
   OnActivate = FormActivate
   OnClose = FormClose
   OnCreate = FormCreate
   OnDeactivate = FormDeactivate
-  PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 15
   object WebView: TWebBrowser
     Left = 0
     Top = 0
-    Width = 605
-    Height = 423
+    Width = 601
+    Height = 446
     Align = alClient
     TabOrder = 0
     OnBeforeNavigate2 = WebViewBeforeNavigate2
     OnDocumentComplete = WebViewDocumentComplete
     ControlData = {
-      4C000000873E0000B82B00000000000000000000000000000000000000000000
+      4C0000001D3E0000182E00000000000000000000000000000000000000000000
       000000004C000000000000000000000001000000E0D057007335CF11AE690800
       2B2E126208000000000000004C0000000114020000000000C000000000000046
       8000000000000000000000000000000000000000000000000000000000000000
@@ -35,19 +33,13 @@ object Main: TMain
   end
   object IdHTTPServer: TIdHTTPServer
     Bindings = <>
-    CommandHandlers = <>
     DefaultPort = 735
-    Greeting.NumericCode = 0
-    MaxConnectionReply.NumericCode = 0
-    ReplyExceptionCode = 0
-    ReplyTexts = <>
-    ReplyUnknownCommand.NumericCode = 0
     OnCommandGet = IdHTTPServerCommandGet
-    Left = 40
+    Left = 24
     Top = 8
   end
   object PopupMenu: TPopupMenu
-    Left = 72
+    Left = 104
     Top = 8
     object CutBtn: TMenuItem
       Caption = #1042#1099#1088#1077#1079#1072#1090#1100
@@ -61,9 +53,5 @@ object Main: TMain
       Caption = #1042#1089#1090#1072#1074#1080#1090#1100
       OnClick = PasteBtnClick
     end
-  end
-  object XPManifest: TXPManifest
-    Left = 8
-    Top = 8
   end
 end

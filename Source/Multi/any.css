@@ -1,0 +1,9 @@
+/* Android / Windows tablet mode */
+@media all and (min-width:550px) {
+	#list{display:block; float:left; width:37%;}
+	#list #items{border-right:1px solid var(--list-right-border-color);}
+	.sub-panel{background-color:var(--background-color);}
+	#editor{display:block; float:right; width:63%;}
+	#settings{float:right; width:63%;}
+	.hide-btn img{opacity:0; cursor:default;}
+}

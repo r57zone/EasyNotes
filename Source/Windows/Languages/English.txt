@@ -1,0 +1,36 @@
+# Main
+NEW_NOTE=New note
+NOTES=Notes
+TODAY=Today
+YESTERDAY=Yesterday
+DAYSAGO=days ago
+SEARCH=Search...
+SYNC=Sync
+DEV_SYNC_CONFIRM=The "%s" device requests permission to sync. Allow it?
+CUT=Cut
+COPY=Copy
+PASTE=Paste
+LAST_UPDATE=Last update:
+
+# Settings
+SETTINGS=Settings
+INTERFACE=Interface
+DARK_THEME=Dark theme
+THEME_TIME=Theme is time dependent
+DARK_THEME_START=Dark theme start:
+DARK_THEME_END=Dark theme end:
+SYNCHRONIZATION=Synchronization
+SYNC_PORT=Port:
+SYNC_WITH_ANY_IPS=Synchronization with any IP (not secure)
+ALLOW_IPS=Allowed IP addresses:
+ALLOW_DEVS=Allowed devices:
+ALLOW_DEV_REM=Remove
+ENTER_DEV_ID=Enter the device ID
+BLOCK_REQUEST_NEW_DEVS=Block requests for new devices
+IMPORT=Import
+EXPORT=Export
+CATEGORIES=Categories
+USER_CATEGORIES=#Shopping\n#Ideas\n#Work\n#Projects\n#Family\n#Health\n#Finances\n#Education\n#Travel\n#Hobbies\n#Personal
+DONE=Done
+OK=OK
+CANCEL=Cancel

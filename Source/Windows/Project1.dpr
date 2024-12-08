@@ -1,7 +1,7 @@
 program Project1;
 
 uses
-  Forms,
+  Vcl.Forms,
   Unit1 in 'Unit1.pas' {Main},
   Unit2 in 'Unit2.pas' {Settings};
 
@@ -9,6 +9,7 @@ uses
 
 begin
   Application.Initialize;
+  Application.MainFormOnTaskbar := True;
   Application.CreateForm(TMain, Main);
   Application.CreateForm(TSettings, Settings);
   Application.Run;

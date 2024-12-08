@@ -1,16 +1,17 @@
 <!DOCTYPE html>
-<html data-theme="default" manifest="app.manifest">
+<html data-theme="default">
+<!-- <html data-theme="default" manifest="app.manifest"> iOS < 13 -->
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>EasyNotes</title>
+<meta name="color-scheme" content="dark">
+<meta name="author" content="r57zone">
 <meta name="apple-mobile-web-app-title" content="EasyNotes">
-<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <!--<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />-->
-<!--<link rel="stylesheet" href="all.css">-->
 <link rel="apple-touch-icon" href="icons/icon-76.png">
-<link rel="apple-touch-icon" sizes="57x57" href="icons/icon-57.png">
-<link rel="apple-touch-icon" sizes="60x60" href="icons/icon-60.png">
 <link rel="apple-touch-icon" sizes="72x72" href="icons/icon-72.png">
 <link rel="apple-touch-icon" sizes="76x76" href="icons/icon-76.png">
 <link rel="apple-touch-icon" sizes="114x114" href="icons/icon-114.png">
@@ -18,135 +19,18 @@
 <link rel="apple-touch-icon" sizes="144x144" href="icons/icon-144.png">
 <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
 <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180x180.png">
-<link rel="apple-touch-startup-image" href="images/launch.png">
-<style type="text/css">
-:root{
-	--background-color: #f8f8f8;
-	--panel-background-color: #017d93;
-    --text-color: #333;
-	
-    --meta-color: #ac5942;
-	--sub-panel-background-color: #e7e7e7;
-	
-	--list-color:black;
-	
-	--items-background-color: #fff;
-	
-	--items-border-color: #ededed;
-	--item-hover-background-color: #ededed;
-	--date-color: #454545;
-	
-	--settings-item-border-color: #dbdbdb;
-	
-	--title-box-color: #333;
-	
-	--notification-border-color: #bdbdbd;
-	
-	--list-right-border-color: #d5d5d5;
-}
-
-/* Dark Theme */
-html[data-theme="dark"] {
-    --background-color: #2a3035;
-	--panel-background-color: #202329;
-	--text-color: white;
-	
-	--meta-color: #787c81;
-	--sub-panel-background-color: #202329;
-	--list-color:#ededef;
-	
-	--items-background-color: #202329;
-	--items-border-color: #3a404a;
-	--item-hover-background-color: #202329;
-	--date-color: #787c81;
-	--settings-item-border-color:#3a404a;
-	
-	--title-box-color: #787c81;
-	--notification-border-color: black;
-	
-	--list-right-border-color: #202329;
-}
-
-html,body{padding:0;margin:0;}
-body{font-family: Arial, sans-serif; font-size:16px; color:var(--text-color); background-color:var(--background-color); -webkit-user-select:none; -webkit-tap-highlight-color:transparent;}
-a{text-decoration:none; color:gray;}
-#wrapper{position:absolute; width:100%; height:100%;}
-
-/* Action bar */
-#panel{position:absolute; display:flex; flex-direction:row; justify-content:space-between; align-items:center; width:inherit; height:45px; overflow:hidden; background-color:var(--panel-background-color); color:white; text-align:center; cursor:default;}
-#panel-bg{width:inherit; height:45px;}
-#btn{width:45px; height:45px; cursor:pointer;}
-#btn:hover{opacity:0.7;}
-#panel .title{font-weight:500px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-#panel-qr{display:none; position:absolute; width:100%; height:45px; background: rgba(0,0,0,0.5); flex-direction:row; justify-content:space-between; align-items:center;}
-
-/* List of notes */
-#list{width:100%; height:100%; color:var(--list-color);}
-#list #items{height:calc(100% - 45px); overflow-y:auto; -webkit-overflow-scrolling:touch;}
-#list #items #note{display:flex; flex-direction:row; justify-content:space-between; align-items:center; cursor:pointer; height:44px; border-bottom:1px solid var(--items-border-color); overflow:hidden;}
-#list #items #note:hover{background-color:var(--item-hover-background-color);}
-#list #items #note #title{margin-left:8px; margin-right:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-#list #items #note #date{margin-right:10px; margin-left:4px; color:var(--date-color); font-size:13px; white-space:nowrap; text-align:right;}
-
-/* Note editor */
-#editor{display:none; width:100%; height:100%;}
-#editor #page{height:calc(100% - 90px);}
-#meta{display:flex; flex-direction:row; justify-content:space-between; align-items:center; color:var(--meta-color); height:32px; width:100%; cursor:default; overflow:hidden; white-space:nowrap;}
-#meta #DaysAgo{margin-left:12px;}
-#meta #DateNote{margin-right:12px;}
-
-#editor #memo{display:block; width:calc(100% - 24px); height:calc(100% - 45px); padding:4px 0; margin:0 auto; background-color:transparent; border:none;}
-textarea{font-weight:normal; font-size:17px; font-family: Arial, sans-serif; color:var(--text-color); overflow-y:auto; -webkit-overflow-scrolling:touch; resize:none; border-radius:0; -webkit-tap-highlight-color:rgba(0,0,0,0);}
-textarea:focus{outline:none;}
-#sub-panel{display:flex; flex-direction:row; justify-content:space-between; align-items:center; height:45px; overflow:hidden; background-color2:var(--sub-panel-background-color); text-align:center; cursor:default;}
-
-/* Settings */
-#settings{display:none; width:100%; height:100%;}
-#settings #page{height:calc(100% - 45px); overflow-y:auto; -webkit-overflow-scrolling:touch;}
-#settings #page #items:first-child{margin-top:3px;}
-#settings #items{padding:10px 0; margin:0 auto; width:92%; overflow:hidden; font-size:14px;}
-#settings #items #item{display:flex; flex-direction:row; justify-content:space-between; align-items:center; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; border:1px solid var(--settings-item-border-color); padding:14px 8px; background-color:var(--items-background-color); border-top:none; color:var(--text-color);}
-#settings #items #item:first-child{border-top-left-radius:15px; border-top-right-radius:15px; border:1px solid var(--settings-item-border-color);}
-#settings #items #item:last-child{border-bottom-left-radius:15px; border-bottom-right-radius:15px;}
-#settings #items #item .title{margin-left:4px;}
-#settings #items #item #control{text-align:right; margin-right:4px;}
-#settings .titlebox{padding:5px 0; margin:0 auto; width:87%; font-size:14px; color:var(--title-box-color);}
-#settings input[type="text"],#settings input[type="number"]{border:none; padding:0 7px; background-color:transparent; width:90%; outline:none; font-size:14px; -webkit-tap-highlight-color:rgba(0,0,0,0); text-align:right; color:var(--text-color);}
-.switch{position:relative; display:inline-block; width:40px; height:20px; background-color:#7e7e7e; border-radius:20px; top:3px;}
-.switch::after{content:''; position:absolute; width:18px; height:18px; border-radius:50%; background-color:white; top:1px; left:1px;}
-.checkbox:checked + .switch::after{left:20px;}
-.checkbox:checked + .switch{background-color:#3498db;}
-.checkbox{display:none;}
-
-/* Notification */
-#notification{position:absolute; bottom:0; width:100%; padding: 15px 0; visibility:hidden; font-size:14px; background-color:var(--sub-panel-background-color); text-align:center; border-top:1px solid var(--notification-border-color);}
-#notification.show{visibility:visible; animation:fadein 0.5s, fadeout 0.5s 3s;}
-@keyframes fadein{from {opacity: 0;} to {opacity: 1;}}
-@keyframes fadeout{from {opacity: 1;} to {opacity: 0;}}
-
-#sync-progress{display:none; position:absolute; bottom:0; width:100%; height:4px; background-color:blue; background:linear-gradient(to left, transparent, transparent, #23A6D5, transparent, transparent); background-size:200% 200%; animation:move-background 2s linear infinite;}	
-@keyframes move-background{0% {background-position:100% 0%} 100% {background-position:-100% 0%}}
-
-/* Layout switching animation */
-#list,#editor,#settings{animation:fadeInFromNone 0.5s ease-out;}
-@keyframes fadeInFromNone{
-	0%{display:none; opacity:0;}
-	1% {display:block; opacity:0;}
-	100%{display:block; opacity:1;}
-}
-
-/* Android tablet mode */
-@media all and (min-width:550px) {
-	#list{display:block; float:left; width:37%;}
-	#list #items{border-right:1px solid var(--list-right-border-color);}
-	#sub-panel{background-color:var(--background-color);}
-	#editor{display:block; float:right; width:63%;}
-	#settings{float:right; width:63%;}
-	.hide-btn img{opacity:0; cursor:default;}
-}
-</style>
-<!--<script type="text/javascript" src="cordova.js"></script>-->
+<!--<link rel="apple-touch-startup-image" href="images/launch.png">-->
+<link rel="stylesheet" href="style.css">
+<script src="langs.js"></script>
 <script type="text/javascript">
+	const PlatformAndroid = 0;
+	const PlatformIOS = 1;
+	const PlatformWindows = 2;
+	let DevicePlatform = -1;
+	let PlatformNames = ['Android', 'iOS', 'Windows'];
+	let UseManualAddress = true; // Ручной ввод адреса
+	let IsPWA = false; // Ручной ввод адреса
+	
 	let FirstRun = false;
 	let DeviceID;
 	let TabletMode = false;
@@ -164,89 +48,53 @@ textarea:focus{outline:none;}
 	
 	let HideFirstNotifyError = true; // На замену navigator.onLine (постоянно стала возвращать true на Android), для iOS ставим true
 	
-	let UsedDarkTheme = false; // Для Cordova QR (проблемы с CSS)
-	
 	// Настройки для Android
-	let ServerAddress;
-	let ServerPort;
+	let ServerAddress; // Для вывода в настройках
+	let ServerPort; // Храним для автопоиска
+	let SyncAddress; // Полный адрес для синхронизации
 	let AutoSearchIP = false;
 	
-	//let FlashLightEnable = false; // Cordova QR
+	let SearchShown = false;
+	let Categories = [];
+	let CategoriesShownList = false;
+	let CategoriesNoteShown = false;
+	let LastSearchValue = '';
 	
-	// Перевод, по умолчанию English
-	let IDS_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-	let IDS_DAYOFWEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-	let IDS_TODAY = 'Today';
-	let IDS_YESTERDAY = 'Yesterday';
-	let IDS_DAYSAGO = 'days ago';
-	let IDS_NEW_NOTE = 'New note';
-	let IDS_NOTES = 'Notes';
+	let DarkThemeStartHour = 18;
+	let DarkThemeEndHour = 8;
 	
-	// Настройки
-	let IDS_SETTINGS = 'Settings';
-	let IDS_SYNC_ADDRESS = 'IP or domain';
-	let IDS_SYNC_PORT = 'Port';
-	let IDS_AUTOSEARCH_IP = 'Autosearch IP address';
-	let IDS_ABOUT_SYNC = 'IP and port or domain to sync notes with your PC or web server.';
-	let IDS_AUTO_SYNC = 'Sync at startup';
-	let IDS_ABOUT_AUTO_SYNC = 'Automatically sync on app launch.';
-	
-	// Для всех
-	let IDS_FULL_RESET = 'Full reset';
-	let IDS_CONFIRM_FULL_RESET = 'Do you really want to reset everything? All notes and settings will be deleted.';
-	let IDS_DARK_THEME = 'Dark theme';
-	let IDS_THEME_TIME_DEPENDENT = 'Theme is time dependent';
-	let IDS_ABOUT_THEME_TIME = 'The dark theme turns on automatically from 06:00 pm to 08:00 am.';
-	let IDS_LAST_UPDATE = 'Last update: ';
-	let IDS_LOCAL_STORAGE = 'Local storage: %s of 5000 KB';
-	
-	// Уведомления
-	let IDS_DATE_UPDATE = 'Date will be update';
-	let IDS_DATE_NOT_UPDATE = 'Date will not be update';
-	let IDS_AUTH_REJECT = 'Authorization rejected';
-	let IDS_SYNC_SUCCESSFUL = 'Sync successful';
-	let IDS_SYNC_ERROR = 'Sync error';
-	let IDS_SYNC_NEED_CONNECT = 'Need connect to the network for sync';
-	let IDS_CONNECTION_FAILED = 'Connection failed';
-	
-	// Русский язык
-	if (navigator.language.toLowerCase() == 'ru-ru' || navigator.language == 'ru') { // В iOS языки прописными буквами, вторая проверка нужна для Edge
-		IDS_MONTHS = ['янв.', 'фев.', 'мар.', 'апр.', 'май', 'июн.', 'июл.', 'авг.', 'сен.', 'окт.', 'ноя.', 'дек.'];
-		IDS_DAYOFWEEK = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'];
-		IDS_TODAY = 'Сегодня';
-		IDS_YESTERDAY = 'Вчера';
-		IDS_DAYSAGO = 'дн. назад';
-		IDS_NEW_NOTE = 'Новая заметка';
-		IDS_NOTES = 'Заметки';
+	// Кеширование платформы
+	if (localStorage.getItem('DevicePlatform') == null) {
+		// Автоопределение платформы
+		if (/Android/i.test(window.navigator.userAgent))
+			DevicePlatform = PlatformAndroid;
+		else if (/iPhone|iPod|iPad/i.test(window.navigator.userAgent))
+			DevicePlatform = PlatformIOS;
+		else if (/Edg/.test(navigator.userAgent))
+			DevicePlatform = PlatformWindows;
+		localStorage.setItem('DevicePlatform', DevicePlatform);
+	} else
+		DevicePlatform = localStorage.getItem('DevicePlatform');
 		
-		// Настройки
-		IDS_SETTINGS = 'Настройки';
-		IDS_SYNC_ADDRESS = 'IP или домен';
-		IDS_SYNC_PORT = 'Порт';
-		IDS_AUTOSEARCH_IP = 'Автопоиск IP адреса';
-		IDS_ABOUT_SYNC = 'IP адрес и порт или домен для синхронизации заметок, с вашим ПК или веб-сервером.';
-		IDS_AUTO_SYNC = 'Синхронизация при запуске';
-		IDS_ABOUT_AUTO_SYNC = 'Автоматическая синхронизация при запуске приложения.';
-		
-		// Для всех
-		IDS_FULL_RESET = 'Полный сброс';
-		IDS_CONFIRM_FULL_RESET = 'Вы действительно хотите сбросить всё? Все заметки и настройки будут удалены.';
-		IDS_DARK_THEME = 'Темная тема';
-		IDS_THEME_TIME_DEPENDENT = 'Тема в зависимости от времени';
-		IDS_ABOUT_THEME_TIME = 'Темная тема включается автоматически с 18:00 до 08:00.';
-		IDS_LAST_UPDATE = 'Последнее обновление: ';
-		IDS_LOCAL_STORAGE = 'Локальное хранилище: %s из 5000 Кб';
-		
-		// Уведомления
-		IDS_DATE_UPDATE = 'Дата обновится';
-		IDS_DATE_NOT_UPDATE = 'Дата не обновится';
-		IDS_AUTH_REJECT = 'Авторизация отклонена';
-		IDS_SYNC_SUCCESSFUL = 'Синхронизация успешно завершена';
-		IDS_SYNC_ERROR = 'Ошибка синхронизации';
-		IDS_SYNC_NEED_CONNECT = 'Для синхронизации нужно<br>подключиться к сети';
-		IDS_CONNECTION_FAILED = 'Cоединение не удалось';
+	// Дополнительные стили
+	function AddCSSFile(cssFile) {
+		let cssFiles = [location.pathname.split('/').pop().replace(/\.\w+$/, '.css'), cssFile];
+		cssFiles.forEach(function(file) {
+			let link = document.createElement('link');
+			link.href = file;
+			link.type = 'text/css';
+			link.rel = 'stylesheet';
+			link.media = 'screen,print';
+			document.head.appendChild(link);
+		});
 	}
-
+	if (DevicePlatform == PlatformIOS)
+		AddCSSFile('ios.css');
+	else // Android / Windows / Web
+		AddCSSFile('any.css');
+		
+	//console.log(PlatformNames[DevicePlatform]);
+	
 	function GetUTCTimeStamp() // Со смещением UTC зоны
 	{
 		let CurDate = new Date;
@@ -389,26 +237,75 @@ textarea:focus{outline:none;}
 		}
 	}
 	
-	function ShowNotes()
+	function ShowNotes(SearchValue) // trim(), toLowerCase()
 	{
 		if (TabletMode == false)
 			document.getElementById('editor').style.display = 'none';
 		document.getElementById('list').style.display = 'block';
 		
 		let NotesStr = '';
+		let NotesCount = 0;
+		
+		LastSearchValue = SearchValue; // Сохраняем на случай удаления заметки, при поиске
 		
 		// Вывод
 		NotesAr.forEach(function(Note) {
-			NotesStr += '<div onclick="GetNote(' + Note.ID  + ')" id="note"><div id="title">' + ExtractTitle(CharCodesToStr(Note.Note)) + '</div><div id="date">' + ListDate(Note.DateTime) + '</div></div>';
+			NoteText = CharCodesToStr(Note.Note);
+			if (SearchValue == '' || NoteText.toLowerCase().indexOf(SearchValue.toLowerCase()) >= 0) {
+				NotesCount += 1;
+				NotesStr += '<div onclick="GetNote(' + Note.ID  + ')" id="note">' + 
+							'<div id="title">' + ExtractTitle(NoteText) + '</div>' +
+							'<div id="date">' + ListDate(Note.DateTime) + '</div>' +
+							'</div>';
+				}
 		});
 		
-		document.getElementById('NotesCount').innerHTML = IDS_NOTES + ' (' + NotesAr.length + ')';
+		document.getElementById('NotesCount').innerHTML = IDS_NOTES + ' (' + NotesCount + ')';
 		document.getElementById('items').innerHTML = NotesStr; // Заменяем, чтобы не мерцала пустота
 		NotesStr = '';
 	}
 	
+	function BackNote() {
+		if (TabletMode == false)
+			document.getElementById('editor').style.display = 'none';
+		document.getElementById('list').style.display = 'block';
+		
+		if (CategoriesShownList || SearchShown) // Оставляем заметки, если выбрана категория или поиск
+			return;
+		else
+			ShowNotes('');
+	}
+	
+	function ShowHideCategoriesList() {
+		if (SearchShown) SearchShowHide();
+	
+		if (CategoriesShownList) {
+			CategoriesShownList = false;
+			ShowNotes('');
+			return;
+		}
+		
+		if (TabletMode == false)
+			document.getElementById('editor').style.display = 'none';
+		document.getElementById('list').style.display = 'block';
+
+		let CatsStr = '';
+		
+		for (let Category of Categories) {
+			CatsStr += '<div onclick="ShowNotes(\'' + Category + '\')" id="note">' + 
+						'<div id="title">' + ExtractTitle(Category) + '</div>' +
+						'<div id="date"></div>' +
+						'</div>';
+		}
+		document.getElementById('NotesCount').innerHTML = IDS_CATEGORIES + ' (' + Categories.length + ')';
+		document.getElementById('items').innerHTML = CatsStr; // Заменяем, чтобы не мерцала пустота
+		CatsStr = '';
+		CategoriesShownList = true;	
+	}
+	
 	function NewNote(MemoFocus)
 	{
+		HideNoteCategories();
 		CurNoteID = '-1';
 		if (TabletMode == false)
 			document.getElementById('list').style.display = 'none';
@@ -416,7 +313,7 @@ textarea:focus{outline:none;}
 		document.getElementById('editor').style.display = 'block';
 		
 		document.getElementById('memo').value = '';
-		if (MemoFocus)
+		if (DevicePlatform != PlatformIOS && MemoFocus) // На iOS баг с увеличением textarea, при клике
 			document.getElementById('memo').select();
 		document.getElementById('NoteTitle').innerHTML = IDS_NEW_NOTE;
 		
@@ -433,16 +330,22 @@ textarea:focus{outline:none;}
 		document.getElementById('localstoragesize').innerHTML = IDS_LOCAL_STORAGE.replace('%s', Math.trunc((new Blob(Object.values(localStorage)).size / 1024)));
 	}
 	
+	function BackSettings() {
+		document.getElementById('settings').style.display = 'none';
+		if (TabletMode == false)
+			document.getElementById('list').style.display = 'block';
+		else
+			document.getElementById('editor').style.display = 'block';
+	}
+	
 	function BackTheme(){
-		document.documentElement.setAttribute("data-theme", "default");
-		document.body.style.backgroundColor='#f8f8f8'; // После QR js фон приоритетный
-		UsedDarkTheme = false;
+		document.documentElement.setAttribute('data-theme', 'default');
+		document.getElementsByTagName('meta')['color-scheme']?.setAttribute('content', 'light');
 	}
 	
 	function DarkTheme(){
-		document.documentElement.setAttribute("data-theme", "dark");
-		document.body.style.backgroundColor='#2a3035'; // После QR js фон приоритетный
-		UsedDarkTheme = true;
+		document.documentElement.setAttribute('data-theme', 'dark');
+		document.getElementsByTagName('meta')['color-scheme']?.setAttribute('content', 'dark');
 	}
 	
 	function IsDomain(Str){
@@ -455,44 +358,59 @@ textarea:focus{outline:none;}
 	
 	function SettingsDone()
 	{
-		// IP
-		let NewAddress = document.getElementById('ServerAddress').value;
-		localStorage.setItem('ServerAddress', NewAddress);
-		if (IsDomain(NewAddress))
-			ServerAddress = NewAddress;
-		else
-			ServerAddress = 'http://' + NewAddress;
+		// Настройки с изменяемым адресом
+		if (UseManualAddress) {
+			// Port
+			ServerPort = document.getElementById('ServerPort').value;
+			localStorage.setItem('ServerPort', ServerPort); // Храним для автопоиска
 		
-		// Port
-		let NewPort = document.getElementById('ServerPort').value;
-		localStorage.setItem('ServerPort', NewPort);
-		ServerPort = NewPort;
+			// IP / Address
+			ServerAddress = document.getElementById('ServerAddress').value;
+			localStorage.setItem('ServerAddress', ServerAddress);
+			
+			if (IsDomain(ServerAddress))
+				SyncAddress = ServerAddress;
+			else
+				SyncAddress = 'http://' + ServerAddress;
+			
+			if (ServerPort != '80')
+				SyncAddress += ':' + ServerPort;
+			
+			// Auto search IP
+			AutoSearchIP = document.getElementById('AutoSearchIPCB').checked; // Глобальная переменная
+			localStorage.setItem('AutoSearchIP', AutoSearchIP);
+		} else
+			SyncAddress = ''; // Для статичной синхронизации адрес относительный - /api/...
 		
-		// Auto search IP
-		AutoSearchIP = document.getElementById('AutoSearchIPCB').checked; // Глобальная переменная
-		localStorage.setItem('AutoSearchIP', AutoSearchIP);
+		// Сохраняем адрес полной синхронизации
+		localStorage.setItem('SyncAddress', SyncAddress);
 		
 		// Auto sync
 		let AutoSyncCB = document.getElementById('AutoSyncCB').checked;
 		localStorage.setItem('AutoSync', AutoSyncCB);
 		
 		// Dark Theme
-		let DarkThemeCB = document.getElementById('DarkThemeCB').checked;
+		DarkThemeStartHour = parseInt(document.getElementById('DarkThemeStartHour').value);
+		DarkThemeEndHour = parseInt(document.getElementById('DarkThemeEndHour').value);
+		localStorage.setItem('DarkThemeStartHour', DarkThemeStartHour);
+		localStorage.setItem('DarkThemeEndHour', DarkThemeEndHour);
 		
+		let DarkThemeCB = document.getElementById('DarkThemeCB').checked;
+	
 		// Theme time	
 		let ThemeTimeCB = document.getElementById('ThemeTimeCB').checked;
 		if (ThemeTimeCB) {
 			DarkThemeCB = false;
 			document.getElementById('DarkThemeCB').checked = false;
 			let date = new Date();
-			if (date.getHours() <=7 || date.getHours() >= 18) 
-				DarkTheme();
+			if (date.getHours() < DarkThemeEndHour || date.getHours() >= DarkThemeStartHour)
+				DarkThemeCB = true;
 		}
 		
 		// Dark Theme
 		if (DarkThemeCB)
 			DarkTheme();
-		else if (ThemeTimeCB == false)
+		else
 			BackTheme();
 		
 		// Save dark theme status
@@ -501,11 +419,16 @@ textarea:focus{outline:none;}
 		// Theme time status
 		localStorage.setItem('ThemeTime', ThemeTimeCB);
 		
-		GetNote(CurNoteID);
+		localStorage.setItem('Categories', document.getElementById('CategorySettingsInput').value);
+		Categories = document.getElementById('CategorySettingsInput').value.split('\n');
+		//console.log(Categories);
+		
+		BackSettings();
 	}
 	
 	function GetNote(NoteID)
 	{	
+		HideNoteCategories();
 		if (NoteID == -1)
 		{
 			NewNote(false)
@@ -535,6 +458,8 @@ textarea:focus{outline:none;}
 	
 	function NoteDone()
 	{
+		if (SearchShown) SearchShowHide();
+		HideNoteCategories();
 		let CurTimeStamp = GetTimeStamp();
 		let UTCTimeStamp = GetUTCTimeStamp();
 		let MemoText = document.getElementById('memo').value;
@@ -604,12 +529,13 @@ textarea:focus{outline:none;}
 		
 		if (TabletMode) // Новая заметка открывается только в режиме планшета
 			NewNote(true);
-		ShowNotes();
+		ShowNotes('');
 	}
 	
 	function RemNote()
-	{
-		if (CurNoteID == '-1') {ShowNotes(); return;}
+	{	
+		HideNoteCategories();
+		if (CurNoteID == '-1') {ShowNotes(''); return;}
 		
 		let IndexToRemove = NotesAr.findIndex(Note => Note.ID === CurNoteID);
 		if (IndexToRemove !== -1)
@@ -625,11 +551,13 @@ textarea:focus{outline:none;}
 		localStorage.setItem('Notes', JSON.stringify(NotesAr));
 		localStorage.setItem('Actions', JSON.stringify(ActionsAr));
 		
-		ShowNotes();
+		if (CategoriesShownList || SearchShown) // Оставлять выбранную категорию или поиск
+			ShowNotes(LastSearchValue);
+		else
+			ShowNotes('');
+		
 		if (TabletMode) // Новая заметка открывается только в режиме планшета
 			NewNote(false);
-		
-		
 		//console.log('Deleted ' + CurNoteID);
 	}
 	
@@ -648,6 +576,65 @@ textarea:focus{outline:none;}
 		setTimeout(function(){
 			notifyBlock.className = notifyBlock.className.replace('show', ''); 
 		}, 3000);
+	}
+	
+	function AddNoteCategory(Category) {
+		CategoriesNoteShown = false;
+		document.getElementById('note-categories').style.display = 'none';
+		let Memo = document.getElementById('memo');
+		let MemoValue = Memo.value.trim();
+		if (MemoValue.indexOf(Category) == -1) {
+			let LastLine = MemoValue.split('\n').pop();
+			if (LastLine && LastLine.charAt(0) === '#') {
+				Memo.value += Category + '\n';
+			} else {
+				if (MemoValue !== '') Memo.value += '\n\n';
+				Memo.value += Category + '\n';
+			}
+		}
+	}
+		
+	function ShowHideNoteCategories() {
+		if (CategoriesNoteShown) {
+			document.getElementById('note-categories').style.display = 'none';
+			CategoriesNoteShown = false;
+			SearchShown = false;
+		} else {
+			document.getElementById('note-categories').style.display = 'block';
+			document.getElementById('note-categories').scrollTop = 0
+			let CatsStr = '';
+
+			for (let Category of Categories)
+				CatsStr += '<div onclick="AddNoteCategory(\'' + Category + '\')" id="item">' + Category + '</div>';
+			document.getElementById('note-categories').innerHTML = CatsStr;
+			CategoriesNoteShown = true;
+		}
+	}
+	
+	function HideNoteCategories() {
+		if (CategoriesNoteShown) {
+			CategoriesNoteShown = false;
+			document.getElementById('note-categories').style.display = 'none';
+		}
+	}
+		
+	function SearchShowHide() {
+		if (SearchShown) { // Скрытие
+			SearchShown = false;
+			CategoriesShownList = false;
+			document.getElementById('search-block').style.display = 'none';
+			document.getElementById('Search').value = '';
+			ShowNotes('');
+		} else { // Показ
+			SearchShown = true;
+			document.getElementById('search-block').style.display = 'block';
+		}
+	}
+	
+	let rotationSyncBtnAngle = 0;
+	function rotateSyncBtn(btnElement) {
+		rotationSyncBtnAngle += 360;
+		btnElement.style.transform = 'rotate(' + rotationSyncBtnAngle + 'deg)';
 	}
 	
 	function GetData(URL){
@@ -677,6 +664,7 @@ textarea:focus{outline:none;}
 			let request = new XMLHttpRequest();
 			request.open('POST', URL);
 			request.setRequestHeader('Content-type', 'text/plain');
+			//request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
 			
 			request.onload = function() {
 				if	(request.status == 200)
@@ -692,56 +680,6 @@ textarea:focus{outline:none;}
 			request.send(Data);
 		});
 	}
-	
-	/*function ShowApp(){ // Cordova QR
-		document.getElementById('wrapper').style.display = 'block';
-		document.getElementById('panel-qr').style.display = 'none';
-		if (UsedDarkTheme) // Трюк с сохранением текущего цвета не работает из-за css тёмной темы
-			document.body.style.backgroundColor = '#2a3035';
-		else
-			document.body.style.backgroundColor = '#f8f8f8';
-	}
-		
-	function HideApp(){
-		document.getElementById('wrapper').style.display = 'none';
-		document.getElementById('panel-qr').style.display = 'flex';
-		document.body.style.backgroundColor = 'transparent';
-	}
-	
-	function QR()
-	{
-		function displayContents(err, text) {
-			if (!err) {
-				document.getElementById('memo').value = document.getElementById('memo').value + text + "\n";
-				ShowApp();
-				QRScanner.hide();
-				QRScanner.cancelScan();
-			} else
-				ShowApp();
-			QRScanner.disableLight();
-			QRScanner.destroy();
-			FlashLightEnable = false;
-		}
-	
-		window.QRScanner.prepare(onDone);
-		function onDone(err, status) {
-			if (status.authorized) {
-				HideApp();
-				QRScanner.show();
-				QRScanner.scan(displayContents);
-			} else {
-				QRScanner.openSettings();
-			}
-		}
-	}
-	
-	function QRClose(){
-		HideApp(); if(FlashLightEnable) QRScanner.disableLight(); QRScanner.cancelScan(); QRScanner.destroy(); if(UsedDarkTheme) document.body.style.backgroundColor='#2a3035'; else document.body.style.backgroundColor='#f8f8f8';
-	}
-	
-	function QRFlashLight(){
-		if(FlashLightEnable == false) {QRScanner.enableLight(); FlashLightEnable=true;} else {QRScanner.disableLight(); FlashLightEnable=false;}
-	}*/
 	
 	function GetDeviceID(){
 		let DeviceOS = 'Unknown'
@@ -770,14 +708,14 @@ textarea:focus{outline:none;}
 				// Первый запуск
 				if (FirstRun) {
 					//console.log('FirstRun');
-					GetData(ServerAddress + ':' + ServerPort + '/api/auth?id=' + DeviceID).then(function(responseText) {
+					GetData(SyncAddress + '/api/auth?id=' + DeviceID).then(function(responseText) {
 						if (responseText == 'auth:ok') {
 							//console.log('auth:ok');
 
 							// Получение всех заметок при первом запуске
 							let XMLDoc = document.createElement('div');
 							
-							GetData(ServerAddress + ':' + ServerPort + '/api/notes?id=' + DeviceID).then(function(responseNotes) {
+							GetData(SyncAddress + '/api/notes?id=' + DeviceID).then(function(responseNotes) {
 								XMLDoc.innerHTML = responseNotes;
 								
 								let NoteItems = XMLDoc.getElementsByTagName('note');
@@ -793,7 +731,7 @@ textarea:focus{outline:none;}
 						
 								delete XMLDoc;
 								
-								ShowNotes();
+								ShowNotes('');
 								
 								Notification(IDS_SYNC_SUCCESSFUL);
 								
@@ -825,11 +763,11 @@ textarea:focus{outline:none;}
 				} else { // Второй и последующие запуски
 					// Получение действий
 					let XMLDoc = document.createElement('div');
-					GetData(ServerAddress + ':' + ServerPort + '/api/actions?id=' + DeviceID).then(function(responseNotes) {
+					GetData(SyncAddress + '/api/actions?id=' + DeviceID).then(function(responseNotes) {
 						XMLDoc.innerHTML = responseNotes;
 						
 						// Удаляем действия
-						GetData(ServerAddress + ':' + ServerPort + '/api/received?id=' + DeviceID).then(function(responseStatus) {
+						GetData(SyncAddress + '/api/received?id=' + DeviceID).then(function(responseStatus) {
 						
 							if (responseStatus == 'ok') {
 								let ActionsItems = XMLDoc.getElementsByTagName('*');
@@ -866,7 +804,7 @@ textarea:focus{outline:none;}
 								
 								localStorage.setItem('Notes', JSON.stringify(NotesAr));
 								
-								ShowNotes();
+								ShowNotes('');
 								if (TabletMode) // Новая заметка открывается только в режиме планшета, нужно для того, чтобы старая заметка не оставалась в интерфейсе, если сервер её удалил
 									NewNote(false);
 							
@@ -898,7 +836,7 @@ textarea:focus{outline:none;}
 				
 			// Генерация XML действий пользователя и отправка на "сервер"
 			if (FirstRun == false) // При первом запуске отправлять нечего
-				GetData(ServerAddress + ':' + ServerPort + '/api/auth?id=' + DeviceID).then(function(responseText) { // Проверка авторизации
+				GetData(SyncAddress + '/api/auth?id=' + DeviceID).then(function(responseText) { // Проверка авторизации
 					if (responseText == 'auth:ok') {
 
 						let XMLAPI = '<actions>\n';
@@ -917,7 +855,7 @@ textarea:focus{outline:none;}
 						//alert(XMLAPI);
 
 						// Отправка XML на "сервер"
-						SendData(ServerAddress + ':' + ServerPort + '/api/syncnotes?id=' + DeviceID, XMLAPI).then(function(responseStatus) {
+						SendData(SyncAddress + '/api/syncnotes?id=' + DeviceID, XMLAPI).then(function(responseStatus) {
 
 							if (responseStatus == 'ok') {
 								ActionsAr = [];
@@ -964,7 +902,7 @@ textarea:focus{outline:none;}
 			//console.log('Check ' + IP);
 			GetData('http://' + IP + ':' + ServerPort + '/api/connecttest').then(function(responseText) { // Проверка IP адреса
 				if (responseText == 'ok') {
-					ServerAddress = 'http://' + IP;
+					SyncAddress = 'http://' + IP + ':' + ServerPort;
 					FoundIPAddress = true;
 					Sync();
 				}
@@ -987,23 +925,79 @@ textarea:focus{outline:none;}
 		else
 			Sync();
 	}
-	
-	function CheckTabletMode(){
-		if (window.innerWidth >= 550) {
-			TabletMode = true;
-			document.getElementById('list').style.display = 'block';
-			
-			if (document.getElementById('editor').style.display == 'none' && (document.getElementById('settings').style.display == 'none' || document.getElementById('settings').style.display == '')) //Когда блока нет, вместо "none" бывает ""
-				document.getElementById('editor').style.display = 'block';
-		} else {
-			TabletMode = false;
-			if (document.getElementById('editor').style.display == 'block' || document.getElementById('settings').style.display == 'block')
-				document.getElementById('list').style.display = 'none';
+		
+	if (DevicePlatform != PlatformIOS) { // На Android и Windows всё хорошо
+		function CheckTabletMode(){
+			if (window.innerWidth >= 550) {
+				TabletMode = true;
+				document.getElementById('list').style.display = 'block';
+				
+				if (document.getElementById('editor').style.display == 'none' && (document.getElementById('settings').style.display == 'none' || document.getElementById('settings').style.display == '')) //Когда блока нет, вместо "none" бывает ""
+					document.getElementById('editor').style.display = 'block';
+				document.getElementsByClassName('sub-panel')[0].style.cssText = 'border-right: 1px solid var(--list-right-border-color);';
+			} else {
+				TabletMode = false;
+				if (document.getElementById('editor').style.display == 'block' || document.getElementById('settings').style.display == 'block')
+					document.getElementById('list').style.display = 'none';
+				document.getElementsByClassName('sub-panel')[0].style.cssText = '';
+			}
 		}
-	}
+		
+		// На iOS нет необходимости из-за проблем
+		window.onresize = function(){
+			CheckTabletMode();
+		}
 	
-	window.onresize = function(){
-		CheckTabletMode();
+	} else {
+		function CheckTabletMode() // Специфика iOS, window.innerWidth не работает, заменяется с height при смене ориентации.
+		{
+			// Если в useragent есть iPad с любым регистром
+			if (/iPad/i.test(window.navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1))
+			{
+				TabletMode = true;
+				document.getElementsByTagName('style')[0].innerHTML +=
+				'#list{display:block; float:left; width:37%;}' +
+				'#list #items{border-right:1px solid var(--list-right-border-color);}' +
+				'.sub-panel{border-right: 1px solid var(--list-right-border-color);}' +
+				'#editor{display:block; float:right; width:63%;}' +
+				'#settings{float:right; width:63%;}' +
+				'.hide-btn img{opacity:0;}';
+			} else {
+				TabletMode = false;
+			}
+		}
+		
+		// iOS блокировка скрола
+		function iOSBlockOffsetAppScrolling() {
+			let preventScroll = function(event, element) {
+				let up = (event.touches[0].clientY > element.slideBeginY);
+				let down = (event.touches[0].clientY < element.slideBeginY);
+				element.slideBeginY = event.touches[0].clientY;
+
+				if ((up && element.allowUp) || (down && element.allowDown))
+					event.stopPropagation();
+				else
+					event.preventDefault();
+			};
+
+			let enableScrollLock = function(elementId) {
+				let element = document.getElementById(elementId);
+
+				element.addEventListener('touchstart', function(event) {
+					element.allowUp = (element.scrollTop > 0);
+					element.allowDown = (element.scrollTop < element.scrollHeight - element.clientHeight);
+					element.slideBeginY = event.touches[0].clientY;
+				});
+
+				element.addEventListener('touchmove', function(event) {
+					preventScroll(event, element);
+				});
+			};
+
+			enableScrollLock('items');
+			enableScrollLock('memo');
+			// Настройки не блочим, проблемы при скролинге
+		}
 	}
 	
 	// Инициализация
@@ -1012,16 +1006,24 @@ textarea:focus{outline:none;}
 		// Перевод
 		document.getElementById('NotesCount').innerHTML = IDS_NOTES + ' (0)';
 		document.getElementById('NoteTitle').innerHTML = IDS_NEW_NOTE;
+		document.getElementById('Search').placeholder = IDS_SEARCH;
 		document.getElementById('SettingsTitle').innerText = IDS_SETTINGS;
-		document.getElementById('SyncAddress').innerText = IDS_SYNC_ADDRESS;
-		document.getElementById('SyncPort').innerText = IDS_SYNC_PORT;
-		document.getElementById('AutoSearchIP').innerText = IDS_AUTOSEARCH_IP;
-		document.getElementById('AboutSync').innerText = IDS_ABOUT_SYNC;
-		document.getElementById('AutoSync').innerText = IDS_AUTO_SYNC;
+		
+		if (UseManualAddress) {
+			document.getElementById('SyncAddressTitle').innerText = IDS_SYNC_ADDRESS;
+			document.getElementById('SyncPortTitle').innerText = IDS_SYNC_PORT;
+			document.getElementById('AutoSearchIPTitle').innerText = IDS_AUTOSEARCH_IP;
+			document.getElementById('AboutSync').innerText = IDS_ABOUT_SYNC;
+		}
+		
+		document.getElementById('AutoSyncTitle').innerText = IDS_AUTO_SYNC;
 		document.getElementById('AboutAutoSync').innerText = IDS_ABOUT_AUTO_SYNC;
-		document.getElementById('DarkTheme').innerText = IDS_DARK_THEME;
-		document.getElementById('ThemeTime').innerText = IDS_THEME_TIME_DEPENDENT;
+		document.getElementById('DarkThemeTitle').innerText = IDS_DARK_THEME;
+		document.getElementById('ThemeTimeTitle').innerText = IDS_THEME_TIME_DEPENDENT;
+		document.getElementById('DarkThemeStartTitle').innerText = IDS_DARK_THEME_START;
+		document.getElementById('DarkThemeEndTitle').innerText = IDS_DARK_THEME_END;
 		document.getElementById('AboutThemeTime').innerText = IDS_ABOUT_THEME_TIME;
+		document.getElementById('CategoriesTitle').innerText = IDS_CATEGORIES;
 		document.getElementById('LastUpdate').innerText = IDS_LAST_UPDATE;
 		document.getElementById('ResetBtn').innerText = IDS_FULL_RESET;
 		
@@ -1035,6 +1037,14 @@ textarea:focus{outline:none;}
 			ActionsAr = JSON.parse(localStorage.getItem('Actions'));
 		
 		// Настройки, Dark theme
+		if (localStorage.getItem('DarkThemeStartHour') != null) {
+			DarkThemeStartHour = parseInt(localStorage.getItem('DarkThemeStartHour'));
+			DarkThemeEndHour = parseInt(localStorage.getItem('DarkThemeEndHour'));
+			document.getElementById('DarkThemeStartHour').value=DarkThemeStartHour;
+			document.getElementById('DarkThemeEndHour').value=DarkThemeEndHour;
+		}
+		
+		document.getElementsByTagName('meta')['color-scheme']?.setAttribute('content', 'light'); // Сброс, по умолчанию почему-то сохраняется прошлый
 		if (localStorage.getItem('DarkTheme') != null && localStorage.getItem('DarkTheme') == 'true') {
 			document.getElementById('DarkThemeCB').checked = true;
 			DarkTheme();
@@ -1042,22 +1052,33 @@ textarea:focus{outline:none;}
 			document.getElementById('ThemeTimeCB').checked = true;
 			
 			let date = new Date();
-			if (date.getHours() <=7 || date.getHours() >= 18) 
+			if (date.getHours() < DarkThemeEndHour || date.getHours() >= DarkThemeStartHour) 
 				DarkTheme();
 		}
+		
+		// Категории
+		if (localStorage.getItem('Categories') != null)
+			document.getElementById('CategorySettingsInput').value = localStorage.getItem('Categories');
+		else
+			document.getElementById('CategorySettingsInput').value = IDS_CATEGORIES_LIST;
+		Categories = document.getElementById('CategorySettingsInput').value.split('\n');
+		//console.log(Categories);
 
 		CheckTabletMode();
 
-		ShowNotes();
+		ShowNotes('');
 		
 		// Настройки, IP
+		// Полный адрес синхронизации
+		if (localStorage.getItem('SyncAddress') != null)
+			SyncAddress = localStorage.getItem('SyncAddress');
+		else
+			ShowSettings();
+			
 		if (localStorage.getItem('ServerAddress') != null) {
 			ServerAddress = localStorage.getItem('ServerAddress');
 			document.getElementById('ServerAddress').value = ServerAddress;
-			if (IsDomain(ServerAddress) == false)
-				ServerAddress = 'http://' + ServerAddress;
-		} else
-			ShowSettings();
+		}
 		
 		// Порт
 		if (localStorage.getItem('ServerPort') != null) {
@@ -1072,10 +1093,7 @@ textarea:focus{outline:none;}
 		}
 		
 		// Первый запуск
-		if (localStorage.getItem('FirstRun') == null)
-			FirstRun = true;
-		else
-			FirstRun = false;
+		FirstRun = localStorage.getItem('FirstRun') == null;
 		
 		// Настройки, Device ID
 		if (localStorage.getItem('DeviceID') === null) {
@@ -1094,16 +1112,37 @@ textarea:focus{outline:none;}
 		} else
 			HideFirstNotifyError = false; // Android, неработающая navigator.onLine
 		
+		// Блокируем скролинг вне приложения для iOS
+		if (DevicePlatform == PlatformIOS)
+			iOSBlockOffsetAppScrolling();
+			
+		// Скрываем лишние пункты меню для статичного адреса
+		if (UseManualAddress == false) {
+			document.querySelectorAll('.HideForStatAddr').forEach(function(element) {
+				element.style.display = 'none';
+			});
+			let AutoSearchIPBlock = document.getElementById('AutoSearchIP').parentElement;
+
+			AutoSearchIPBlock.style.border = '1px solid var(--settings-item-border-color)';
+			AutoSearchIPBlock.style.borderTopLeftRadius = '15px';
+			AutoSearchIPBlock.style.borderTopRightRadius = '15px';
+		}
+		
+		// PWA
+		if (IsPWA && 'serviceWorker' in navigator) {
+			navigator.serviceWorker.register('pwa.js');
+		}
+		
 	});
 </script>
 </head>
 <body>
-<div id="wrapper">
+<div id="container">
 	<div id="list">
 		<div id="panel">
-			<div id="btn" onclick="SyncAdvance()"><img src="images/sync.png" /></div>
+			<div id="btn" onclick="SyncAdvance();rotateSyncBtn(this);"><img src="images/sync.png" /></div>
 			<div class="title" id="NotesCount">Заметки (0)</div>
-			<div id="btn" onclick="NewNote(true)"><img src="images/new.png" /></div>
+			<div id="btn" onclick="NewNote(true);if (SearchShown) SearchShowHide(); if (CategoriesShownList) ShowHideCategoriesList();"><img src="images/new.png" /></div>
 		</div>
 		<div id="panel-bg"></div>
 		
@@ -1113,11 +1152,17 @@ textarea:focus{outline:none;}
 				<div id="date">28 сен. 2018</div>
 			</div>-->
 		</div>
+		<div class="sub-panel">
+			<div id="btn" onclick="ShowSettings()"><img src="images/settings.png" /></div>
+			<div id="btn" onclick="ShowHideCategoriesList()"><img src="images/folders.png" /></div>
+			<div id="search-block"><input id="Search" type="text" onkeyup="ShowNotes(this.value.trim().toLowerCase())" placeholder="Поиск..."></div>
+			<div id="btn" onclick="SearchShowHide()"><img src="images/search.png" /></div>
+		</div>
 	</div>
 	
 	<div id="editor">
 		<div id="panel">
-			<div id="btn" class="hide-btn" onclick="ShowNotes();"><img src="images/back.png" /></div>
+			<div id="btn" class="hide-btn" onclick="BackNote()"><img src="images/back.png" /></div>
 			<div class="title" id="NoteTitle">Заметка</div>
 			<div id="btn" onclick="NoteDone()"><img src="images/done.png" /></div>
 		</div>
@@ -1127,34 +1172,35 @@ textarea:focus{outline:none;}
 				<div id="DaysAgo">3 дня назад</div>
 				<div id="DateNote" onclick="ChangeDateTimeStatus()">25 сент. 2:29</div>
 			</div>
-			<textarea id="memo" value="Текст"></textarea>
+			<textarea id="memo" onclick="HideNoteCategories()" value="Текст"></textarea>
 		</div>
-		<div id="sub-panel">
+		<div class="sub-panel">
 			<div id="btn" onclick="RemNote()"><img src="images/rm.png" /></div>
 			<!--<div id="btn" onclick="QR()"><img src="images/qr.png" /></div>-->
-			<div id="btn" onclick="ShowSettings()"><img src="images/settings.png" /></div>
+			<div id="btn" onclick="ShowHideNoteCategories()"><img src="images/folders.png" /></div>
 		</div>
+		<div id="note-categories"></div>
 	</div>
 	
 	<div id="settings">
 		<div id="panel">
-			<div id="btn" onclick="GetNote(CurNoteID)"><img src="images/back.png" /></div>
+			<div id="btn" onclick="BackSettings()"><img src="images/back.png" /></div>
 			<div class="title" id="SettingsTitle">Настройки</div>
 			<div id="btn" onclick="SettingsDone()"><img src="images/done.png" /></div>
 		</div>
 		<div id="panel-bg"></div>
 		<div id="page">
-			<div id="items">
-				<div id="item">
-					<div class="title" id="SyncAddress">IP или домен</div>
+			<div id="items" class="HideForStatAddr">
+				<div id="item" >
+					<div class="title" id="SyncAddressTitle">IP или домен</div>
 					<div id="control"><input type="text" id="ServerAddress" oninput="if (IsDomain(this.value)) document.getElementById('ServerPort').value='80';" value="192.168.0.1" placeholder="192.168.0.1"></div>
 				</div>
 				<div id="item">
-					<div class="title" id="SyncPort">Порт</div>
-					<div id="control"><input type="number" id="ServerPort" value="735" placeholder="735"></div>
+					<div class="title" id="SyncPortTitle">Порт</div>
+					<div id="control"><input type="number" id="ServerPort" value="735"></div>
 				</div>
 				<div id="item">
-					<div class="title" id="AutoSearchIP" style="width:70%;">Автопоиск IP адреса</div>
+					<div class="title" id="AutoSearchIPTitle" style="width:70%;">Автопоиск IP адреса</div>
 					<div id="control" style="width:30%;margin-top:-3px;">
 						<input type="checkbox" id="AutoSearchIPCB" class="checkbox" /><label for="AutoSearchIPCB" class="switch"></label>
 					</div>
@@ -1165,7 +1211,7 @@ textarea:focus{outline:none;}
 			
 			<div id="items">
 				<div id="item">
-					<div class="title" id="AutoSync" style="width:70%;">Синхронизация при запуске</div>
+					<div class="title" id="AutoSyncTitle" style="width:70%;">Синхронизация при запуске</div>
 					<div id="control" style="width:30%;margin-top:-3px;">
 						<input type="checkbox" id="AutoSyncCB" class="checkbox" /><label for="AutoSyncCB" class="switch"></label>
 					</div>
@@ -1176,7 +1222,7 @@ textarea:focus{outline:none;}
 			
 			<div id="items">
 				<div id="item">
-					<div class="title" id="DarkTheme" style="width:70%;">Тёмная тема</div>
+					<div class="title" id="DarkThemeTitle" style="width:70%;">Тёмная тема</div>
 					<div id="control" style="width:30%;margin-top:-3px;">
 						<input type="checkbox" id="DarkThemeCB" class="checkbox" /><label for="DarkThemeCB" class="switch"></label>
 					</div>
@@ -1185,21 +1231,37 @@ textarea:focus{outline:none;}
 			
 			<div id="items">
 				<div id="item">
-					<div class="title" id="ThemeTime" style="width:70%;">Тема в зависимости от времени</div>
+					<div class="title" id="ThemeTimeTitle" style="width:70%;">Тема в зависимости от времени</div>
 					<div id="control" style="width:30%;margin-top:-3px;">
 						<input type="checkbox" id="ThemeTimeCB" class="checkbox" /><label for="ThemeTimeCB" class="switch"></label>
 					</div>
 				</div>
+				
+				<div id="item" >
+					<div class="title" id="DarkThemeStartTitle">Начало тёмной темы</div>
+					<div id="control"><input type="number" id="DarkThemeStartHour" value="18" min="0" max="23"></div>
+				</div>
+				<div id="item">
+					<div class="title" id="DarkThemeEndTitle">Конец тёмной темы</div>
+					<div id="control"><input type="number" id="DarkThemeEndHour" value="8" min="0" max="23"></div>
+				</div>
 			</div>
-			
+
 			<div id="AboutThemeTime" class="titlebox"></div>
 			
-			<div class="titlebox" style="text-align:center;"><br><span id="DeviceID"></span><br><span id="localstoragesize">-</span><br><br>EasyNotes<br><span id="LastUpdate"></span> 15.02.24<br>https://r57zone.github.io</div>
+			<div id="items">
+				<div id="item">
+					<div class="title" style="width:30%;" id="CategoriesTitle">Категории</div>
+					<textarea id="CategorySettingsInput" style="width:70%;height:76px"></textarea>
+				</div>
+			</div>
+			
+			<div class="titlebox" style="text-align:center;"><br><span id="DeviceID"></span><br><span id="localstoragesize">-</span><br><br>EasyNotes<br><span id="LastUpdate"></span> 07.12.24<br><a style="border-bottom:1px dashed var(--title-box-color)" href="https://r57zone.github.io" target="_blank">https://r57zone.github.io</a></div>
 			<br>
 			<div id="items">
 				<div id="item">
 					<div class="title" id="ResetBtn" style="width:95%;" onclick="FullReset()">Полный сброс</div>
-					<div id="control" style="width:5%;">></div>
+					<div id="control" style="width:5%;">►</div>
 				</div>
 			</div>
 			<br><br>
@@ -1209,9 +1271,5 @@ textarea:focus{outline:none;}
 	<div id="notification" onclick="this.className='';"></div>
 	<div id="sync-progress"></div>
 </div>
-<!--<div id="panel-qr">
-	<div id="btn" onclick="QRClose()"><img src="images/close.png" /></div>
-	<div id="btn" onclick="QRFlashLight()"><img src="images/flashlight.png" /></div>
-</div>-->
 </body>
 </html>

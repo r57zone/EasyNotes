@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>EasyNotes UI Windows</title>
+<!--<link rel="stylesheet" href="all.css">-->
+<style type="text/css">
+html,body{padding:0;margin:0;}
+body{font-family:Segoe UI; color:#333; background-color:#f8f8f8;
+
+scrollbar-arrow-color: #606060;
+
+scrollbar-track-color: #ededed;
+scrollbar-base-color: #ededed;
+
+scrollbar-3dlight-color: #dedede;
+scrollbar-highlight-color: #dedede;
+scrollbar-face-color: #dedede; 
+scrollbar-shadow-color: #dedede;
+scrollbar-darkshadow-color: #dedede;}
+
+#clear{clear:both;float:none; height:0;}
+
+#wrapper{position:fixed; width:100%;height:100%;}
+
+#panel{width:100%; height:40px; overflow:hidden; background-color:#017d93; color:white; text-align:center; cursor:default;}
+#btn{width:40px; height:40px; cursor:pointer; flex-shrink: 0;}
+#btn:hover{opacity:0.7;}
+.sub-panel{width:calc(100% - 1px); height:40px; border-right:1px solid #d5d5d5; display:flex; align-items:center; justify-content: space-between;}
+.sub-panel #search-block{display: none; width:calc(100% - 80px); margin:0 auto;}
+.sub-panel #search-block input[type=text]{
+	flex-grow:1;
+    width:100%;
+    padding: 5px 8px;
+    box-sizing:border-box;
+    border-radius: 5px;
+    border: 1px solid #d5d5d5;
+}
+
+#panel .title{display:inline-block; max-width:60%; margin-top:8px; font-size:16px; font-weight:400px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+
+#list{float:left; width:37%; height:100%; font-size:14px; color:black;}
+#list #items{height:calc(100% - 80px); overflow:auto; border-right:1px solid #d5d5d5;}
+#list #items #note{display:flex; flex-direction:row; justify-content:space-between; align-items:center; cursor:pointer; height:40px; border-bottom:1px solid #ededed; overflow:hidden;}
+#list #items #note:hover{background-color:#ededed;}
+#list #items #note #title{display:inline-block; margin-left:8px; margin-right:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+#list #items #note #date{display:inline-block; margin-right:10px; margin-left:4px; color:#454545; font-size:13px; white-space:nowrap; text-align:right;}
+
+#editor{float:right; width:63%; height:100%;}
+#meta{color:#ac5942; height:38px; width:100%; font-size:14px; cursor:default; overflow:hidden; white-space:nowrap;}
+#meta #DaysAgo{float:left; font-weight:bold; margin:8px 0 0 12px;}
+#meta #DateNote{float:right; margin:8px 12px 0 0;}
+#note-categories{
+	display: none;
+	position: absolute;
+	height: 200px;
+	font-size:14px;
+	overflow-y: auto;
+	border-radius: 5px;
+	background-color: white;
+	bottom: 40px;
+	right: 10px;
+	transition: opacity 0.3s;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+	border: 1px solid #d5d5d5;
+}
+#note-categories #item{display:flex;
+    justify-content:space-between;
+    align-items:center;
+    cursor:pointer;
+    height:20px;
+	padding:4px 8px;
+	text-align:center;
+    border-bottom:1px solid #ededed;
+}
+#note-categories #item:hover{background-color:#ededed;}
+#note-categories #item:last-child {border-bottom:none;}
+
+#editor #memo{display:block; width:calc(100% - 24px); height:calc(100% - 126px); padding:0 12px 8px 12px; background-color:transparent; font-family:Segoe UI; font-size: 14px; border:none; overflow:auto;}
+</style>
+<!--<link rel="stylesheet" href="darktheme.css">-->
+<script type="text/javascript">
+let SearchShown = false;
+let CategoriesShownList = false;
+let CategoriesNoteShown = false;
+
+function SearchShowHide() {
+	if (SearchShown) { // Скрытие
+		SearchShown = false;
+		document.getElementById('search-block').style.display = 'none';
+		document.getElementById('Search').value = '';
+		document.location='#search=';
+	} else { // Показ
+		SearchShown = true;
+		document.getElementById('search-block').style.display = 'inline-block';
+	}
+}
+
+function AddNoteCategory(Category) {
+	CategoriesNoteShown = false;
+	document.getElementById('note-categories').style.display = 'none';
+	let Memo = document.getElementById('memo');
+	let MemoValue = Memo.value.trim();
+	if (MemoValue.indexOf(Category) == -1) {
+		let LastLine = MemoValue.split('\n').pop();
+		if (LastLine && LastLine.charAt(0) === '#') {
+			Memo.value += Category + '\n';
+		} else {
+			if (MemoValue !== '') Memo.value += '\n\n';
+			Memo.value += Category + '\n';
+		}
+	}
+}
+
+function ShowHideNoteCategories() {
+	if (CategoriesNoteShown) {
+			document.getElementById('note-categories').style.display = 'none';
+			CategoriesNoteShown = false;
+	} else {
+		document.getElementById('note-categories').style.display = 'block';
+		document.getElementById('note-categories').scrollTop = 0;
+		CategoriesNoteShown = true;
+	}
+}
+
+function ShowHideCategoriesList() {
+		if (SearchShown) SearchShowHide();
+	
+		if (CategoriesShownList) {
+			CategoriesShownList = false;
+			document.location='#search=';
+			return;
+		}
+		
+		document.location='#show-categories';
+		CategoriesShownList = true;	
+	}
+
+function HideNoteCategories() {
+	if (CategoriesNoteShown) {
+		CategoriesNoteShown = false;
+		document.getElementById('note-categories').style.display = 'none';
+	}
+}
+</script>
+</head>
+<body oncontextmenu="return false">
+<div id="wrapper">
+	<div id="list" onselectstart="return false">
+		<div id="panel">
+			<div id="btn" style="float:left;" onclick="document.location='#new';"><img src="images/new.png" /></div>
+			<div class="title" id="NotesCount">Заметки (3)</div>
+			<div id="btn" style="float:right;" onclick="document.location='#settings';"><img src="images/settings.png" /></div>
+			<!--<div id="btn" style="float:right;cursor:default;"></div>-->
+		</div>
+		<div id="items">
+			<div onclick="document.location='#note1';" id="note">
+				<div id="title">Заголовок</div>
+				<div id="date">28 сен. 2018</div>
+			</div>
+		</div>
+		<div class="sub-panel">
+			<div id="btn" style="float:left;" onclick="ShowHideCategoriesList()"><img src="images/folders.png" /></div>
+			<div id="search-block"><input type="text" id="Search" onkeyup="document.location='#search=' + this.value;" placeholder="Поиск..." /></div>
+			<div id="btn" style="float:right;" onclick="SearchShowHide()"><img src="images/search.png" /></div>
+			<!--<div id="btn" style="float:right;cursor:default;"></div>-->
+		</div>
+	</div>
+	
+	<div id="editor">
+		<div id="panel" onselectstart="return false">
+			<div id="btn" style="float:left;" onclick="document.location='#rem';HideNoteCategories();"><img src="images/rm.png" /></div>
+			<div class="title" id="NoteTitle">Заметка</div>
+			<div id="btn" style="float:right;" onclick="document.location='#done';HideNoteCategories();"><img src="images/done.png" /></div>
+		</div>
+		<div id="meta" onselectstart="return false">
+			<div id="DaysAgo">3 дня назад</div>
+			<div id="DateNote">25 сент. 2:29</div>
+		</div>
+		<div id="clear"></div>
+		<textarea id="memo" onclick="HideNoteCategories()" oncontextmenu="document.location='#memo-menu';">Текст</textarea>
+		<div class="sub-panel" style="border-right:0;width:100%;" onselectstart="return false">
+			<div id="btn" style="margin-left:auto" onclick="ShowHideNoteCategories()"><img src="images/folders.png" /></div>
+		</div>
+		<div id="note-categories">
+			<!--<div onclick="AddNoteCategory('#Покупки')" id="item">#Покупки</div>
+			<div onclick="AddNoteCategory('#Идеи')" id="item">#Идеи</div>
+			<div onclick="AddNoteCategory('#Работа')" id="item">#Работа</div>
+			<div onclick="AddNoteCategory('#Проекты')" id="item">#Проекты</div>
+			<div onclick="AddNoteCategory('#Семья')" id="item">#Семья</div>
+			<div onclick="AddNoteCategory('#Финансы')" id="item">#Финансы</div>
+			<div onclick="AddNoteCategory('#Учеба')" id="item">#Учеба</div>
+			<div onclick="AddNoteCategory('#Путешествия')" id="item">#Путешествия</div>
+			<div onclick="AddNoteCategory('#Хобби')" id="item">#Хобби</div>
+			<div onclick="AddNoteCategory('#Личное')" id="item">#Личное</div>-->
+		</div>
+	</div>
+</div>
+</body>
+</html>

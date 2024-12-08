@@ -1,0 +1,36 @@
+# Main
+NEW_NOTE=Новая заметка
+NOTES=Заметки
+TODAY=Сегодня
+YESTERDAY=Вчера
+DAYSAGO=дн. назад
+SEARCH=Поиск...
+SYNC=Синхронизация
+DEV_SYNC_CONFIRM=Устройство "%s" запрашивает разрешение на синхронизацию. Разрешить?
+CUT=Вырезать
+COPY=Копировать
+PASTE=Вставить
+LAST_UPDATE=Последнее обновление:
+
+# Settings
+SETTINGS=Настройки
+INTERFACE=Интерфейс
+DARK_THEME=Тёмная тема
+THEME_TIME=Тема в зависимости от времени
+DARK_THEME_START=Начало тёмной темы:
+DARK_THEME_END=Конец тёмной темы:
+SYNCHRONIZATION=Синхронизация
+SYNC_PORT=Порт:
+SYNC_WITH_ANY_IPS=Синхронизация с любыми IP (небезопасно)
+ALLOW_IPS=Разрешённые IP адреса:
+ALLOW_DEVS=Разрешённые устройства:
+ALLOW_DEV_REM=Удалить
+ENTER_DEV_ID=Введите ID устройства
+BLOCK_REQUEST_NEW_DEVS=Блокировать запросы новых устройств
+IMPORT=Импорт
+EXPORT=Экспорт
+CATEGORIES=Категории
+USER_CATEGORIES=#Покупки\n#Идеи\n#Работа\n#Проекты\n#Семья\n#Здоровье\n#Финансы\n#Учеба\n#Путешествия\n#Хобби\n#Личное
+DONE=Готово
+OK=ОК
+CANCEL=Отмена

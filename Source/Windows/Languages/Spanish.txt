@@ -1,0 +1,36 @@
+# Main
+NEW_NOTE=Nueva nota
+NOTES=Notas
+TODAY=Hoy
+YESTERDAY=Ayer
+DAYSAGO=Hace días
+SEARCH=Buscar...
+SYNC=Sincronizar
+DEV_SYNC_CONFIRM=El dispositivo "%s" solicita permiso para sincronizar. ¿Lo permites?
+CUT=Cortar
+COPY=Copiar
+PASTE=Pegar
+LAST_UPDATE=Última actualización:
+
+# Settings
+SETTINGS=Configuración
+INTERFACE=Interfaz
+DARK_THEME=Tema oscuro
+THEME_TIME=El tema depende del tiempo
+DARK_THEME_START=Inicio del tema oscuro:
+DARK_THEME_END=Fin del tema oscuro:
+SYNCHRONIZATION=Sincronización
+SYNC_PORT=Puerto:
+SYNC_WITH_ANY_IPS=Sincronización con cualquier IP (inseguro)
+ALLOW_IPS=Direcciones IP permitidas:
+ALLOW_DEVS=Dispositivos permitidos:
+ALLOW_DEV_REM=Eliminar
+ENTER_DEV_ID=Ingrese el ID del dispositivo
+BLOCK_REQUEST_NEW_DEVS=Bloquear nuevas solicitudes de dispositivos
+IMPORT=Importar
+EXPORT=Exportar
+CATEGORIES=Categorías
+USER_CATEGORIES=#Compras\n#Ideas\n#Trabajo\n#Proyectos\n#Familia\n#Salud\n#Finanzas\n#Estudios\n#Viajes\n#Aficiones\n#Personal
+DONE=Hecho
+OK=Aceptar
+CANCEL=Cancelar

@@ -1,0 +1,36 @@
+# Main
+NEW_NOTE=新しいノート
+NOTES=ノート
+TODAY=今日
+YESTERDAY=昨日
+DAYSAGO=日前
+SEARCH=検索...
+SYNC=同期
+DEV_SYNC_CONFIRM=「%s」デバイスが同期の許可を求めています。許可しますか？
+CUT=切り取り
+COPY=コピー
+PASTE=貼り付け
+LAST_UPDATE=最終更新:
+
+# Settings
+SETTINGS=設定
+INTERFACE=インターフェース
+DARK_THEME=ダークテーマ
+THEME_TIME=テーマは時間によって変わる
+DARK_THEME_START=ダークテーマ開始:
+DARK_THEME_END=ダークテーマ終了:
+SYNCHRONIZATION=同期
+SYNC_PORT=ポート:
+SYNC_WITH_ANY_IPS=任意のIPとの同期（セキュリティ非対応）
+ALLOW_IPS=許可されたIPアドレス:
+ALLOW_DEVS=許可されたデバイス:
+ALLOW_DEV_REM=デバイスを削除
+ENTER_DEV_ID=デバイスIDを入力
+BLOCK_REQUEST_NEW_DEVS=新しいデバイスのリクエストをブロック
+IMPORT=インポート
+EXPORT=エクスポート
+CATEGORIES=カテゴリ
+USER_CATEGORIES=#買い物\n#アイデア\n#仕事\n#プロジェクト\n#家族\n#健康\n#財務\n#勉強\n#旅行\n#趣味\n#個人的
+DONE=完了
+OK=OK
+CANCEL=キャンセル

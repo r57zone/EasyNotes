@@ -1,0 +1,44 @@
+/*DarkTheme*/
+body{background-color:#2a3035;
+
+scrollbar-arrow-color: #3a404a;
+
+scrollbar-track-color: #2a3035;
+scrollbar-base-color: #2a3035;
+
+scrollbar-3dlight-color: #3a404a;
+scrollbar-highlight-color: #3a404a;
+scrollbar-face-color: #3a404a; 
+scrollbar-shadow-color: #3a404a;
+scrollbar-darkshadow-color: #3a404a;}
+
+#panel{background-color:#202329;}
+#meta{color:#787c81;}
+.sub-panel{width:calc(100% - 1px); height:40px; border-right:1px solid #202329;}
+.sub-panel #search-block input[type=text]{border: 1px solid #3a404a; background-color: #202329;}
+
+#list{color:#ededef;}
+#list #items{border-right: 1px solid #202329;}
+#list #items #note{border-bottom:1px solid #3a404a;}
+#list #items #note:hover{background-color:#202329;}
+#list #items #note #date{color:#787c81;}
+
+textarea{color:white;}
+
+#note-categories{
+	color:#ededef;
+	background-color:#202329;
+	border: 1px solid #3a404a;
+}
+#note-categories #item{
+    border-bottom:1px solid #3a404a;
+}
+#note-categories #item:hover{background-color:#2a3035;}
+
+#settings #items #item{background-color:#202329; color:white;}
+#settings #items #item{border:1px solid #3a404a; border-top:none;}
+#settings #items #item:first-child{border:1px solid #3a404a;}
+#settings input[type="text"],#settings input[type="number"]{background-color:#202329;color:white;}
+#settings .aboutbox{color:#787c81;}
+
+#notification{background-color:#202329; border-top:1px solid black; color:white;}

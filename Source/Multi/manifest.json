@@ -1,0 +1,23 @@
+{
+  "name": "Updating EasyNotes",
+  "short_name": "EasyNotes",
+  "description": "App for notes.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f8f8f8",
+  "theme_color": "#f8f8f8",
+  "icons": [
+    {
+      "src": "res/icon.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon/icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
