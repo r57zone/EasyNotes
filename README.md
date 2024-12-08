@@ -47,15 +47,15 @@ Install `EasyNotes.apk`, select auto search for IP address or enter a reserved p
 ### iOS 13+
 If you want to sync directly with a PC or with an http web server, you need to do the following:
 1. Download the archive "EasyNotes.iOS.zip", unzip it to the EasyNotes folder and place the folder in [Apple iCloud](https://www.icloud.com/iclouddrive/), also create an `images` folder and move the images from `EasyNotes\images` there.
-2. Install the [HTML Viewer Q](https://apps.apple.com/us/app/html-viewer-q/id810042973) application (or any other application that can display HTML).
+2. Install the [HTML Viewer Q](https://apps.apple.com/us/app/html-viewer-q/id810042973) application (or any other application that can display HTML and allows Internet connections).
 3. Launch the `HTML Viewer Q` application, click the files icon (5th from the bottom). Click on `Browse`, go to iCloud Drive, then to `Applications` and click on the `EasyNotes` folder to move, then move the folder to `iPhone/HTML Viewer`.
 4. Next, open `index.html`, close the `HTML Viewer Q` application and open it again, after which the application will work and all styles will be displayed.
 5. In the application settings, you can disable `Tabbed Browsing` to disable the top bar with switching HTML pages.
 
-### iOS 13+ (PWA)
+### iOS 13+
 If you just want to use the application without synchronization or want to synchronize with an https web server, then you need to do the following:
 1. Open the Safari browser on your mobile device and enter `https://easynotespwa.github.io` there.
-2. Click the `Share` button → `To Home Screen`. A shortcut to EasyNotes will appear on the desktop.
+2. Click the `Share` button → `Add to Home Screen`. A shortcut to EasyNotes will appear on the desktop.
 
 ### iOS 9-12
 1. Open Safari browser on your mobile device and enter `http://IP:735/webapp`, where IP is the reserved permanent IP of your computer.
