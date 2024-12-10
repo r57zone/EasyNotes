@@ -9,7 +9,8 @@ import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
-
+import android.content.Intent
+import android.net.Uri
 
 class MainActivity : AppCompatActivity() {
     @SuppressLint("SetJavaScriptEnabled")
@@ -26,8 +27,12 @@ class MainActivity : AppCompatActivity() {
         val webViewClient: WebViewClient = object : WebViewClient() {
             @Deprecated("Deprecated in Java")
             override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
+                if (url.startsWith("http://") || url.startsWith("https://")) { // Добавлена проверка внешних ссылок
+                    view.context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                    return true
+                }
                 view.loadUrl(url)
-                return true
+                return false
             }
 
             @TargetApi(Build.VERSION_CODES.N)
@@ -35,12 +40,20 @@ class MainActivity : AppCompatActivity() {
                 view: WebView,
                 request: WebResourceRequest
             ): Boolean {
-                view.loadUrl(request.url.toString())
-                return true
+                //view.loadUrl(request.url.toString())
+                //return true
+                // Открытие во внешнем браузере
+                val url = request.url.toString()
+                if (url.startsWith("http://") || url.startsWith("https://")) {
+                    view.context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                    return true
+                } else {
+                    return false
+                }
             }
         }
 
-        webView.setWebViewClient(webViewClient);
+        webView.setWebViewClient(webViewClient)
         webView.webChromeClient = WebChromeClient(); // Включаение confirm & alert
     }
 }
