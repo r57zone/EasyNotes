@@ -5,7 +5,7 @@
 # EasyNotes
 ![](https://user-images.githubusercontent.com/9499881/100446367-1cd14000-30c8-11eb-8e82-335f134a8c95.png)
 
-Notes apps for Windows, Android and iOS, with direct local sync or web server sync. The server can be either a Windows application (you need to run it for synchronization) or your web server. View API can be [here](https://github.com/r57zone/EasyNotes/blob/master/API.md).
+Note apps for Windows, Android and iOS, with direct local sync or web server sync. The server can be either a Windows application (you need to run it for synchronization) or your web server. The API documentation can be found [here](https://github.com/r57zone/EasyNotes/blob/master/API.md).
 
 ## Features
 The following languages ​​are supported: English, Russian, Chinese (Traditional), Spanish, Portuguese (Brazilian Portuguese), French, German, Japanese, Arabic, Italian and Korean.
@@ -26,30 +26,30 @@ The following languages ​​are supported: English, Russian, Chinese (Traditio
 ![flag-south-korea](https://github.com/user-attachments/assets/ed3d3778-9193-444a-85fd-ac5dd7bc91c6)
 
 
-Apps have a dark theme and automatic switching to it in the dark time.
+Apps support a dark theme with automatic switching during night time.
 
 
 There is full support for tablets.
 
 
-If you want to leave the old date when editing a note then on mobile phones you need to click on the date and on the PC hold down the "Shift" key when you click on the done button.
+If you want to leave the old date when editing a note then on mobile phones you need to click on the date and on the PC hold down the `Shift` key when you click on the done button.
 
 
-There is a 5 megabyte limit for notes, you can monitor the amount of available memory in the application settings.
+There is a 5-megabyte limit for notes, you can monitor the available storage in the application settings.
 
 ## Setup
 ### Windows
-For Windows, there are 2 applications, one is a server application that is a P2P sync hub and the other is a client application that syncs with a P2P or web server.
+For Windows there are 2 applications, one is a server application that other client applications synchronize with, and the other is a client application that synchronizes with a server application or web server.
 
 ### Android
-Install `EasyNotes.apk`, select auto search for IP address or enter a reserved permanent IP of your computer (more on this below). If your router assigns the following IP addresses: `192.168.0.0/15`, `192.168.0.100/115`, `192.168.1.0/15`, `192.168.1.100/115`, `192.168.2.0/15`, `192.168.3.0/15`, then you can simply enable auto search for IP address and the application will find your computer itself.
+Install `EasyNotes.apk`, select automatic IP address search or enter a reserved permanent IP of your computer (more on this below). If your router assigns the following IP addresses: `192.168.0.0/15`, `192.168.0.100/115`, `192.168.1.0/15`, `192.168.1.100/115`, `192.168.2.0/15`, `192.168.3.0/15`, then you can simply enable automatic IP address search, and the application will automatically detect your computer.
 
 ### iOS 13+
-If you want to sync directly with a PC or with an http web server, you need to do the following:
+If you want to synchronize directly with a PC or http web server, you need to do the following:
 1. Download the archive "EasyNotes.iOS.zip", unzip it to the EasyNotes folder and place the folder in [Apple iCloud](https://www.icloud.com/iclouddrive/), also create an `images` folder and move the images from `EasyNotes\images` there.
 2. Install the [HTML Viewer Q](https://apps.apple.com/us/app/html-viewer-q/id810042973) application (or any other application that can display HTML and allows Internet connections).
 3. Launch the `HTML Viewer Q` application, click the files icon (5th from the bottom). Click on `Browse`, go to iCloud Drive, then to `Applications` and click on the `EasyNotes` folder to move, then move the folder to `iPhone/HTML Viewer`.
-4. Next, open `index.html`, close the `HTML Viewer Q` application and open it again, after which the application will work and all styles will be displayed.
+4. Next, open `index.html`, then close and reopen the `HTML Viewer Q` application, after which the application will work and all styles will be displayed.
 5. In the application settings, you can disable `Tabbed Browsing` to disable the top bar with switching HTML pages.
 
 
@@ -61,7 +61,7 @@ If you just want to use the application without synchronization or want to synch
 1. Open Safari browser on your mobile device and enter `http://IP:735/webapp`, where IP is the reserved permanent IP of your computer.
 2. Click the `Share` button → `Add to Home Screen`. A shortcut to EasyNotes will appear on your desktop.
 
-Also, if you have iOS 6-8, you can use [the old version of the web app](https://github.com/r57zone/EasyNotes/releases/download/0.8.7/EasyNotes.iOS.6-8.support.fix.zip).
+Also, if you have iOS 6-8, you can download and use [the legacy version of the web app](https://github.com/r57zone/EasyNotes/releases/download/0.8.7/EasyNotes.iOS.6-8.support.fix.zip).
 
 ### P2P mobile app synchronization (optional, in case of problems)
 Check Windows firewall to see if incoming connections are allowed for your network type (private) and allow if disabled.
