@@ -52,7 +52,7 @@ If you want to sync directly with a PC or with an http web server, you need to d
 4. Next, open `index.html`, close the `HTML Viewer Q` application and open it again, after which the application will work and all styles will be displayed.
 5. In the application settings, you can disable `Tabbed Browsing` to disable the top bar with switching HTML pages.
 
-### iOS 13+
+
 If you just want to use the application without synchronization or want to synchronize with an https web server, then you need to do the following:
 1. Open the Safari browser on your mobile device and enter `https://easynotespwa.github.io` there.
 2. Click the `Share` button → `Add to Home Screen`. A shortcut to EasyNotes will appear on the desktop.
