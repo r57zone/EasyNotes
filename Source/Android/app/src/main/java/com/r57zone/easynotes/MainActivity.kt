@@ -54,6 +54,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         webView.setWebViewClient(webViewClient)
-        webView.webChromeClient = WebChromeClient(); // Включаение confirm & alert
+        webView.webChromeClient = WebChromeClient() // Включаение confirm & alert
     }
 }
