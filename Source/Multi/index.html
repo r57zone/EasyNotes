@@ -217,6 +217,8 @@
 	function ExtractTitle(Str){
 		if (Str.indexOf('\n') > 0)
 			Str = Str.substring(0, Str.indexOf('\n'));
+		if (Str.endsWith(':'))
+			Str = Str.slice(0, -1);
 		if (Str.length > 50)
 			Str = Str.substring(0, 50) + '...';
 		return Str;
@@ -1256,7 +1258,7 @@
 				</div>
 			</div>
 			
-			<div class="titlebox" style="text-align:center;"><br><span id="DeviceID"></span><br><span id="localstoragesize">-</span><br><br>EasyNotes<br><span id="LastUpdate"></span> 07.12.24<br><a style="border-bottom:1px dashed var(--title-box-color)" href="https://r57zone.github.io" target="_blank">https://r57zone.github.io</a></div>
+			<div class="titlebox" style="text-align:center;"><br><span id="DeviceID"></span><br><span id="localstoragesize">-</span><br><br>EasyNotes<br><span id="LastUpdate"></span> 06.04.25<br><a style="border-bottom:1px dashed var(--title-box-color)" href="https://r57zone.github.io" target="_blank">https://r57zone.github.io</a></div>
 			<br>
 			<div id="items">
 				<div id="item">

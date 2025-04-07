@@ -8,17 +8,23 @@ body, textarea {font-family: '-apple-system', Helvetica, HelveticaNeue;}
 	iPhone SE 2016 - 320x568 
 */
 
+/* Most iPhones / Большинство айфонов  */
 @media only screen and (min-width: 321px) and (orientation: portrait) {
     #btn {padding: 0 10px;}
     #list #items #note #title {margin-left: 18px;}
     #list #items #note #date {margin-right: 20px;}
-    #notification {padding: 15px 0 25px 0;}
+    #notification {padding: 13px 0 30px 0;}
+	
+	#list #items{height: calc(100% - 105px);}
+	#editor #page{height: calc(100% - 105px);}
+	.sub-panel{height:60px; align-items: flex-start;}
 }
 
 @media only screen and (min-width: 569px) and (orientation: landscape) {
     #btn {padding: 0 20px;}
     #list #items #note #title {margin-left: 46px;}
     #list #items #note #date {margin-right: 48px;}
+	
     #editor #memo {width: calc(100% - 76px);}
 }
 
