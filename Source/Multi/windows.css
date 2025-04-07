@@ -1,0 +1,16 @@
+/* Windows client */
+body{font-size:14px;}
+#panel,#panel-bg{height:40px;}
+#panel .title{font-size:16px;}
+#btn{width:40px; height:40px;}
+#list #items{font-size:14px; height:calc(100% - 80px)}
+#list #items #note{height:40px;}
+#editor #page{height:calc(100% - 80px);}
+#editor #memo{height:calc(100% - 40px); font-size:14px;}
+.sub-panel{height:40px;}
+#settings #page{height:calc(100% - 40px);}
+#settings #items{font-size:14px;}
+#settings #items #item{padding:10px 5px;}
+#settings #items #item:first-child{border-top-left-radius:10px; border-top-right-radius:10px;}
+#settings #items #item:last-child{border-bottom-left-radius:10px; border-bottom-right-radius:10px;}
+input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {-webkit-appearance: none; margin: 0;}

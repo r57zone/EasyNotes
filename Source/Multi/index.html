@@ -30,6 +30,7 @@
 	let PlatformNames = ['Android', 'iOS', 'Windows'];
 	let UseManualAddress = true; // Ручной ввод адреса
 	let IsPWA = false; // Ручной ввод адреса
+	let IsWindowsClient = false;
 	
 	let FirstRun = false;
 	let DeviceID;
@@ -92,6 +93,8 @@
 		AddCSSFile('ios.css');
 	else // Android / Windows / Web
 		AddCSSFile('any.css');
+	if (IsWindowsClient && DevicePlatform == PlatformWindows)
+		AddCSSFile('windows.css');
 		
 	//console.log(PlatformNames[DevicePlatform]);
 	
