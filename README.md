@@ -35,7 +35,7 @@ There is full support for tablets.
 If you want to leave the old date when editing a note then on mobile phones you need to click on the date and on the PC hold down the `Shift` key when you click on the done button.
 
 
-There is a 5-megabyte limit for notes, you can monitor the available storage in the application settings.
+There is a 5-megabyte limit for notes (except PC), you can monitor the available storage in the application settings.
 
 ## Setup
 ### Windows
