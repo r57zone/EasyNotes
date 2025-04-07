@@ -324,6 +324,8 @@ begin
   Str:=Trim(Str);
   if Pos(#10, Str) > 0 then
     Str:=Copy(Str, 1, Pos(#10, Str) - 1);
+  if (Length(Str) > 0) and (Str[Length(Str)] = ':') then
+    Str:=Copy(Str, 1, Length(Str) - 1);
   if Length(Str) > 150 then
     Str:=Copy(Str, 1, 150) + '...';
   Result:=Str;
@@ -418,7 +420,7 @@ begin
   // Update
   if (NoteIndex <> -1) and ( Trim(LatestNote) <> Trim(WebView.OleObject.Document.getElementById('memo').innerHTML) ) then begin
 
-    if (GetAsyncKeyState(VK_LSHIFT) <> 0) or (GetAsyncKeyState(VK_RSHIFT) <> 0) then begin //Если нажат Shift, то не обновляем дату
+    if (GetAsyncKeyState(VK_LSHIFT) and $8000 <> 0) or (GetAsyncKeyState(VK_RSHIFT) and $8000 <> 0) then begin // Если нажат Shift, то не обновляем дату
       SQLDB.Execute('UPDATE Notes SET Note="' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '" WHERE ID=' + IntToStr(NoteIndex));
 
       // Добавляем действие во все таблицы авторизованных устройств. Проверка доступности нужна для использования иных баз данных

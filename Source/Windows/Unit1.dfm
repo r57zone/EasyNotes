@@ -1,8 +1,8 @@
 object Main: TMain
   Left = 0
   Top = 0
-  ClientHeight = 400
-  ClientWidth = 680
+  ClientHeight = 398
+  ClientWidth = 672
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -18,16 +18,14 @@ object Main: TMain
   object WebView: TWebBrowser
     Left = 0
     Top = 0
-    Width = 680
-    Height = 400
+    Width = 672
+    Height = 398
     Align = alClient
     TabOrder = 0
     OnBeforeNavigate2 = WebViewBeforeNavigate2
     OnDocumentComplete = WebViewDocumentComplete
-    ExplicitWidth = 597
-    ExplicitHeight = 445
     ControlData = {
-      4C00000048460000572900000000000000000000000000000000000000000000
+      4C00000074450000222900000000000000000000000000000000000000000000
       000000004C000000000000000000000001000000E0D057007335CF11AE690800
       2B2E126208000000000000004C0000000114020000000000C000000000000046
       8000000000000000000000000000000000000000000000000000000000000000
