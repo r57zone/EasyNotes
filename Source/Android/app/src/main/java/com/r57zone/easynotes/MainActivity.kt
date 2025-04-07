@@ -16,13 +16,13 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main);
-        supportActionBar?.hide(); /* Спрятать sidebar */
+        setContentView(R.layout.activity_main)
+        supportActionBar?.hide() /* Спрятать sidebar */
 
-        val webView = findViewById<WebView>(R.id.webView);
-        webView.getSettings().setJavaScriptEnabled(true);
-        webView.getSettings().domStorageEnabled = true; // Включение localStorage
-        webView.loadUrl("file:///android_asset/index.html");
+        val webView = findViewById<WebView>(R.id.webView)
+        webView.getSettings().setJavaScriptEnabled(true)
+        webView.getSettings().domStorageEnabled = true // Включение localStorage
+        webView.loadUrl("file:///android_asset/index.html")
 
         val webViewClient: WebViewClient = object : WebViewClient() {
             @Deprecated("Deprecated in Java")

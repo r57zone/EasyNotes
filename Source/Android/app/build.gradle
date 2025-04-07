@@ -11,8 +11,8 @@ android {
         applicationId "com.r57zone.easynotes"
         minSdk 25
         targetSdk 32
-        versionCode 21
-        versionName "1.1.0"
+        versionCode 22
+        versionName "1.2.0"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
