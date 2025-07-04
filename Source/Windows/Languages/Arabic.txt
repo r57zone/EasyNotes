@@ -31,6 +31,7 @@ IMPORT=استيراد
 EXPORT=تصدير
 CATEGORIES=الفئات
 USER_CATEGORIES=#التسوق\n#أفكار\n#عمل\n#مشاريع\n#عائلة\n#صحة\n#المالية\n#دراسة\n#سفر\n#هوايات\n#شخصي
+CATEGORIES_AT_RUN=الفئات عند التشغيل
 DONE=تم
 OK=موافق
 CANCEL=إلغاء

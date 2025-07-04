@@ -1,0 +1,37 @@
+# Main
+NEW_NOTE=Yeni not
+NOTES=Notlar
+TODAY=Bugün
+YESTERDAY=Dün
+DAYSAGO=gün önce
+SEARCH=Ara...
+SYNC=Senkronize Et
+DEV_SYNC_CONFIRM="%s" cihazı senkronizasyon için izin istiyor. İzin verilsin mi?
+CUT=Kes
+COPY=Kopyala
+PASTE=Yapıştır
+LAST_UPDATE=Son güncelleme:
+
+# Settings
+SETTINGS=Ayarlar
+INTERFACE=Arayüz
+DARK_THEME=Karanlık tema
+THEME_TIME=Tema zamana bağlı
+DARK_THEME_START=Karanlık tema başlangıç saati:
+DARK_THEME_END=Karanlık tema bitiş saati:
+SYNCHRONIZATION=Senkronizasyon
+SYNC_PORT=Port:
+SYNC_WITH_ANY_IPS=Her IP ile senkronizasyon (güvenli değil)
+ALLOW_IPS=İzin verilen IP adresleri:
+ALLOW_DEVS=İzin verilen cihazlar:
+ALLOW_DEV_REM=Kaldır
+ENTER_DEV_ID=Cihaz kimliğini girin
+BLOCK_REQUEST_NEW_DEVS=Yeni cihaz isteklerini engelle
+IMPORT=İçe Aktar
+EXPORT=Dışa Aktar
+CATEGORIES=Kategoriler
+USER_CATEGORIES=#Alışveriş\n#Fikirler\n#İş\n#Projeler\n#Aile\n#Sağlık\n#Finans\n#Eğitim\n#Seyahat\n#Hobiler\n#Kişisel
+CATEGORIES_AT_RUN=Başlangıçta kategoriler
+DONE=Tamamlandı
+OK=Tamam
+CANCEL=İptal

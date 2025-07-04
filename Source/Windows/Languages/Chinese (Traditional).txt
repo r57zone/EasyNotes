@@ -1,0 +1,37 @@
+# Main
+NEW_NOTE=新建筆記
+NOTES=筆記
+TODAY=今天
+YESTERDAY=昨天
+DAYSAGO=天前
+SEARCH=搜尋...
+SYNC=同步
+DEV_SYNC_CONFIRM=裝置“%s”請求同步權限。允許嗎？
+CUT=剪下
+COPY=複製
+PASTE=貼上
+LAST_UPDATE=最後更新：
+
+# Settings
+SETTINGS=設定
+INTERFACE=介面
+DARK_THEME=暗色主題
+THEME_TIME=主題隨時間變化
+DARK_THEME_START=暗色主題開始時間：
+DARK_THEME_END=暗色主題結束時間：
+SYNCHRONIZATION=同步
+SYNC_PORT=連接埠：
+SYNC_WITH_ANY_IPS=允許任何IP同步（不安全）
+ALLOW_IPS=允許的IP地址：
+ALLOW_DEVS=允許的裝置：
+ALLOW_DEV_REM=移除
+ENTER_DEV_ID=輸入裝置ID
+BLOCK_REQUEST_NEW_DEVS=阻止新裝置請求
+IMPORT=匯入
+EXPORT=匯出
+CATEGORIES=分類
+USER_CATEGORIES=#購物\n#創意\n#工作\n#專案\n#家庭\n#健康\n#財務\n#教育\n#旅行\n#興趣\n#個人
+CATEGORIES_AT_RUN=啟動時分類
+DONE=完成
+OK=確定
+CANCEL=取消

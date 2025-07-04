@@ -24,8 +24,7 @@ object Main: TMain
     TabOrder = 0
     OnBeforeNavigate2 = WebViewBeforeNavigate2
     OnDocumentComplete = WebViewDocumentComplete
-    ExplicitWidth = 668
-    ExplicitHeight = 397
+    ExplicitHeight = 399
     ControlData = {
       4C00000048460000572900000000000000000000000000000000000000000000
       000000004C000000000000000000000001000000E0D057007335CF11AE690800

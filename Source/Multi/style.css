@@ -60,7 +60,6 @@ a{text-decoration:none; color:gray;}
 #btn img{max-width:100%;}
 .rotateBtn{transform:rotate(360deg);}
 #panel .title{font-weight:500px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-#panel-qr{display:none; position:absolute; width:100%; height:45px; background: rgba(0,0,0,0.5); flex-direction:row; justify-content:space-between; align-items:center;}
 
 /* List of notes */
 #list{width:100%; height:100%; color:var(--list-color);}

@@ -134,7 +134,7 @@ object Settings: TSettings
       OnMouseDown = AllowedDevsLBMouseDown
     end
     object AddManualDev: TButton
-      Left = 8
+      Left = 7
       Top = 273
       Width = 34
       Height = 17
@@ -152,7 +152,7 @@ object Settings: TSettings
       WordWrap = True
     end
     object RemManualDev: TButton
-      Left = 44
+      Left = 43
       Top = 273
       Width = 34
       Height = 17
@@ -189,8 +189,8 @@ object Settings: TSettings
     OnClick = AboutBtnClick
   end
   object NotesGB: TGroupBox
-    Left = 264
-    Top = 228
+    Left = 263
+    Top = 250
     Width = 248
     Height = 54
     Caption = #1047#1072#1084#1077#1090#1082#1080
@@ -218,7 +218,7 @@ object Settings: TSettings
     Left = 263
     Top = 132
     Width = 249
-    Height = 94
+    Height = 116
     Caption = #1050#1072#1090#1077#1075#1086#1088#1080#1080
     TabOrder = 6
     object CategoriesMemo: TMemo
@@ -228,6 +228,14 @@ object Settings: TSettings
       Height = 65
       ScrollBars = ssVertical
       TabOrder = 0
+    end
+    object CategoriesAtRunCB: TCheckBox
+      Left = 8
+      Top = 91
+      Width = 225
+      Height = 17
+      Caption = 'CategoriesAtRunCB'
+      TabOrder = 1
     end
   end
   object AllowedDevsPM: TPopupMenu
@@ -240,10 +248,10 @@ object Settings: TSettings
   end
   object OpenDialog: TOpenDialog
     Left = 288
-    Top = 301
+    Top = 325
   end
   object SaveDialog: TSaveDialog
     Left = 360
-    Top = 301
+    Top = 325
   end
 end

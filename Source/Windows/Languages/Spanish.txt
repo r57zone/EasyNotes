@@ -31,6 +31,7 @@ IMPORT=Importar
 EXPORT=Exportar
 CATEGORIES=Categorías
 USER_CATEGORIES=#Compras\n#Ideas\n#Trabajo\n#Proyectos\n#Familia\n#Salud\n#Finanzas\n#Estudios\n#Viajes\n#Aficiones\n#Personal
+CATEGORIES_AT_RUN=Categorías al iniciar
 DONE=Hecho
 OK=Aceptar
 CANCEL=Cancelar

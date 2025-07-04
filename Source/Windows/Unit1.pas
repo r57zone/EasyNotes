@@ -18,11 +18,6 @@ type
     CopyBtn: TMenuItem;
     PasteBtn: TMenuItem;
     procedure FormCreate(Sender: TObject);
-    procedure AddStyle(FileName: string);
-    procedure ExportNotes(FileName: string);
-    procedure ImportNotes(FileName: string);
-    procedure ShowNotes(SearchValue: string);
-    procedure ShowCategories;
     procedure WebViewBeforeNavigate2(ASender: TObject;
       const pDisp: IDispatch; const URL, Flags, TargetFrameName, PostData,
       Headers: OleVariant; var Cancel: WordBool);
@@ -37,13 +32,19 @@ type
     procedure CopyBtnClick(Sender: TObject);
     procedure PasteBtnClick(Sender: TObject);
   private
+    procedure AddStyle(FileName: string);
+    procedure ShowCategories;
     procedure NewNote(MemoFocus: boolean);
     procedure NoteDone(UpdateList: integer);
     procedure MessageHandler(var Msg: TMsg; var Handled: Boolean);
     { Private declarations }
   public
+    CategoriesAtRun: boolean;
     function SQLDBTableExists(TableName: string): boolean;
 	  function SQLTBCount(TableName: string): integer;
+    procedure ShowNotes(SearchValue: string);
+    procedure ExportNotes(FileName: string);
+    procedure ImportNotes(FileName: string);
     { Public declarations }
   end;
 
@@ -62,10 +63,10 @@ var
   IDS_NEW_NOTE, IDS_NOTES, IDS_TODAY, IDS_YESTERDAY, IDS_DAYSAGO, IDS_SEARCH: string;
   IDS_SYNC, IDS_DEV_SYNC_CONFIRM, IDS_CUT, IDS_COPY, IDS_PASTE, IDS_LAST_UPDATE: string;
 
-  IDS_SETTINGS, IDS_INTERFACE, IDS_DARK_THEME, IDS_THEME_TIME, IDS_DARK_THEME_START, IDS_DARK_THEME_END,
-  IDS_SYNCHRONIZATION, IDS_SYNC_PORT, IDS_SYNC_WITH_ANY_IPS, IDS_ALLOW_IPS, IDS_ALLOW_DEVS,
-  IDS_ALLOW_DEV_REM, IDS_ENTER_DEV_ID, IDS_BLOCK_REQUEST_NEW_DEVS, IDS_IMPORT, IDS_EXPORT, IDS_CATEGORIES,
-  IDS_DONE, IDS_OK, IDS_CANCEL: string;
+  IDS_SETTINGS, IDS_INTERFACE, IDS_DARK_THEME, IDS_THEME_TIME, IDS_DARK_THEME_START,
+  IDS_DARK_THEME_END, IDS_SYNCHRONIZATION, IDS_SYNC_PORT, IDS_SYNC_WITH_ANY_IPS, IDS_ALLOW_IPS,
+  IDS_ALLOW_DEVS, IDS_ALLOW_DEV_REM, IDS_ENTER_DEV_ID, IDS_BLOCK_REQUEST_NEW_DEVS, IDS_IMPORT,
+  IDS_EXPORT, IDS_CATEGORIES, IDS_CATEGORIES_AT_RUN, IDS_DONE, IDS_OK, IDS_CANCEL: string;
 
   AllowedIPs, AuthorizedDevices, CategoriesList: TStringList;
   AllowAnyIPs, BlockReqNewDevs: boolean;
@@ -117,7 +118,7 @@ end;
 
 function GetLocaleInformation(Flag: Integer): string;
 var
-  pcLCA: array [0..20] of Char;
+  pcLCA: array [0..63] of Char;
 begin
   if GetLocaleInfo(LOCALE_SYSTEM_DEFAULT, Flag, pcLCA, 19)<=0 then
     pcLCA[0]:=#0;
@@ -165,7 +166,7 @@ var
   i: integer;
 
   SQLTB: TSQLite3Statement;
-  LangFileName: string;
+  SystemLang, LangFileName: string;
 
   LangFile: TLangFile;
 begin
@@ -185,11 +186,13 @@ begin
   UseDarkTheme:=Ini.ReadBool('Main', 'DarkTheme', false);
   UseThemeTime:=Ini.ReadBool('Main', 'ThemeTime', false);
 
+  DarkThemeStartHour:=Ini.ReadInteger('Main', 'DarkThemeStartHour', 19);
+  DarkThemeEndHour:=Ini.ReadInteger('Main', 'DarkThemeEndHour', 7);
+
   CategoriesList:=TStringList.Create;
   CategoriesList.Text:=Ini.ReadString('Main', 'Categories', '');
 
-  DarkThemeStartHour:=Ini.ReadInteger('Main', 'DarkThemeStartHour', 18);
-  DarkThemeEndHour:=Ini.ReadInteger('Main', 'DarkThemeEndHour', 8);
+  CategoriesAtRun:=Ini.ReadBool('Main', 'CategoriesAtRun', false);
 
   // Автоматическое изменение темы от времени суток
   if (UseDarkTheme = false) and (UseThemeTime) then begin
@@ -217,11 +220,20 @@ begin
   IdHTTPServer.Active:=true;
 
   // Перевод
-  LangFileName:=GetLocaleInformation(LOCALE_SENGLANGUAGE) + '.txt';
+  SystemLang:=GetLocaleInformation(LOCALE_SENGLANGUAGE);
+  if SystemLang = 'Chinese' then
+    SystemLang:='Chinese (Simplified)'
+  else if Pos('Spanish', SystemLang) > 0 then
+    SystemLang:='Spanish'
+  else if Pos('Portuguese', SystemLang) > 0 then
+    SystemLang:='Portuguese';
+
+  LangFileName:=SystemLang + '.txt';
   if not FileExists(ExtractFilePath(ParamStr(0)) + 'Languages\' + LangFileName) then
     LangFileName:='English.txt';
   //LangFileName:='English.txt';
-  //LangFileName:='Chinese.txt';
+  //LangFileName:='Chinese (Simplified).txt';
+  //LangFileName:='Chinese (Traditional).txt';
   //LangFileName:='Spanish.txt';
   //LangFileName:='Portuguese.txt';
   //LangFileName:='French.txt';
@@ -229,44 +241,47 @@ begin
   //LangFileName:='Japanese.txt';
   //LangFileName:='Italian.txt';
   //LangFileName:='Korean.txt';
+  //LangFileName:='Turkish.txt';
+  //LangFileName:='Empty';
 
   LangFile:=TLangFile.Create(ExtractFilePath(ParamStr(0)) + 'Languages\' + LangFileName);
   try
-    IDS_NEW_NOTE:=LangFile.GetString('NEW_NOTE', '');
-    IDS_NOTES:=LangFile.GetString('NOTES', '');
-    IDS_TODAY:=LangFile.GetString('TODAY', '');
-    IDS_YESTERDAY:=LangFile.GetString('YESTERDAY', '');
-    IDS_DAYSAGO:=LangFile.GetString('DAYSAGO', '');
-    IDS_SEARCH:=LangFile.GetString('SEARCH', '');
-    IDS_SYNC:=LangFile.GetString('SYNC', '');
-    IDS_DEV_SYNC_CONFIRM:=LangFile.GetString('DEV_SYNC_CONFIRM', '');
-    IDS_CUT:=LangFile.GetString('CUT', '');
-    IDS_COPY:=LangFile.GetString('COPY', '');
-    IDS_PASTE:=LangFile.GetString('PASTE', '');
-    IDS_LAST_UPDATE:=LangFile.GetString('LAST_UPDATE', '');
+    IDS_NEW_NOTE:=LangFile.GetString('NEW_NOTE', 'New note');
+    IDS_NOTES:=LangFile.GetString('NOTES', 'Notes');
+    IDS_TODAY:=LangFile.GetString('TODAY', 'Today');
+    IDS_YESTERDAY:=LangFile.GetString('YESTERDAY', 'Yesterday');
+    IDS_DAYSAGO:=LangFile.GetString('DAYSAGO', 'days ago');
+    IDS_SEARCH:=LangFile.GetString('SEARCH', 'Search...');
+    IDS_SYNC:=LangFile.GetString('SYNC', 'Sync');
+    IDS_DEV_SYNC_CONFIRM:=LangFile.GetString('DEV_SYNC_CONFIRM', 'The "%s" device requests permission to sync. Allow it?');
+    IDS_CUT:=LangFile.GetString('CUT', 'Cut');
+    IDS_COPY:=LangFile.GetString('COPY', 'Copy');
+    IDS_PASTE:=LangFile.GetString('PASTE', 'Paste');
+    IDS_LAST_UPDATE:=LangFile.GetString('LAST_UPDATE', 'Last update:');
 
-    IDS_SETTINGS:=LangFile.GetString('SETTINGS', '');
-    IDS_INTERFACE:=LangFile.GetString('INTERFACE', '');
-    IDS_DARK_THEME:=LangFile.GetString('DARK_THEME', '');
-    IDS_THEME_TIME:=LangFile.GetString('THEME_TIME', '');
-    IDS_DARK_THEME_START:=LangFile.GetString('DARK_THEME_START', '');
-    IDS_DARK_THEME_END:=LangFile.GetString('DARK_THEME_END', '');
-    IDS_SYNCHRONIZATION:=LangFile.GetString('SYNCHRONIZATION', '');
-    IDS_SYNC_PORT:=LangFile.GetString('SYNC_PORT', '');
-    IDS_SYNC_WITH_ANY_IPS:=LangFile.GetString('SYNC_WITH_ANY_IPS', '');
-    IDS_ALLOW_IPS:=LangFile.GetString('ALLOW_IPS', '');
-    IDS_ALLOW_DEVS:=LangFile.GetString('ALLOW_DEVS', '');
-    IDS_ALLOW_DEV_REM:=LangFile.GetString('ALLOW_DEV_REM', '');
-    IDS_ENTER_DEV_ID:=LangFile.GetString('ENTER_DEV_ID', '');
-    IDS_BLOCK_REQUEST_NEW_DEVS:=LangFile.GetString('BLOCK_REQUEST_NEW_DEVS', '');
-    IDS_IMPORT:=LangFile.GetString('IMPORT', '');
-    IDS_EXPORT:=LangFile.GetString('EXPORT', '');
-    IDS_CATEGORIES:=LangFile.GetString('CATEGORIES', '');
-    IDS_DONE:=LangFile.GetString('DONE', '');
-    IDS_OK:=LangFile.GetString('OK', '');
-    IDS_CANCEL:=LangFile.GetString('CANCEL', '');
+    IDS_SETTINGS:=LangFile.GetString('SETTINGS', 'Settings');
+    IDS_INTERFACE:=LangFile.GetString('INTERFACE', 'Interface');
+    IDS_DARK_THEME:=LangFile.GetString('DARK_THEME', 'Dark theme');
+    IDS_THEME_TIME:=LangFile.GetString('THEME_TIME', 'Theme is time dependent');
+    IDS_DARK_THEME_START:=LangFile.GetString('DARK_THEME_START', 'Dark theme start:');
+    IDS_DARK_THEME_END:=LangFile.GetString('DARK_THEME_END', 'Dark theme end:');
+    IDS_SYNCHRONIZATION:=LangFile.GetString('SYNCHRONIZATION', 'Synchronization');
+    IDS_SYNC_PORT:=LangFile.GetString('SYNC_PORT', 'Port:');
+    IDS_SYNC_WITH_ANY_IPS:=LangFile.GetString('SYNC_WITH_ANY_IPS', 'Synchronization with any IP (not secure)');
+    IDS_ALLOW_IPS:=LangFile.GetString('ALLOW_IPS', 'Allowed IP addresses:');
+    IDS_ALLOW_DEVS:=LangFile.GetString('ALLOW_DEVS', 'Allowed devices:');
+    IDS_ALLOW_DEV_REM:=LangFile.GetString('ALLOW_DEV_REM', 'Remove');
+    IDS_ENTER_DEV_ID:=LangFile.GetString('ENTER_DEV_ID', 'Enter the device ID');
+    IDS_BLOCK_REQUEST_NEW_DEVS:=LangFile.GetString('BLOCK_REQUEST_NEW_DEVS', 'Block requests for new devices');
+    IDS_IMPORT:=LangFile.GetString('IMPORT', 'Import');
+    IDS_EXPORT:=LangFile.GetString('EXPORT', 'Export');
+    IDS_CATEGORIES:=LangFile.GetString('CATEGORIES', 'Categories');
+    IDS_CATEGORIES_AT_RUN:=LangFile.GetString('CATEGORIES_AT_RUN', 'Categories at startup');
+    IDS_DONE:=LangFile.GetString('DONE', 'Done');
+    IDS_OK:=LangFile.GetString('OK', 'OK');
+    IDS_CANCEL:=LangFile.GetString('CANCEL', 'Cancel');
     if CategoriesList.Text = '' then
-      CategoriesList.Text:=LangFile.GetString('USER_CATEGORIES', '');
+      CategoriesList.Text:=LangFile.GetString('USER_CATEGORIES', '#Shopping\n#Ideas\n#Work\n#Projects\n#Family\n#Health\n#Finances\n#Education\n#Travel\n#Hobbies\n#Personal');
   finally
     LangFile.Free;
   end;
@@ -292,7 +307,7 @@ begin
   SQLDB:=TSQLite3Database.Create;
   SQLDB.Open(DBFileName);
 
-  SQLDB.Execute('CREATE TABLE IF NOT EXISTS Notes (ID TIMESTAMP, Note TEXT, DateTime TIMESTAMP)');
+  SQLDB.Execute('CREATE TABLE IF NOT EXISTS Notes (ID INTEGER, Note TEXT, DateTime INTEGER)');
 
   // Ограничение IP адресов для синхронизации
   AllowedIPs:=TStringList.Create;
@@ -415,39 +430,36 @@ end;
 
 procedure TMain.NoteDone(UpdateList: integer);
 var
-  CurTimeStamp: int64; i: integer;
+  CurTimeStamp, CurDateTime: int64; i: integer;
 begin
+  CurDateTime:=DateTimeToUnix(Now);
   // Update
   if (NoteIndex <> -1) and ( Trim(LatestNote) <> Trim(WebView.OleObject.Document.getElementById('memo').innerHTML) ) then begin
 
-    if (GetAsyncKeyState(VK_LSHIFT) and $8000 <> 0) or (GetAsyncKeyState(VK_RSHIFT) and $8000 <> 0) then begin // Если нажат Shift, то не обновляем дату
-      SQLDB.Execute('UPDATE Notes SET Note="' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '" WHERE ID=' + IntToStr(NoteIndex));
+    if (GetAsyncKeyState(VK_LSHIFT) and $8000 <> 0) or (GetAsyncKeyState(VK_RSHIFT) and $8000 <> 0) then // Если нажат Shift, то не обновляем дату
+      CurDateTime:=NoteTimeStamp
+    else
+      CurDateTime:=DateTimeToUnix(Now);
 
-      // Добавляем действие во все таблицы авторизованных устройств. Проверка доступности нужна для использования иных баз данных
-      for i:=0 to AuthorizedDevices.Count - 1 do
-        if SQLDBTableExists('Actions_' + AuthorizedDevices.Strings[i]) then
-          SQLDB.Execute('INSERT INTO Actions_' + AuthorizedDevices.Strings[i] + ' (Action, ID, Note, DateTime) values("UPDATE", "' + IntToStr(NoteIndex) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", "' + IntToStr(NoteTimeStamp) + '")');
+    SQLDB.Execute('UPDATE Notes SET Note="' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", DateTime="' + IntToStr(CurDateTime) + '" WHERE ID=' + IntToStr(NoteIndex));
 
-    end else begin //По умолчанию (обновление текста и даты)
-	    SQLDB.Execute('UPDATE Notes SET Note="' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", DateTime="' + IntToStr(DateTimeToUnix(Now)) + '" WHERE ID=' + IntToStr(NoteIndex));
-
-      //Добавляем действие во все таблицы авторизованных устройств. Проверка доступности нужна для использования иных баз данных
-      for i:=0 to AuthorizedDevices.Count - 1 do
-        if SQLDBTableExists('Actions_' + AuthorizedDevices.Strings[i]) then
-          SQLDB.Execute('INSERT INTO Actions_' + AuthorizedDevices.Strings[i] + ' (Action, ID, Note, DateTime) values("UPDATE", "' + IntToStr(NoteIndex) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", "' + IntToStr(DateTimeToUnix(Now)) + '")');
-    end;
+    // Добавляем действие во все таблицы авторизованных устройств. Проверка доступности нужна для использования иных баз данных
+    for i:=0 to AuthorizedDevices.Count - 1 do
+      if SQLDBTableExists('Actions_' + AuthorizedDevices.Strings[i]) then
+        SQLDB.Execute('INSERT INTO Actions_' + AuthorizedDevices.Strings[i] + ' (Action, ID, Note, DateTime) values("UPDATE", "' + IntToStr(NoteIndex) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", "' + IntToStr(CurDateTime) + '")');
   end;
 
   // Add, обязательно под Update, потому что обновляется текущий NoteIndex
   if (NoteIndex = -1) and (Trim(WebView.OleObject.Document.getElementById('memo').innerHTML) <> '') then begin
 	  CurTimeStamp:=GetTimeStamp;
-	  SQLDB.Execute('INSERT INTO Notes (ID, Note, DateTime) values("' + IntToStr(CurTimeStamp) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", "' + IntToStr(DateTimeToUnix(Now)) + '")');
+    CurDateTime:=DateTimeToUnix(Now);
+	  SQLDB.Execute('INSERT INTO Notes (ID, Note, DateTime) values("' + IntToStr(CurTimeStamp) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", "' + IntToStr(CurDateTime) + '")');
 	  NoteIndex:=CurTimeStamp; //Для того, чтобы последняя запись не создавалась снова и снова
 
-    //Добавляем действие во все базы авторизованных устройств. Проверка доступности нужна для использования иных баз данных
+    // Добавляем действие во все базы авторизованных устройств. Проверка доступности нужна для использования иных баз данных
     for i:=0 to AuthorizedDevices.Count - 1 do
       if SQLDBTableExists('Actions_' + AuthorizedDevices.Strings[i]) then
-        SQLDB.Execute('INSERT INTO Actions_' + AuthorizedDevices.Strings[i] + ' (Action, ID, Note, DateTime) values("INSERT", "' + IntToStr(CurTimeStamp) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", "' + IntToStr(DateTimeToUnix(Now)) + '")');
+        SQLDB.Execute('INSERT INTO Actions_' + AuthorizedDevices.Strings[i] + ' (Action, ID, Note, DateTime) values("INSERT", "' + IntToStr(CurTimeStamp) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", "' + IntToStr(CurDateTime) + '")');
   end;
 
   if UpdateList = 0 then begin
@@ -531,12 +543,12 @@ begin
         DaysAgo:=DaysBetween(StrToDate(NoteDate), Date);
 
         if IDS_DAYSAGO='дн. назад' then begin
-          if DaysAgo mod 10 = 1 then NoteDate:=IntToStr(DaysAgo) + ' день назад';
+          if DaysAgo mod 10 = 1 then NoteDate:=IntToStr(DaysAgo) + ' день назад'
 
-          if (DaysAgo mod 10 >= 2) and (DaysAgo mod 10 <= 4) then
-            NoteDate:=IntToStr(DaysAgo) + ' дня назад';
+          else if (DaysAgo mod 10 >= 2) and (DaysAgo mod 10 <= 4) then
+            NoteDate:=IntToStr(DaysAgo) + ' дня назад'
 
-          if ( (DaysAgo mod 10 >= 5) and (DaysAgo mod 10 <= 9) ) or (DaysAgo mod 10 = 0) then
+          else if ( (DaysAgo mod 10 >= 5) and (DaysAgo mod 10 <= 9) ) or (DaysAgo mod 10 = 0) then
             NoteDate:=IntToStr(DaysAgo) + ' дней назад';
         end else
           NoteDate:=IntToStr(DaysAgo) + ' ' + IDS_DAYSAGO;
@@ -612,6 +624,9 @@ begin
 
       if UseDarkTheme then
         AddStyle(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'UI\darktheme.css');
+
+      if CategoriesAtRun then
+        ShowCategories;
     end;
   end;
 end;
@@ -754,12 +769,12 @@ begin
         AResponseInfo.ContentText:='<actions>' + #13#10;
         while SQLTB.Step = SQLITE_ROW do begin
           if SQLTB.ColumnText(0) = 'INSERT' then
-            AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<insert id="' + SQLTB.ColumnText(1) + '" datetime="' + SQLTB.ColumnText(3) + '">' + SQLTB.ColumnText(2) + '</insert>' + #13#10;
+            AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<insert id="' + SQLTB.ColumnText(1) + '" datetime="' + SQLTB.ColumnText(3) + '">' + SQLTB.ColumnText(2) + '</insert>' + #13#10
 
-          if SQLTB.ColumnText(0) = 'UPDATE' then
-            AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<update id="' + SQLTB.ColumnText(1) + '" datetime="' + SQLTB.ColumnText(3) + '">' + SQLTB.ColumnText(2) + '</update>' + #13#10;
+          else if SQLTB.ColumnText(0) = 'UPDATE' then
+            AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<update id="' + SQLTB.ColumnText(1) + '" datetime="' + SQLTB.ColumnText(3) + '">' + SQLTB.ColumnText(2) + '</update>' + #13#10
 
-          if SQLTB.ColumnText(0) = 'DELETE' then
+          else if SQLTB.ColumnText(0) = 'DELETE' then
               AResponseInfo.ContentText:=AResponseInfo.ContentText + #9 + '<delete id="' + SQLTB.ColumnText(1) + '"></delete>' + #13#10;
         end;
       finally
@@ -839,6 +854,7 @@ begin
     XMLNode:=XMLDoc.DocumentElement;
     for i:=0 to XMLNode.ChildNodes.Count - 1 do
       try
+        // Добавление
         if (XMLNode.ChildNodes[i].NodeName = 'insert') and (Trim( StrToCharCodes( CharCodesToStr(XMLNode.ChildNodes[i].NodeValue) ) ) <> '') then begin
           SQLDB.Execute('INSERT INTO Notes (ID, Note, DateTime) values("' + XMLNode.ChildNodes[i].Attributes['id'] + '", "' + XMLNode.ChildNodes[i].NodeValue + '", "' + XMLNode.ChildNodes[i].Attributes['datetime'] + '")');
 
@@ -846,18 +862,18 @@ begin
           for j:=0 to AuthorizedDevices.Count - 1 do
             if (AuthorizedDevices.Strings[j] <> AuthDeviceID) and (SQLDBTableExists('Actions_' + AuthorizedDevices.Strings[j])) then // Исключаем устройств отправляющее действие
               SQLDB.Execute('INSERT INTO Actions_' + AuthorizedDevices.Strings[j] + ' (Action, ID, Note, DateTime) values("INSERT", "' + XMLNode.ChildNodes[i].Attributes['id'] + '", "' + XMLNode.ChildNodes[i].NodeValue + '", "' + XMLNode.ChildNodes[i].Attributes['datetime'] + '")');
-        end;
 
-        if XMLNode.ChildNodes[i].NodeName = 'update' then begin
+        // Обновление
+        end else if XMLNode.ChildNodes[i].NodeName = 'update' then begin
           SQLDB.Execute('UPDATE Notes SET Note="' + XMLNode.ChildNodes[i].NodeValue + '", DateTime="' + XMLNode.ChildNodes[i].Attributes['datetime'] + '" WHERE ID=' + XMLNode.ChildNodes[i].Attributes['id']);
 
           // Добавляем действие во все таблицы авторизованных устройств. Проверка доступности нужна для использования иных баз данных
           for j:=0 to AuthorizedDevices.Count - 1 do
            if (AuthorizedDevices.Strings[j] <> AuthDeviceID) and (SQLDBTableExists('Actions_' + AuthorizedDevices.Strings[j])) then // Исключаем устройств отправляющее действие
               SQLDB.Execute('INSERT INTO Actions_' + AuthorizedDevices.Strings[j] + ' (Action, ID, Note, DateTime) values("UPDATE", "' + XMLNode.ChildNodes[i].Attributes['id'] + '", "' + XMLNode.ChildNodes[i].NodeValue + '", "' + XMLNode.ChildNodes[i].Attributes['datetime'] + '")');
-        end;
 
-        if XMLNode.ChildNodes[i].NodeName = 'delete' then begin
+        // Удаление
+        end else if XMLNode.ChildNodes[i].NodeName = 'delete' then begin
           SQLDB.Execute('DELETE FROM Notes WHERE ID=' + XMLNode.ChildNodes[i].Attributes['id']);
           // Добавляем действие во все доступные таблицы авторизованных устройств. Проверка доступности нужна для использования иных баз данных
           for j:=0 to AuthorizedDevices.Count - 1 do

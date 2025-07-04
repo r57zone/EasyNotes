@@ -64,6 +64,9 @@
 	let DarkThemeStartHour = 18;
 	let DarkThemeEndHour = 8;
 	
+	let CategoriesAtRun = false;
+	let CategoriesAtRunOnce = false; // Показать категории один раз, если включена синхронизация при запуске
+	
 	// Кеширование платформы
 	if (localStorage.getItem('DevicePlatform') == null) {
 		// Автоопределение платформы
@@ -428,6 +431,9 @@
 		Categories = document.getElementById('CategorySettingsInput').value.split('\n');
 		//console.log(Categories);
 		
+		// Категории при запуске
+		localStorage.setItem('CategoriesAtRun', document.getElementById('CategoriesAtRunCB').checked);
+		
 		BackSettings();
 	}
 	
@@ -701,202 +707,207 @@
 	function Sync(){
 		if (SyncWait) // Ждем выполнения
 			return;
-		
-		if (window.navigator.onLine) {
-			SyncWait = true;
-		
-			if (HideFirstNotifyError == false) // Android, из-за неработающего navigator.onLine
-				document.getElementById('sync-progress').style.display = 'block';
-			
-			function SyncNotes(){
-									
-				// Первый запуск
-				if (FirstRun) {
-					//console.log('FirstRun');
-					GetData(SyncAddress + '/api/auth?id=' + DeviceID).then(function(responseText) {
-						if (responseText == 'auth:ok') {
-							//console.log('auth:ok');
 
-							// Получение всех заметок при первом запуске
-							let XMLDoc = document.createElement('div');
+		SyncWait = true;
+	
+		if (HideFirstNotifyError == false) // Android, из-за неработающего navigator.onLine
+			document.getElementById('sync-progress').style.display = 'block';
+		
+		function SyncNotes(){
+								
+			// Первый запуск
+			if (FirstRun) {
+				//console.log('FirstRun');
+				GetData(SyncAddress + '/api/auth?id=' + DeviceID).then(function(responseText) {
+					if (responseText == 'auth:ok') {
+						//console.log('auth:ok');
+
+						// Получение всех заметок при первом запуске
+						let XMLDoc = document.createElement('div');
+						
+						GetData(SyncAddress + '/api/notes?id=' + DeviceID).then(function(responseNotes) {
+							XMLDoc.innerHTML = responseNotes;
 							
-							GetData(SyncAddress + '/api/notes?id=' + DeviceID).then(function(responseNotes) {
-								XMLDoc.innerHTML = responseNotes;
-								
-								let NoteItems = XMLDoc.getElementsByTagName('note');
-								for (let i = 0; i < NoteItems.length; i++)
-									NotesAr.push({
-										ID: parseInt(NoteItems[i].getAttribute('id')),
-										DateTime: parseInt(NoteItems[i].getAttribute('datetime')),
-										Note: NoteItems[i].innerHTML
-									});
-									//InsertNote(NoteItems[i].getAttribute('id'), NoteItems[i].innerHTML, NoteItems[i].getAttribute('datetime'));
-						
-								localStorage.setItem('Notes', JSON.stringify(NotesAr));
-						
-								delete XMLDoc;
-								
-								ShowNotes('');
-								
-								Notification(IDS_SYNC_SUCCESSFUL);
-								
-								// Сохраняем статус успешного первого запуска
-								FirstRun = false;
-								localStorage.setItem('FirstRun', FirstRun);
-								
-								SyncWait = false; // Разрешаем повторную синхронизацию;
-								
-							}).catch(function() {
-								SyncWait = false; // Разрешаем повторную синхронизацию;
-								
-								Notification(IDS_CONNECTION_FAILED);
-							});
+							let NoteItems = XMLDoc.getElementsByTagName('note');
+							for (let i = 0; i < NoteItems.length; i++)
+								NotesAr.push({
+									ID: parseInt(NoteItems[i].getAttribute('id')),
+									DateTime: parseInt(NoteItems[i].getAttribute('datetime')),
+									Note: NoteItems[i].innerHTML
+								});
+								//InsertNote(NoteItems[i].getAttribute('id'), NoteItems[i].innerHTML, NoteItems[i].getAttribute('datetime'));
+					
+							localStorage.setItem('Notes', JSON.stringify(NotesAr));
+					
+							delete XMLDoc;
+							
+							ShowNotes('');
+							
+							Notification(IDS_SYNC_SUCCESSFUL);
+							
+							// Сохраняем статус успешного первого запуска
+							FirstRun = false;
+							localStorage.setItem('FirstRun', FirstRun);
+							
+							SyncWait = false; // Разрешаем повторную синхронизацию;
+							
+						}).catch(function() {
+							SyncWait = false; // Разрешаем повторную синхронизацию;
+							
+							Notification(IDS_CONNECTION_FAILED);
+						});
 
+					} else {
+						SyncWait = false; // Разрешаем повторную синхронизацию;
+						
+						Notification(IDS_AUTH_REJECT);
+					}
+						
+					//console.log(responseText);
+				}).catch(function() {
+					SyncWait = false; // Разрешаем повторную синхронизацию;
+					
+					Notification(IDS_CONNECTION_FAILED);
+				});
+					
+			} else { // Второй и последующие запуски
+				// Получение действий
+				let XMLDoc = document.createElement('div');
+				GetData(SyncAddress + '/api/actions?id=' + DeviceID).then(function(responseNotes) {
+					XMLDoc.innerHTML = responseNotes;
+					
+					// Удаляем действия
+					GetData(SyncAddress + '/api/received?id=' + DeviceID).then(function(responseStatus) {
+					
+						if (responseStatus == 'ok') {
+							let ActionsItems = XMLDoc.getElementsByTagName('*');
+							for (let i = 0; i < ActionsItems.length; i++) { 
+
+								let ReceivedNoteID = parseInt(ActionsItems[i].getAttribute('id'));
+								let ReceivedNoteDateTime = parseInt(ActionsItems[i].getAttribute('datetime'));
+								let ReceivedNote = ActionsItems[i].innerHTML;
+								
+								if (ActionsItems[i].tagName == 'INSERT')
+									NotesAr.push({
+										ID: ReceivedNoteID,
+										DateTime: ReceivedNoteDateTime,
+										Note: ReceivedNote
+									});
+									
+								if (ActionsItems[i].tagName == 'UPDATE') {
+									const UpdateNote = NotesAr.find(function(Note) {
+										return Note.ID === ReceivedNoteID;
+									});
+									UpdateNote.DateTime = ReceivedNoteDateTime;
+									UpdateNote.Note = ReceivedNote;
+								}
+									
+								if (ActionsItems[i].tagName == 'DELETE') {
+									let IndexToRemove = NotesAr.findIndex(Note => Note.ID === ReceivedNoteID);
+									if (IndexToRemove !== -1)
+										NotesAr.splice(IndexToRemove, 1);
+								}
+							}
+							
+							// Сортировка по времени
+							NotesAr.sort(function(a, b) { return b.DateTime - a.DateTime; }); 
+							
+							localStorage.setItem('Notes', JSON.stringify(NotesAr));
+							
+							if (CategoriesAtRun && CategoriesAtRunOnce) {
+								ShowHideCategoriesList();
+								CategoriesAtRunOnce = false;
+							} else
+								ShowNotes('');
+							
+							if (TabletMode) // Новая заметка открывается только в режиме планшета, нужно для того, чтобы старая заметка не оставалась в интерфейсе, если сервер её удалил
+								NewNote(false);
+
+							Notification(IDS_SYNC_SUCCESSFUL);
+						} else if (responseStatus == 'auth:denied') {
+							FirstRun = true; // Запрос повторной авторизации, статус ↓
+							//console.log(responseStatus);
+						
+						} else
+							Notification(IDS_CONNECTION_FAILED);
+					
+						SyncWait = false; // Разрешаем повторную синхронизацию
+					
+					}).catch(function() {
+						SyncWait = false; // Разрешаем повторную синхронизацию;
+						
+						Notification(IDS_CONNECTION_FAILED);
+					});
+			
+					delete XMLDoc;
+					
+				}).catch(function() {
+					SyncWait = false; // Разрешаем повторную синхронизацию;
+					
+					Notification(IDS_CONNECTION_FAILED);
+				});
+				
+			}
+		}	
+			
+		// Генерация XML действий пользователя и отправка на "сервер"
+		if (FirstRun == false) // При первом запуске отправлять нечего
+			GetData(SyncAddress + '/api/auth?id=' + DeviceID).then(function(responseText) { // Проверка авторизации
+				if (responseText == 'auth:ok') {
+
+					let XMLAPI = '<actions>\n';
+
+					ActionsAr.forEach(function(Action) {
+						if (Action.Name == 'insert')
+							XMLAPI += '\t<insert id="' + Action.ID + '" datetime="' + Action.DateTime + '">' + Action.Note + '</insert>\n';
+						if (Action.Name == 'update')
+							XMLAPI += '\t<update id="' + Action.ID + '" datetime="' + Action.DateTime + '">' + Action.Note + '</update>\n';
+						if (Action.Name == 'delete')
+							XMLAPI += '\t<delete id="' + Action.ID + '"></delete>\n';
+					});
+					
+					XMLAPI += '</actions>';
+					
+					//alert(XMLAPI);
+
+					// Отправка XML на "сервер"
+					SendData(SyncAddress + '/api/syncnotes?id=' + DeviceID, XMLAPI).then(function(responseStatus) {
+
+						if (responseStatus == 'ok') {
+							ActionsAr = [];
+							localStorage.setItem('Actions', '');
+							
+							SyncNotes();
 						} else {
 							SyncWait = false; // Разрешаем повторную синхронизацию;
 							
-							Notification(IDS_AUTH_REJECT);
+							Notification(IDS_CONNECTION_FAILED);
 						}
-							
-						//console.log(responseText);
 					}).catch(function() {
 						SyncWait = false; // Разрешаем повторную синхронизацию;
-						
-						Notification(IDS_CONNECTION_FAILED);
-					});
-						
-				} else { // Второй и последующие запуски
-					// Получение действий
-					let XMLDoc = document.createElement('div');
-					GetData(SyncAddress + '/api/actions?id=' + DeviceID).then(function(responseNotes) {
-						XMLDoc.innerHTML = responseNotes;
-						
-						// Удаляем действия
-						GetData(SyncAddress + '/api/received?id=' + DeviceID).then(function(responseStatus) {
-						
-							if (responseStatus == 'ok') {
-								let ActionsItems = XMLDoc.getElementsByTagName('*');
-								for (let i = 0; i < ActionsItems.length; i++) { 
-
-									let ReceivedNoteID = parseInt(ActionsItems[i].getAttribute('id'));
-									let ReceivedNoteDateTime = parseInt(ActionsItems[i].getAttribute('datetime'));
-									let ReceivedNote = ActionsItems[i].innerHTML;
-									
-									if (ActionsItems[i].tagName == 'INSERT')
-										NotesAr.push({
-											ID: ReceivedNoteID,
-											DateTime: ReceivedNoteDateTime,
-											Note: ReceivedNote
-										});
-										
-									if (ActionsItems[i].tagName == 'UPDATE') {
-										const UpdateNote = NotesAr.find(function(Note) {
-											return Note.ID === ReceivedNoteID;
-										});
-										UpdateNote.DateTime = ReceivedNoteDateTime;
-										UpdateNote.Note = ReceivedNote;
-									}
-										
-									if (ActionsItems[i].tagName == 'DELETE') {
-										let IndexToRemove = NotesAr.findIndex(Note => Note.ID === ReceivedNoteID);
-										if (IndexToRemove !== -1)
-											NotesAr.splice(IndexToRemove, 1);
-									}
-								}
-								
-								// Сортировка по времени
-								NotesAr.sort(function(a, b) { return b.DateTime - a.DateTime; }); 
-								
-								localStorage.setItem('Notes', JSON.stringify(NotesAr));
-								
-								ShowNotes('');
-								if (TabletMode) // Новая заметка открывается только в режиме планшета, нужно для того, чтобы старая заметка не оставалась в интерфейсе, если сервер её удалил
-									NewNote(false);
-							
-								Notification(IDS_SYNC_SUCCESSFUL);
-							} else if (responseStatus == 'auth:denied') {
-								FirstRun = true;
-								//console.log(responseStatus);
-							} else
-								Notification(IDS_CONNECTION_FAILED);
-						
-							SyncWait = false; // Разрешаем повторную синхронизацию
-						
-						}).catch(function() {
-							SyncWait = false; // Разрешаем повторную синхронизацию;
-							
-							Notification(IDS_CONNECTION_FAILED);
-						});
-				
-						delete XMLDoc;
-						
-					}).catch(function() {
-						SyncWait = false; // Разрешаем повторную синхронизацию;
-						
-						Notification(IDS_CONNECTION_FAILED);
-					});
 					
-				}
-			}	
-				
-			// Генерация XML действий пользователя и отправка на "сервер"
-			if (FirstRun == false) // При первом запуске отправлять нечего
-				GetData(SyncAddress + '/api/auth?id=' + DeviceID).then(function(responseText) { // Проверка авторизации
-					if (responseText == 'auth:ok') {
-
-						let XMLAPI = '<actions>\n';
-
-						ActionsAr.forEach(function(Action) {
-							if (Action.Name == 'insert')
-								XMLAPI += '\t<insert id="' + Action.ID + '" datetime="' + Action.DateTime + '">' + Action.Note + '</insert>\n';
-							if (Action.Name == 'update')
-								XMLAPI += '\t<update id="' + Action.ID + '" datetime="' + Action.DateTime + '">' + Action.Note + '</update>\n';
-							if (Action.Name == 'delete')
-								XMLAPI += '\t<delete id="' + Action.ID + '"></delete>\n';
-						});
-						
-						XMLAPI += '</actions>';
-						
-						//alert(XMLAPI);
-
-						// Отправка XML на "сервер"
-						SendData(SyncAddress + '/api/syncnotes?id=' + DeviceID, XMLAPI).then(function(responseStatus) {
-
-							if (responseStatus == 'ok') {
-								ActionsAr = [];
-								localStorage.setItem('Actions', '');
-								
-								SyncNotes();
-							} else {
-								SyncWait = false; // Разрешаем повторную синхронизацию;
-								
-								Notification(IDS_CONNECTION_FAILED);
-							}
-						}).catch(function() {
-							SyncWait = false; // Разрешаем повторную синхронизацию;
-						
-							Notification(IDS_CONNECTION_FAILED);
-						});
-								
-						// Завершение генерации и отправки XML API.
-					} else {
-						SyncWait = false; // Разрешаем повторную синхронизацию;
+						Notification(IDS_CONNECTION_FAILED);
+					});
 							
-						Notification(IDS_AUTH_REJECT);
-					}
-				}).catch(function() {
+					// Завершение генерации и отправки XML API.
+				} else { // responseText == 'auth:denied'
 					SyncWait = false; // Разрешаем повторную синхронизацию;
-							
-					Notification(IDS_CONNECTION_FAILED);
-				});
-			
-			
-			if (FirstRun)
-				SyncNotes();
+						
+					Notification(IDS_AUTH_REJECT);
+				}
+			}).catch(function() {
+				SyncWait = false; // Разрешаем повторную синхронизацию;
+				
+				if (CategoriesAtRun && CategoriesAtRunOnce) {
+					ShowHideCategoriesList();
+					CategoriesAtRunOnce = false;
+				}
+						
+				Notification(IDS_CONNECTION_FAILED);
+			});
 		
-		} else {
-			Notification(IDS_SYNC_NEED_CONNECT);
-		}
+		if (FirstRun)
+			SyncNotes();
 	}
 	
 	function SyncWithFoundAddress(){
@@ -1029,6 +1040,7 @@
 		document.getElementById('DarkThemeEndTitle').innerText = IDS_DARK_THEME_END;
 		document.getElementById('AboutThemeTime').innerText = IDS_ABOUT_THEME_TIME;
 		document.getElementById('CategoriesTitle').innerText = IDS_CATEGORIES;
+		document.getElementById('CategoriesAtRunTitle').innerText = IDS_CATEGORIES_AT_RUN;
 		document.getElementById('LastUpdate').innerText = IDS_LAST_UPDATE;
 		document.getElementById('ResetBtn').innerText = IDS_FULL_RESET;
 		
@@ -1073,6 +1085,15 @@
 
 		ShowNotes('');
 		
+		// Категории при запуске
+		if (localStorage.getItem('CategoriesAtRun') != null && localStorage.getItem('CategoriesAtRun') == 'true') {
+			document.getElementById('CategoriesAtRunCB').checked = true;
+			CategoriesAtRun = true;
+			CategoriesAtRunOnce = true;
+			ShowHideCategoriesList(); // Чтобы не мерцали заметки, до выполнения или ошибки синхронизации
+			CategoriesShownList = false; // Обходной путь
+		}
+				
 		// Настройки, IP
 		// Полный адрес синхронизации
 		if (localStorage.getItem('SyncAddress') != null)
@@ -1112,11 +1133,10 @@
 		if (localStorage.getItem('AutoSync') != null && localStorage.getItem('AutoSync') == 'true') {
 			document.getElementById('AutoSyncCB').checked = true;
 			
-			if (window.navigator.onLine)
-				SyncAdvance();
+			SyncAdvance();
 		} else
-			HideFirstNotifyError = false; // Android, неработающая navigator.onLine
-		
+			HideFirstNotifyError = false; // На Android не работает navigator.onLine, поэтому так
+	
 		// Блокируем скролинг вне приложения для iOS
 		if (DevicePlatform == PlatformIOS)
 			iOSBlockOffsetAppScrolling();
@@ -1147,7 +1167,7 @@
 		<div id="panel">
 			<div id="btn" onclick="SyncAdvance();rotateSyncBtn(this);"><img src="images/sync.png" /></div>
 			<div class="title" id="NotesCount">Заметки (0)</div>
-			<div id="btn" onclick="NewNote(true);if (SearchShown) SearchShowHide(); if (CategoriesShownList) ShowHideCategoriesList();"><img src="images/new.png" /></div>
+			<div id="btn" onclick="if (SearchShown) SearchShowHide(); if (CategoriesShownList) ShowHideCategoriesList(); NewNote(true);"><img src="images/new.png" /></div>
 		</div>
 		<div id="panel-bg"></div>
 		
@@ -1181,7 +1201,6 @@
 		</div>
 		<div class="sub-panel">
 			<div id="btn" onclick="RemNote()"><img src="images/rm.png" /></div>
-			<!--<div id="btn" onclick="QR()"><img src="images/qr.png" /></div>-->
 			<div id="btn" onclick="ShowHideNoteCategories()"><img src="images/folders.png" /></div>
 		</div>
 		<div id="note-categories"></div>
@@ -1244,11 +1263,11 @@
 				
 				<div id="item" >
 					<div class="title" id="DarkThemeStartTitle">Начало тёмной темы</div>
-					<div id="control"><input type="number" id="DarkThemeStartHour" value="18" min="0" max="23"></div>
+					<div id="control"><input type="number" id="DarkThemeStartHour" value="19" min="0" max="23"></div>
 				</div>
 				<div id="item">
 					<div class="title" id="DarkThemeEndTitle">Конец тёмной темы</div>
-					<div id="control"><input type="number" id="DarkThemeEndHour" value="8" min="0" max="23"></div>
+					<div id="control"><input type="number" id="DarkThemeEndHour" value="7" min="0" max="23"></div>
 				</div>
 			</div>
 
@@ -1259,9 +1278,15 @@
 					<div class="title" style="width:30%;" id="CategoriesTitle">Категории</div>
 					<textarea id="CategorySettingsInput" style="width:70%;height:76px"></textarea>
 				</div>
+				<div id="item">
+					<div class="title" id="CategoriesAtRunTitle">Категории при запуске</div>
+					<div id="control" style="width:30%;margin-top:-3px;">
+						<input type="checkbox" id="CategoriesAtRunCB" class="checkbox" /><label for="CategoriesAtRunCB" class="switch"></label>
+					</div>
+				</div>
 			</div>
 			
-			<div class="titlebox" style="text-align:center;"><br><span id="DeviceID"></span><br><span id="localstoragesize">-</span><br><br>EasyNotes<br><span id="LastUpdate"></span> 06.04.25<br><a style="border-bottom:1px dashed var(--title-box-color)" href="https://r57zone.github.io" target="_blank">https://r57zone.github.io</a></div>
+			<div class="titlebox" style="text-align:center;"><br><span id="DeviceID"></span><br><span id="localstoragesize">-</span><br><br>EasyNotes<br><span id="LastUpdate"></span> 29.06.25<br><a style="border-bottom:1px dashed var(--title-box-color)" href="https://r57zone.github.io" target="_blank">https://r57zone.github.io</a></div>
 			<br>
 			<div id="items">
 				<div id="item">

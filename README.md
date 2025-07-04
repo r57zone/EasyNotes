@@ -8,7 +8,7 @@
 Note apps for Windows, Android and iOS, with direct local sync or web server sync. The server can be either a Windows application (you need to run it for synchronization) or your web server. The API documentation can be found [here](https://github.com/r57zone/EasyNotes/blob/master/API.md).
 
 ## Features
-The following languages ​​are supported: English, Russian, Chinese (Traditional), Spanish, Portuguese (Brazilian Portuguese), French, German, Japanese, Arabic, Italian and Korean.
+The following languages ​​are supported: English, Russian, Chinese (Traditional), Spanish, Portuguese (Brazilian Portuguese), French, German, Japanese, Arabic, Italian, Korean and Turkish.
 
 ![flag-united-kingdom](https://github.com/user-attachments/assets/8c03c9b8-d154-466f-b9c4-6ea60278d537)
 ![flag-russia](https://user-images.githubusercontent.com/9499881/27683795-5b0fbac6-5cd8-11e7-929c-057833e01fb1.png)
@@ -24,6 +24,7 @@ The following languages ​​are supported: English, Russian, Chinese (Traditio
 ![flag-italy](https://github.com/user-attachments/assets/692490d6-bc53-446f-99b8-bf2becb8ec0d)
 ![flag-north-korea](https://github.com/user-attachments/assets/5b315a3d-6ce0-4cbb-b7a3-133ef2bcb2c5)
 ![flag-south-korea](https://github.com/user-attachments/assets/ed3d3778-9193-444a-85fd-ac5dd7bc91c6)
+![flag-turkey](https://github.com/user-attachments/assets/e18e5455-7321-4632-bf3f-19921b42a7ce)
 
 
 Apps support a dark theme with automatic switching during night time.

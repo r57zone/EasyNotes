@@ -31,6 +31,7 @@ IMPORT=インポート
 EXPORT=エクスポート
 CATEGORIES=カテゴリ
 USER_CATEGORIES=#買い物\n#アイデア\n#仕事\n#プロジェクト\n#家族\n#健康\n#財務\n#勉強\n#旅行\n#趣味\n#個人的
+CATEGORIES_AT_RUN=起動時のカテゴリ
 DONE=完了
 OK=OK
 CANCEL=キャンセル

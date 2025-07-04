@@ -1,0 +1,37 @@
+# Main
+NEW_NOTE=新建笔记
+NOTES=笔记
+TODAY=今天
+YESTERDAY=昨天
+DAYSAGO=天前
+SEARCH=搜索...
+SYNC=同步
+DEV_SYNC_CONFIRM=设备“%s”请求同步权限。允许吗？
+CUT=剪切
+COPY=复制
+PASTE=粘贴
+LAST_UPDATE=最后更新：
+
+# Settings
+SETTINGS=设置
+INTERFACE=界面
+DARK_THEME=暗色主题
+THEME_TIME=主题随时间变化
+DARK_THEME_START=暗色主题开始时间：
+DARK_THEME_END=暗色主题结束时间：
+SYNCHRONIZATION=同步
+SYNC_PORT=端口：
+SYNC_WITH_ANY_IPS=允许任何IP同步（不安全）
+ALLOW_IPS=允许的IP地址：
+ALLOW_DEVS=允许的设备：
+ALLOW_DEV_REM=移除
+ENTER_DEV_ID=输入设备ID
+BLOCK_REQUEST_NEW_DEVS=阻止新设备请求
+IMPORT=导入
+EXPORT=导出
+CATEGORIES=分类
+USER_CATEGORIES=#购物\n#创意\n#工作\n#项目\n#家庭\n#健康\n#财务\n#教育\n#旅行\n#爱好\n#个人
+CATEGORIES_AT_RUN=启动时分类
+DONE=完成
+OK=确定
+CANCEL=取消

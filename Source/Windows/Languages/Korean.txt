@@ -31,6 +31,7 @@ IMPORT=가져오기
 EXPORT=내보내기
 CATEGORIES=카테고리
 USER_CATEGORIES=#쇼핑\n#아이디어\n#일\n#프로젝트\n#가족\n#건강\n#재정\n#학습\n#여행\n#취미\n#개인
+CATEGORIES_AT_RUN=실행 시 카테고리
 DONE=완료
 OK=확인
 CANCEL=취소

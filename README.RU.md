@@ -6,7 +6,7 @@
 Простые заметки для Windows, Android и iOS, с прямой локальной синхронизацией или синхронизацией с веб-сервером. Сервером может выступать как приложение для Windows (для синхронизации необходимо запускать его), так и ваш веб-сервер. Посмотреть API можно [здесь](https://github.com/r57zone/EasyNotes/blob/master/API.RU.md).
 
 ## Особенности
-Поддерживаются следующие языки: английский, русский, китайский (традиционный), испанский, португальский (бразильский португальский), французкий, немецкий, японский, арабский, итальянский и корейский.
+Поддерживаются следующие языки: английский, русский, китайский (традиционный), испанский, португальский (бразильский португальский), французкий, немецкий, японский, арабский, итальянский, корейский и турецкий.
 
 ![flag-united-kingdom](https://github.com/user-attachments/assets/8c03c9b8-d154-466f-b9c4-6ea60278d537)
 ![flag-russia](https://user-images.githubusercontent.com/9499881/27683795-5b0fbac6-5cd8-11e7-929c-057833e01fb1.png)
@@ -22,6 +22,7 @@
 ![flag-italy](https://github.com/user-attachments/assets/692490d6-bc53-446f-99b8-bf2becb8ec0d)
 ![flag-north-korea](https://github.com/user-attachments/assets/5b315a3d-6ce0-4cbb-b7a3-133ef2bcb2c5)
 ![flag-south-korea](https://github.com/user-attachments/assets/ed3d3778-9193-444a-85fd-ac5dd7bc91c6)
+![flag-turkey](https://github.com/user-attachments/assets/e18e5455-7321-4632-bf3f-19921b42a7ce)
 
 
 Приложения имеют тёмную тему и автоматическое переключение на неё в тёмное время суток.

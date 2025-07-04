@@ -38,6 +38,7 @@ type
     DarkThemeEndHourLbl: TLabel;
     DarkThemeStartHourEdt: TEdit;
     DarkThemeEndHourEdt: TEdit;
+    CategoriesAtRunCB: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure CancelBtnClick(Sender: TObject);
     procedure AboutBtnClick(Sender: TObject);
@@ -72,8 +73,8 @@ uses Unit1;
 
 procedure TSettings.AboutBtnClick(Sender: TObject);
 begin
-  Application.MessageBox(PChar(Main.Caption + ' 1.1' + #13#10 +
-    IDS_LAST_UPDATE + ' 07.12.24' + #13#10 +
+  Application.MessageBox(PChar(Main.Caption + ' 1.3' + #13#10 +
+    IDS_LAST_UPDATE + ' 29.06.25' + #13#10 +
     'https://r57zone.github.io' + #13#10 +
     'r57zone@gmail.com'), PChar(Main.Caption), MB_ICONINFORMATION);
 end;
@@ -179,8 +180,9 @@ begin
   AllowedDevRemBtn.Caption:=IDS_ALLOW_DEV_REM;
   BlockReqNewDevsCB.Caption:=IDS_BLOCK_REQUEST_NEW_DEVS;
   CategoriesGB.Caption:=IDS_CATEGORIES;
-
   CategoriesMemo.Text:=Trim(CategoriesList.Text);
+  CategoriesAtRunCB.Caption:=IDS_CATEGORIES_AT_RUN;
+  CategoriesAtRunCB.Checked:=Main.CategoriesAtRun;
 
   NotesGB.Caption:=IDS_NOTES;
   OpenDialog.Filter:=IDS_NOTES + ' (*.ntxt)|*.ntxt';
@@ -239,7 +241,9 @@ begin
   Ini.WriteBool('Sync', 'BlockRequestNewDevs', BlockReqNewDevsCB.Checked);
   AllowedIPsMemo.Lines.SaveToFile(ExtractFilePath(ParamStr(0)) + AllowedIPsFile); // В Ini ограничение на кол-во символов в строке
   CategoriesMemo.Text:=StringReplace(Trim(CategoriesMemo.Text), ' ', '_', [rfReplaceAll]);
-  CategoriesMemo.Text:=StringReplace(CategoriesMemo.Text, #13#10, '\n', [rfReplaceAll]);
+  Ini.WriteString('Main', 'Categories', StringReplace(CategoriesMemo.Text, #13#10, '\n', [rfReplaceAll]));
+  Main.CategoriesAtRun:=CategoriesAtRunCB.Checked;
+  Ini.WriteBool('Main', 'CategoriesAtRun', CategoriesAtRunCB.Checked);
   Ini.Free;
   Main.IdHTTPServer.Active:=false;
   for i:=1 to ParamCount do
