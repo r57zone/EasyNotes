@@ -1,0 +1,1 @@
+Einfache Notiz-App mit optionalem Sync

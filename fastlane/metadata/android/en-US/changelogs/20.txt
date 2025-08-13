@@ -1,0 +1,1 @@
+signing key was changed from debug to release, so to update you will have to uninstall and reinstall the app

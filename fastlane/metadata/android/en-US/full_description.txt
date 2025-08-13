@@ -1,0 +1,1 @@
+<p><i>EasyNotes</i> is an easy note taking app for Android, iOS and Windows. You can keep your notes in sync by using its Windows based server.</p>
