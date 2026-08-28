@@ -1,7 +1,0 @@
-Added confirmation when deleting notes.
-Added note export and import to the mobile versions.
-Added swipe gestures to the note list in the mobile versions.
-Improved device discovery on Asus and Xiaomi routers.
-Added additional animal or fruit names to device IDs to make them easier to identify.
-Added support for the "Back" button on Android smartphones.
-Fixed various bugs, added optimizations, and improved the visual appearance.

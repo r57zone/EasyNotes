@@ -1,1 +1,0 @@
-<p><i>EasyNotes</i> ist eine einfache Notiz-App für Android, iOS und Windows. Notizen lassen sich über Connect oder einen Windows-basierten Webserver synchron halten.</p>
