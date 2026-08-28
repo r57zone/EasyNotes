@@ -20,26 +20,26 @@ object Settings: TSettings
     Left = 264
     Top = 8
     Width = 248
-    Height = 122
+    Height = 133
     Caption = #1048#1085#1090#1077#1088#1092#1077#1081#1089
     TabOrder = 0
     object DarkThemeStartHourLbl: TLabel
       Left = 8
-      Top = 65
+      Top = 88
       Width = 121
       Height = 15
       Caption = #1053#1072#1095#1072#1083#1086' '#1090#1105#1084#1085#1086#1081' '#1090#1077#1084#1099':'
     end
     object DarkThemeEndHourLbl: TLabel
       Left = 8
-      Top = 95
+      Top = 111
       Width = 113
       Height = 15
       Caption = #1050#1086#1085#1077#1094' '#1090#1105#1084#1085#1086#1081' '#1090#1077#1084#1099':'
     end
     object DarkThemeCB: TCheckBox
       Left = 8
-      Top = 20
+      Top = 43
       Width = 97
       Height = 17
       Caption = #1058#1105#1084#1085#1072#1103' '#1090#1077#1084#1072
@@ -48,7 +48,7 @@ object Settings: TSettings
     end
     object ThemeTimeCB: TCheckBox
       Left = 8
-      Top = 40
+      Top = 66
       Width = 201
       Height = 17
       Caption = #1058#1077#1084#1072' '#1074' '#1079#1072#1074#1080#1089#1080#1084#1086#1089#1090#1080' '#1086#1090' '#1074#1088#1077#1084#1077#1085#1080
@@ -56,18 +56,26 @@ object Settings: TSettings
       OnClick = ThemeTimeCBClick
     end
     object DarkThemeStartHourEdt: TEdit
-      Left = 170
-      Top = 63
+      Left = 191
+      Top = 84
       Width = 48
       Height = 23
       TabOrder = 2
     end
     object DarkThemeEndHourEdt: TEdit
-      Left = 170
-      Top = 92
+      Left = 191
+      Top = 107
       Width = 48
       Height = 23
       TabOrder = 3
+    end
+    object MinimizeToTrayCB: TCheckBox
+      Left = 8
+      Top = 20
+      Width = 237
+      Height = 17
+      Caption = #1057#1074#1086#1088#1072#1095#1080#1074#1072#1090#1100' '#1074' '#1086#1073#1083#1072#1089#1090#1100' '#1091#1074#1077#1076#1086#1084#1083#1077#1085#1080#1081
+      TabOrder = 4
     end
   end
   object SyncGB: TGroupBox
@@ -190,14 +198,14 @@ object Settings: TSettings
   end
   object NotesGB: TGroupBox
     Left = 263
-    Top = 250
+    Top = 269
     Width = 248
-    Height = 54
+    Height = 79
     Caption = #1047#1072#1084#1077#1090#1082#1080
     TabOrder = 5
     object ImportBtn: TButton
-      Left = 8
-      Top = 20
+      Left = 7
+      Top = 44
       Width = 75
       Height = 25
       Caption = #1048#1084#1087#1086#1088#1090
@@ -206,17 +214,25 @@ object Settings: TSettings
     end
     object ExportBtn: TButton
       Left = 88
-      Top = 20
+      Top = 44
       Width = 75
       Height = 25
       Caption = #1069#1082#1089#1087#1086#1088#1090
       TabOrder = 1
       OnClick = ExportBtnClick
     end
+    object ConfirmBeforeDeleteCB: TCheckBox
+      Left = 8
+      Top = 21
+      Width = 236
+      Height = 17
+      Caption = #1055#1086#1076#1090#1074#1077#1088#1078#1076#1072#1090#1100' '#1091#1076#1072#1083#1077#1085#1080#1077
+      TabOrder = 2
+    end
   end
   object CategoriesGB: TGroupBox
     Left = 263
-    Top = 132
+    Top = 147
     Width = 249
     Height = 116
     Caption = #1050#1072#1090#1077#1075#1086#1088#1080#1080
@@ -232,9 +248,9 @@ object Settings: TSettings
     object CategoriesAtRunCB: TCheckBox
       Left = 8
       Top = 91
-      Width = 225
+      Width = 236
       Height = 17
-      Caption = 'CategoriesAtRunCB'
+      Caption = #1050#1072#1090#1077#1075#1086#1088#1080#1080' '#1087#1088#1080' '#1079#1072#1087#1091#1089#1082#1077
       TabOrder = 1
     end
   end
@@ -247,11 +263,11 @@ object Settings: TSettings
     end
   end
   object OpenDialog: TOpenDialog
-    Left = 288
+    Left = 272
     Top = 325
   end
   object SaveDialog: TSaveDialog
-    Left = 360
+    Left = 344
     Top = 325
   end
 end

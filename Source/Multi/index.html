@@ -44,6 +44,8 @@
 	let CurNoteDateTime;
 	
 	let SyncWait = false;
+	let SyncWaitAdvance = false;
+	let SyncSuccess = false; // Успешная синхронизация, чтобы не сохранять Actions если не было синхронизации
 
 	let UpdateDateTime = true;
 	
@@ -56,6 +58,7 @@
 	let AutoSearchIP = false;
 	
 	let SearchShown = false;
+	let SearchHiddenForRemove = false; // Сохранение поиска при показе кнопок подтверждения удаления заметки
 	let Categories = [];
 	let CategoriesShownList = false;
 	let CategoriesNoteShown = false;
@@ -66,6 +69,22 @@
 	
 	let CategoriesAtRun = false;
 	let CategoriesAtRunOnce = false; // Показать категории один раз, если включена синхронизация при запуске
+	
+	let ConfirmBeforeDelete = false;
+	let ConfirmSwipeDelete = false;
+	let DeleteConfirmShown = false;
+	let RemoveNoteID = -1; // ID для свайпов
+	
+	// Экраны и элементы управления
+	let LayoutList;
+	let LayoutSettings;
+	let LayoutEditor;
+		
+	let NoteMemo;
+	let NoteTitle;
+		
+	let DaysAgoTitle;
+	let DayNoteTitle;
 	
 	// Кеширование платформы
 	if (localStorage.getItem('DevicePlatform') == null) {
@@ -113,17 +132,21 @@
 	}
 	
 	function StrToCharCodes(Str){
-		let NewStr = '';
+		/*let NewStr = '';
 		let CharCode = 0;
 		for (let i = 0; i < Str.length; i++)
 			NewStr += 'x' + Str.charCodeAt(i);
 			
-		return NewStr;
+		return NewStr;*/
+		let arr = [];
+		for (let i = 0; i < Str.length; i++)
+			arr.push('x' + Str.charCodeAt(i));
+		return arr.join('');
 	}
 	
 	function CharCodesToStr(Str){
-		let NewStr = '';
-		if (Str.length = 0) return '';
+		/*let NewStr = '';
+		if (Str.length == 0) return '';
 		if (Str[0] != 'x') return '';
 		Str = Str.substring(1, Str.length);
 		Str += 'x';
@@ -131,7 +154,9 @@
 			NewStr += String.fromCharCode(parseInt(Str.substring(0, Str.indexOf('x')), 0));
 			Str = Str.substring(Str.indexOf('x') + 1, Str.length);
 		}	
-		return NewStr;
+		return NewStr;*/
+		if (!Str || Str[0] !== 'x') return '';
+		return Str.slice(1).split('x').map(c => String.fromCharCode(+c)).join('');
 	}
 	
 	function FullReset()
@@ -148,8 +173,6 @@
 			date.setTime(TimeStampSec * 1000 + date.getTimezoneOffset() * 60000 ); // После присвоения времени добавляется смещение UTC, поэтому вычитаем его.
 
 			let CurDate = new Date(); // Текущее время для сравнения
-			let mTime = '' + date.getHours();
-			if (date.getMinutes() < 10) {mTime += ':0' + date.getMinutes();} else {mTime += ':' + date.getMinutes();}
 			
 			// Даты без времени для точного определения пройденных дней
 			let DCurDate = new Date(CurDate.getFullYear(), CurDate.getMonth(), CurDate.getDate(), 0, 0, 0, 0);
@@ -157,6 +180,7 @@
 			
 			let DaysAgo = Math.floor((DCurDate - DDate) / (1000 * 60 * 60 * 24));
 			
+			let MyDate = '-';
 			if (DaysAgo == 0) MyDate = IDS_TODAY;
 			if (DaysAgo == 1) MyDate = IDS_YESTERDAY;
 			if (DaysAgo > 1) MyDate = DaysAgo + ' ' + IDS_DAYSAGO;
@@ -221,6 +245,7 @@
 	}
 	
 	function ExtractTitle(Str){
+		if (!Str) return '';
 		if (Str.indexOf('\n') > 0)
 			Str = Str.substring(0, Str.indexOf('\n'));
 		if (Str.endsWith(':'))
@@ -228,6 +253,15 @@
 		if (Str.length > 50)
 			Str = Str.substring(0, 50) + '...';
 		return Str;
+	}
+	
+	function EscapeHTML(Str) {
+		if (Str == null) return '';
+		return Str.replace(/&/g, '&amp;')
+				  .replace(/</g, '&lt;')
+				  .replace(/>/g, '&gt;')
+				  .replace(/"/g, '&quot;')
+				  .replace(/'/g, '&#39;');
 	}
 	
 	function ChangeDateTimeStatus()
@@ -248,8 +282,8 @@
 	function ShowNotes(SearchValue) // trim(), toLowerCase()
 	{
 		if (TabletMode == false)
-			document.getElementById('editor').style.display = 'none';
-		document.getElementById('list').style.display = 'block';
+			LayoutEditor.style.display = 'none';
+		LayoutList.style.display = 'block';
 		
 		let NotesStr = '';
 		let NotesCount = 0;
@@ -258,12 +292,13 @@
 		
 		// Вывод
 		NotesAr.forEach(function(Note) {
-			NoteText = CharCodesToStr(Note.Note);
+			let NoteText = CharCodesToStr(Note.Note);
 			if (SearchValue == '' || NoteText.toLowerCase().indexOf(SearchValue.toLowerCase()) >= 0) {
 				NotesCount += 1;
-				NotesStr += '<div onclick="GetNote(' + Note.ID  + ')" id="note">' + 
-							'<div id="title">' + ExtractTitle(NoteText) + '</div>' +
-							'<div id="date">' + ListDate(Note.DateTime) + '</div>' +
+				NotesStr += '<div data-id="' + Note.ID  + '" class="note">' + 
+							'<div class="title">' + EscapeHTML(ExtractTitle(NoteText)) + '</div>' +
+							'<div class="date">' + ListDate(Note.DateTime) + '</div>' +
+							'<div class="remove"></div>' +
 							'</div>';
 				}
 		});
@@ -275,8 +310,8 @@
 	
 	function BackNote() {
 		if (TabletMode == false)
-			document.getElementById('editor').style.display = 'none';
-		document.getElementById('list').style.display = 'block';
+			LayoutEditor.style.display = 'none';
+		LayoutList.style.display = 'block';
 		
 		if (CategoriesShownList || SearchShown) // Оставляем заметки, если выбрана категория или поиск
 			return;
@@ -294,15 +329,18 @@
 		}
 		
 		if (TabletMode == false)
-			document.getElementById('editor').style.display = 'none';
-		document.getElementById('list').style.display = 'block';
+			LayoutEditor.style.display = 'none';
+		LayoutList.style.display = 'block';
 
 		let CatsStr = '';
 		
 		for (let Category of Categories) {
-			CatsStr += '<div onclick="ShowNotes(\'' + Category + '\')" id="note">' + 
-						'<div id="title">' + ExtractTitle(Category) + '</div>' +
-						'<div id="date"></div>' +
+			let CatTitle = EscapeHTML(ExtractTitle(Category));
+			if (CatTitle.startsWith('#'))
+				CatTitle = CatTitle.substring(1);
+			CatsStr += '<div onclick="ShowNotes(\'' + EscapeHTML(Category) + '\')" class="note">' + 
+						'<div class="title">' + CatTitle + '</div>' +
+						'<div class="date"></div>' +
 						'</div>';
 		}
 		document.getElementById('NotesCount').innerHTML = IDS_CATEGORIES + ' (' + Categories.length + ')';
@@ -314,36 +352,38 @@
 	function NewNote(MemoFocus)
 	{
 		HideNoteCategories();
+		HideItemsCancelBtn();
+		HideNoteCancelBtn();
 		CurNoteID = '-1';
 		if (TabletMode == false)
-			document.getElementById('list').style.display = 'none';
-		document.getElementById('settings').style.display = 'none';
-		document.getElementById('editor').style.display = 'block';
+			LayoutList.style.display = 'none';
+		LayoutSettings.style.display = 'none';
+		LayoutEditor.style.display = 'block';
 		
-		document.getElementById('memo').value = '';
+		NoteMemo.value = '';
 		if (DevicePlatform != PlatformIOS && MemoFocus) // На iOS баг с увеличением textarea, при клике
-			document.getElementById('memo').select();
-		document.getElementById('NoteTitle').innerHTML = IDS_NEW_NOTE;
+			NoteMemo.select();
+		NoteTitle.innerHTML = IDS_NEW_NOTE;
 		
-		document.getElementById('DaysAgo').innerHTML = NoteDateAgo(GetUTCTimeStamp());
-		document.getElementById('DateNote').innerHTML = NoteDate(GetUTCTimeStamp());
+		DaysAgoTitle.innerHTML = NoteDateAgo(GetUTCTimeStamp());
+		DayNoteTitle.innerHTML = NoteDate(GetUTCTimeStamp());
 	}
 	
 	function ShowSettings()
 	{
 		if (TabletMode == false)
-			document.getElementById('list').style.display = 'none';
-		document.getElementById('editor').style.display = 'none';
-		document.getElementById('settings').style.display = 'block';
+			LayoutList.style.display = 'none';
+		LayoutEditor.style.display = 'none';
+		LayoutSettings.style.display = 'block';
 		document.getElementById('localstoragesize').innerHTML = IDS_LOCAL_STORAGE.replace('%s', Math.trunc((new Blob(Object.values(localStorage)).size / 1024)));
 	}
 	
 	function BackSettings() {
-		document.getElementById('settings').style.display = 'none';
+		LayoutSettings.style.display = 'none';
 		if (TabletMode == false)
-			document.getElementById('list').style.display = 'block';
+			LayoutList.style.display = 'block';
 		else
-			document.getElementById('editor').style.display = 'block';
+			LayoutEditor.style.display = 'block';
 	}
 	
 	function BackTheme(){
@@ -404,19 +444,20 @@
 		localStorage.setItem('DarkThemeEndHour', DarkThemeEndHour);
 		
 		let DarkThemeCB = document.getElementById('DarkThemeCB').checked;
-	
-		// Theme time	
+
+		// Theme time
 		let ThemeTimeCB = document.getElementById('ThemeTimeCB').checked;
+		let EffectiveDarkTheme = DarkThemeCB;		
+		
 		if (ThemeTimeCB) {
 			DarkThemeCB = false;
 			document.getElementById('DarkThemeCB').checked = false;
 			let date = new Date();
-			if (date.getHours() < DarkThemeEndHour || date.getHours() >= DarkThemeStartHour)
-				DarkThemeCB = true;
+			EffectiveDarkTheme = (date.getHours() < DarkThemeEndHour || date.getHours() >= DarkThemeStartHour);
 		}
 		
 		// Dark Theme
-		if (DarkThemeCB)
+		if (EffectiveDarkTheme)
 			DarkTheme();
 		else
 			BackTheme();
@@ -427,12 +468,24 @@
 		// Theme time status
 		localStorage.setItem('ThemeTime', ThemeTimeCB);
 		
-		localStorage.setItem('Categories', document.getElementById('CategorySettingsInput').value);
-		Categories = document.getElementById('CategorySettingsInput').value.split('\n');
+		let CategoriesListToSave = document.getElementById('CategorySettingsInput').value;
+		CategoriesListToSave = CategoriesListToSave.replace(/'/g, '');
+		localStorage.setItem('Categories', CategoriesListToSave);
+		Categories = CategoriesListToSave.split('\n');
 		//console.log(Categories);
 		
 		// Категории при запуске
 		localStorage.setItem('CategoriesAtRun', document.getElementById('CategoriesAtRunCB').checked);
+		
+		ConfirmBeforeDelete = document.getElementById('ConfirmBeforeDeleteCB').checked;
+		localStorage.setItem('ConfirmBeforeDelete', ConfirmBeforeDelete);
+		
+		ConfirmSwipeDelete = document.getElementById('ConfirmSwipeDeleteCB').checked;
+		localStorage.setItem('ConfirmSwipeDelete', ConfirmSwipeDelete);
+		
+		if (DeleteConfirmShown)
+			if (TabletMode)
+				HideNoteCancelBtn();
 		
 		BackSettings();
 	}
@@ -440,6 +493,8 @@
 	function GetNote(NoteID)
 	{	
 		HideNoteCategories();
+		HideItemsCancelBtn();
+		HideNoteCancelBtn();
 		if (NoteID == -1)
 		{
 			NewNote(false)
@@ -452,17 +507,17 @@
 		});
 		
 		if (CurNote) {
-			document.getElementById('memo').value = CharCodesToStr(CurNote.Note);
-			LatestNote = document.getElementById('memo').value;
-			document.getElementById('NoteTitle').innerHTML = ExtractTitle(CharCodesToStr(CurNote.Note));
-			document.getElementById('DaysAgo').innerHTML = NoteDateAgo(CurNote.DateTime);
-			document.getElementById('DateNote').innerHTML = NoteDate(CurNote.DateTime); 
+			NoteMemo.value = CharCodesToStr(CurNote.Note);
+			LatestNote = NoteMemo.value;
+			NoteTitle.innerHTML = EscapeHTML(ExtractTitle(CharCodesToStr(CurNote.Note)));
+			DaysAgoTitle.innerHTML = NoteDateAgo(CurNote.DateTime);
+			DayNoteTitle.innerHTML = NoteDate(CurNote.DateTime); 
 			CurNoteID = CurNote.ID;
 			CurNoteDateTime = CurNote.DateTime;
 			if (TabletMode == false)
-				document.getElementById('list').style.display = 'none';
-			document.getElementById('settings').style.display = 'none';
-			document.getElementById('editor').style.display = 'block';
+				LayoutList.style.display = 'none';
+			LayoutSettings.style.display = 'none';
+			LayoutEditor.style.display = 'block';
 		}
 		//console.log('GetNote ' + NoteID);
 	}
@@ -471,9 +526,10 @@
 	{
 		if (SearchShown) SearchShowHide();
 		HideNoteCategories();
+
 		let CurTimeStamp = GetTimeStamp();
 		let UTCTimeStamp = GetUTCTimeStamp();
-		let MemoText = document.getElementById('memo').value;
+		let MemoText = NoteMemo.value;
 		let LatestCurNoteID = CurNoteID; // Для мновенного переключения на новую заметку, без ожидания выполнения SQL
 		let NotesChanded = false;
 		
@@ -487,12 +543,13 @@
 					Note: StrToCharCodes(MemoText)
 				});
 				
-				ActionsAr.push({
-					Name: 'insert',
-					ID: CurTimeStamp,
-					DateTime: UTCTimeStamp,
-					Note: StrToCharCodes(MemoText)
-				});
+				if (SyncSuccess)
+					ActionsAr.push({
+						Name: 'insert',
+						ID: CurTimeStamp,
+						DateTime: UTCTimeStamp,
+						Note: StrToCharCodes(MemoText)
+					});
 				NotesChanded = true;
 			}
 			//console.log('Inserted done');
@@ -506,22 +563,24 @@
 				CurNote.DateTime = UTCTimeStamp;
 				CurNote.Note = StrToCharCodes(MemoText);
 				
-				ActionsAr.push({
-					Name: 'update',
-					ID: LatestCurNoteID,
-					DateTime: UTCTimeStamp,
-					Note: StrToCharCodes(MemoText)
-				});
+				if (SyncSuccess)
+					ActionsAr.push({
+						Name: 'update',
+						ID: LatestCurNoteID,
+						DateTime: UTCTimeStamp,
+						Note: StrToCharCodes(MemoText)
+					});
 
 			} else { // Сохранение старого времени
 				CurNote.Note = StrToCharCodes(MemoText);
 				
-				ActionsAr.push({
-					Name: 'update',
-					ID: LatestCurNoteID,
-					DateTime: CurNoteDateTime,
-					Note: StrToCharCodes(MemoText)
-				});
+				if (SyncSuccess)
+					ActionsAr.push({
+						Name: 'update',
+						ID: LatestCurNoteID,
+						DateTime: CurNoteDateTime,
+						Note: StrToCharCodes(MemoText)
+					});
 				
 			}
 			
@@ -535,51 +594,63 @@
 			NotesAr.sort(function(a, b) { return b.DateTime - a.DateTime; }); 
 			
 			localStorage.setItem('Notes', JSON.stringify(NotesAr));
-			localStorage.setItem('Actions', JSON.stringify(ActionsAr));
+			
+			if (SyncSuccess)
+				localStorage.setItem('Actions', JSON.stringify(ActionsAr));
 		}
 		
 		if (TabletMode) // Новая заметка открывается только в режиме планшета
 			NewNote(true);
+		else { // В NewNote уже есть сброс этого
+			HideItemsCancelBtn();
+			HideNoteCancelBtn();
+		}
 		ShowNotes('');
+	}
+	
+	function RemNoteByID(NoteID) {		
+		let IndexToRemove = NotesAr.findIndex(Note => Note.ID === NoteID);
+		if (IndexToRemove !== -1)
+			NotesAr.splice(IndexToRemove, 1);
+		
+		if (SyncSuccess)
+			ActionsAr.push({
+				Name: 'delete',
+				ID: NoteID,
+				DateTime: 0,
+				Note: ''
+			});
+		
+		localStorage.setItem('Notes', JSON.stringify(NotesAr));
+		if (SyncSuccess)
+			localStorage.setItem('Actions', JSON.stringify(ActionsAr));
+		
+		if (CategoriesShownList || SearchShown) // Оставлять выбранную категорию или поиск
+			ShowNotes(LastSearchValue);
+		else
+			ShowNotes('');
+		//console.log('Deleted ' + NoteID);
 	}
 	
 	function RemNote()
 	{	
 		HideNoteCategories();
 		if (CurNoteID == '-1') {ShowNotes(''); return;}
-		
-		let IndexToRemove = NotesAr.findIndex(Note => Note.ID === CurNoteID);
-		if (IndexToRemove !== -1)
-			NotesAr.splice(IndexToRemove, 1);
-		
-		ActionsAr.push({
-			Name: 'delete',
-			ID: CurNoteID,
-			DateTime: 0,
-			Note: ''
-		});
-		
-		localStorage.setItem('Notes', JSON.stringify(NotesAr));
-		localStorage.setItem('Actions', JSON.stringify(ActionsAr));
-		
-		if (CategoriesShownList || SearchShown) // Оставлять выбранную категорию или поиск
-			ShowNotes(LastSearchValue);
-		else
-			ShowNotes('');
+	
+		RemNoteByID(CurNoteID);
 		
 		if (TabletMode) // Новая заметка открывается только в режиме планшета
 			NewNote(false);
-		//console.log('Deleted ' + CurNoteID);
 	}
 	
 	function Notification(Str){
+		document.getElementById('sync-progress').style.display = 'none';
 		if (HideFirstNotifyError) // На замену navigator.onLine (постоянно стала возвращать true на Android)
 		{
 			HideFirstNotifyError = false;
-			if (Str == IDS_CONNECTION_FAILED)
+			if (Str == IDS_CONNECTION_FAILED || Str == IDS_SYNC_PC_NOT_FOUND)
 				return;
 		}
-		document.getElementById('sync-progress').style.display = 'none';
 		let notifyBlock = document.getElementById('notification');
 		notifyBlock.innerHTML = Str;
 		notifyBlock.className = 'show';
@@ -592,7 +663,7 @@
 	function AddNoteCategory(Category) {
 		CategoriesNoteShown = false;
 		document.getElementById('note-categories').style.display = 'none';
-		let Memo = document.getElementById('memo');
+		let Memo = NoteMemo;
 		let MemoValue = Memo.value.trim();
 		if (MemoValue.indexOf(Category) == -1) {
 			let LastLine = MemoValue.split('\n').pop();
@@ -615,8 +686,12 @@
 			document.getElementById('note-categories').scrollTop = 0
 			let CatsStr = '';
 
-			for (let Category of Categories)
-				CatsStr += '<div onclick="AddNoteCategory(\'' + Category + '\')" id="item">' + Category + '</div>';
+			for (let Category of Categories) {
+				let CatTitle = EscapeHTML(Category);
+				if (CatTitle.startsWith('#'))
+					CatTitle = CatTitle.substring(1);
+				CatsStr += '<div onclick="AddNoteCategory(\'' + EscapeHTML(Category) + '\')" id="item">' + CatTitle + '</div>';
+			}
 			document.getElementById('note-categories').innerHTML = CatsStr;
 			CategoriesNoteShown = true;
 		}
@@ -648,6 +723,64 @@
 		btnElement.style.transform = 'rotate(' + rotationSyncBtnAngle + 'deg)';
 	}
 	
+	function HideNoteCancelBtn() {
+		document.getElementById('CancelEditorBtn').style.display = 'none';
+		document.getElementById('CatBtn').style.display = 'block';
+		DeleteConfirmShown = false;
+	}
+	
+	function ShowCancelBtn() {
+		if (ConfirmBeforeDelete == false) {
+			RemNote();
+		} else {
+			if (DeleteConfirmShown) {
+				RemNote();
+				HideNoteCancelBtn();
+			} else {
+				document.getElementById('CancelEditorBtn').style.display = 'block';
+				document.getElementById('CatBtn').style.display = 'none';
+				DeleteConfirmShown = true;
+				if (TabletMode) {
+					HideItemsCancelBtn();
+					
+					document.querySelectorAll('#list #items .note .remove').forEach(function(block) {
+						block.style.transition = 'width 0.3s ease, flex-basis 0.3s ease';
+						block.style.width = '0';
+						block.style.flexBasis = '0';
+					});
+				}
+			}
+		}
+	}
+	
+	function HideItemsCancelBtn() {
+		document.getElementById('SettingsBtn').style.display = 'block';
+		document.getElementById('CatListBtn').style.display = 'block';
+		document.getElementById('SearchBtn').style.display = 'block';
+		document.getElementById('RemoveBtn').style.display = 'none';
+		document.getElementById('CancelItemsBtn').style.display = 'none';
+		
+		if (SearchHiddenForRemove) {
+			SearchHiddenForRemove = false;
+			SearchShowHide();
+		}
+	}
+	
+	function ShowItemsRemoveBtn() {
+		document.getElementById('SettingsBtn').style.display = 'none';
+		document.getElementById('CatListBtn').style.display = 'none';
+		document.getElementById('SearchBtn').style.display = 'none';
+		document.getElementById('RemoveBtn').style.display = 'block';
+		document.getElementById('CancelItemsBtn').style.display = 'block';
+		if (SearchShown) { // Легкий хак, чтобы спрятать поле, если до этого был поиск
+			SearchShown = false;
+			SearchHiddenForRemove = true;
+			document.getElementById('search-block').style.display = 'none';
+		}
+		if (TabletMode && DeleteConfirmShown)
+			HideNoteCancelBtn();
+	}
+	
 	function GetData(URL){
 		return new Promise(function(resolve, reject) {
 			let request = new XMLHttpRequest();
@@ -667,6 +800,110 @@
 			
 			request.send();
 		});
+	}
+	
+	function GetReadableDateTime(TimeStampSec)
+	{
+		try {
+			let date = new Date();
+			date.setTime(TimeStampSec * 1000 + date.getTimezoneOffset() * 60000);
+			let pad = function(n) { return (n < 10 ? '0' + n : n); };
+			return pad(date.getDate()) + '.' + pad(date.getMonth() + 1) + '.' + date.getFullYear() + ' ' +
+				   pad(date.getHours()) + ':' + pad(date.getMinutes()) + ':' + pad(date.getSeconds());
+		} catch (e) {
+			return '-';
+		}
+	}
+	
+	function ExportNotes()
+	{
+		let ExportStr = '';
+		
+		NotesAr.forEach(function(Note) {
+			let NoteText = CharCodesToStr(Note.Note).replace(/\n/g, ' \\n ');
+			ExportStr += GetReadableDateTime(Note.DateTime) + '\t' + Note.DateTime + '\t' + NoteText + '\r\n';
+		});
+		
+		let FileName = 'Notes_' + GetTimeStamp() + '.ntxt';
+		
+		// Нативное сохранение через Android (диалог "Сохранить как")
+		if (typeof Android !== 'undefined' && Android.saveFile) {
+			Android.saveFile(FileName, ExportStr);
+			return;
+		}
+		
+		// Фолбэк для браузера (как было)
+		let ExportBlob = new Blob([ExportStr], {type: 'text/plain;charset=utf-8'});
+		let DownloadLink = document.createElement('a');
+		DownloadLink.href = URL.createObjectURL(ExportBlob);
+		DownloadLink.download = FileName;
+		document.body.appendChild(DownloadLink);
+		DownloadLink.click();
+		document.body.removeChild(DownloadLink);
+		URL.revokeObjectURL(DownloadLink.href);
+	}
+
+	// Вызывается из Android после попытки сохранения файла
+	function OnExportResult(Success) {
+		if (Success)
+			Notification(IDS_DONE);
+	}
+	
+	function ImportNotes()
+	{
+		if (typeof Android !== 'undefined' && Android.importFile) {
+			Android.importFile();
+			return;
+		}
+		
+		document.getElementById('ImportFileInput').click();
+	}
+	
+	function OnImportFileContent(Content) {
+		if (Content === null) return; // отмена или ошибка чтения
+		ProcessImportContent(Content);
+	}
+
+	function ProcessImportContent(text)
+	{
+		let Lines = text.split(/\r\n|\n/);
+		let ImportedCount = 0;
+		
+		Lines.forEach(function(Line) {
+			if (Line.trim() == '') return;
+			
+			let FirstTab = Line.indexOf('\t');
+			if (FirstTab == -1) return;
+			let Rest = Line.substring(FirstTab + 1);
+			
+			let SecondTab = Rest.indexOf('\t');
+			if (SecondTab == -1) return;
+			
+			let ImportDateTime = Rest.substring(0, SecondTab).trim();
+			let ImportText = Rest.substring(SecondTab + 1).replace(/ \\n /g, '\n');
+			
+			let ID = parseInt(ImportDateTime);
+			
+			if (isNaN(ID) || ImportText.trim() == '') return;
+			
+			if (NotesAr.some(function(Note) { return Note.ID === ID; })) return;
+			
+			NotesAr.push({
+				ID: ID,
+				DateTime: ID,
+				Note: StrToCharCodes(ImportText)
+			});
+							
+			ImportedCount++;
+		});
+		
+		if (ImportedCount > 0) {
+			NotesAr.sort(function(a, b) { return b.DateTime - a.DateTime; });
+			localStorage.setItem('Notes', JSON.stringify(NotesAr));
+			ShowNotes('');
+		}
+		
+		Notification(IDS_DONE);
 	}
 	
 	function SendData(URL, Data){
@@ -693,15 +930,42 @@
 	}
 	
 	function GetDeviceID(){
-		let DeviceOS = 'Unknown'
+		let DeviceOS = 'Unknown';
+
 		if (/Android/i.test(window.navigator.userAgent))
 			DeviceOS = 'Android';
 		else if (/iPhone|iPod|iPad/i.test(window.navigator.userAgent))
 			DeviceOS = 'iOS';
 		else if (/Edg/.test(navigator.userAgent))
 			DeviceOS = 'Windows';
-			
-		return DeviceOS + '_' + Math.random().toString(36).substr(2, 9);
+
+		const Names = [
+			// Животные
+			'Fox',
+			'Panda',
+			'Koala',
+			'Puppy',
+			'Kitten',
+			'Bunny',
+			'Bear',
+			'Otter',
+			'Dolphin',
+			'Penguin',
+
+			// Фрукты и вкусы
+			'Apple',
+			'Peach',
+			'Mango',
+			'Cherry',
+			'Berry',
+			'Kiwi',
+			'Coconut',
+			'Melon'
+		];
+
+		const Name = Names[Math.floor(Math.random() * Names.length)];
+
+		return DeviceOS + '_' + Name + '_' + Math.random().toString(36).substring(2, 10);
 	}
 	
 	function Sync(){
@@ -729,17 +993,21 @@
 							XMLDoc.innerHTML = responseNotes;
 							
 							let NoteItems = XMLDoc.getElementsByTagName('note');
-							for (let i = 0; i < NoteItems.length; i++)
+							for (let i = 0; i < NoteItems.length; i++) {
+								let ReceivedID = parseInt(NoteItems[i].getAttribute('id'));
+								if (NotesAr.some(function(Note) { return Note.ID === ReceivedID; })) // Пропускаем создание заметки, если она уже есть
+									continue;
 								NotesAr.push({
-									ID: parseInt(NoteItems[i].getAttribute('id')),
+									ID: ReceivedID,
 									DateTime: parseInt(NoteItems[i].getAttribute('datetime')),
 									Note: NoteItems[i].innerHTML
 								});
+							}
 								//InsertNote(NoteItems[i].getAttribute('id'), NoteItems[i].innerHTML, NoteItems[i].getAttribute('datetime'));
 					
 							localStorage.setItem('Notes', JSON.stringify(NotesAr));
 					
-							delete XMLDoc;
+							XMLDoc = null;
 							
 							ShowNotes('');
 							
@@ -748,13 +1016,14 @@
 							// Сохраняем статус успешного первого запуска
 							FirstRun = false;
 							localStorage.setItem('FirstRun', FirstRun);
+							SyncSuccess = true;
+							localStorage.setItem('SyncSuccess', SyncSuccess);
 							
 							SyncWait = false; // Разрешаем повторную синхронизацию;
 							
 						}).catch(function() {
 							SyncWait = false; // Разрешаем повторную синхронизацию;
 							
-							Notification(IDS_CONNECTION_FAILED);
 						});
 
 					} else {
@@ -798,8 +1067,10 @@
 									const UpdateNote = NotesAr.find(function(Note) {
 										return Note.ID === ReceivedNoteID;
 									});
-									UpdateNote.DateTime = ReceivedNoteDateTime;
-									UpdateNote.Note = ReceivedNote;
+									if (UpdateNote) {
+										UpdateNote.DateTime = ReceivedNoteDateTime;
+										UpdateNote.Note = ReceivedNote;
+									}
 								}
 									
 								if (ActionsItems[i].tagName == 'DELETE') {
@@ -825,7 +1096,8 @@
 
 							Notification(IDS_SYNC_SUCCESSFUL);
 						} else if (responseStatus == 'auth:denied') {
-							FirstRun = true; // Запрос повторной авторизации, статус ↓
+							FirstRun = true; // Запрос повторной авторизации, пропускаем вторую проверку с отправкой, сохранять не нужно, чисто повторный запрос авторизации
+							// В выводе статуса нет необходимости, он выводится ниже ↓ - Notification(IDS_AUTH_REJECT);
 							//console.log(responseStatus);
 						
 						} else
@@ -910,25 +1182,49 @@
 			SyncNotes();
 	}
 	
-	function SyncWithFoundAddress(){
+	function SyncWithFoundAddress() {	
+		if (SyncWaitAdvance || SyncWait) // Ждем выполнения
+			return;
+		SyncWaitAdvance = true;
+			
+		if (HideFirstNotifyError == false) // Android, из-за неработающего navigator.onLine
+			document.getElementById('sync-progress').style.display = 'block';
 		// Проверка доступности IP адреса
+		
 		let FoundIPAddress = false;
+		let IPsTotalChecks = 0;
+		let IPsDoneChecks = 0;
+		
+		function CheckDone() {
+			IPsDoneChecks++;
+			if (IPsDoneChecks == IPsTotalChecks && !FoundIPAddress) {
+				Notification(IDS_SYNC_PC_NOT_FOUND);
+				SyncWaitAdvance = false;
+			}
+		}
+
 		function CheckIPStatus(IP){
 			if (FoundIPAddress) return;
+			IPsTotalChecks++;
 			//console.log('Check ' + IP);
-			GetData('http://' + IP + ':' + ServerPort + '/api/connecttest').then(function(responseText) { // Проверка IP адреса
-				if (responseText == 'ok') {
+			// Проверка IP адреса
+			GetData('http://' + IP + ':' + ServerPort + '/api/connecttest').then(function(responseText) {
+				if (responseText == 'ok' && !FoundIPAddress) {
 					SyncAddress = 'http://' + IP + ':' + ServerPort;
 					FoundIPAddress = true;
 					Sync();
+					SyncWaitAdvance = false;
+				} else {
+					CheckDone();
 				}
 			}).catch(function() {
+				CheckDone();
 			});
 		}
-		
+				
 		// Список наиболее популярных локальных IP адресов
-		let IPs = ['192.168.0.', '192.168.0.', '192.168.1.', '192.168.1.', '192.168.2.', '192.168.3.'];
-		let LastAddrs = [     0,            100,          0,            100,          0,            0]; // Начальный адрес
+		let IPs = ['192.168.0.', '192.168.0.', '192.168.1.', '192.168.1.', '192.168.2.', '192.168.3.', '192.168.31.', '192.168.50.'];
+		let LastAddrs = [     0,            100,          0,            100,          0,            0,          0,            0]; // Начальный адрес
 		
 		for (let i = 0; i < IPs.length; i++)
 			for (let j = 0; j <= 15; j++)
@@ -946,15 +1242,15 @@
 		function CheckTabletMode(){
 			if (window.innerWidth >= 550) {
 				TabletMode = true;
-				document.getElementById('list').style.display = 'block';
+				LayoutList.style.display = 'block';
 				
-				if (document.getElementById('editor').style.display == 'none' && (document.getElementById('settings').style.display == 'none' || document.getElementById('settings').style.display == '')) //Когда блока нет, вместо "none" бывает ""
-					document.getElementById('editor').style.display = 'block';
+				if (LayoutEditor.style.display == 'none' && (LayoutSettings.style.display == 'none' || LayoutSettings.style.display == '')) //Когда блока нет, вместо "none" бывает ""
+					LayoutEditor.style.display = 'block';
 				document.getElementsByClassName('sub-panel')[0].style.cssText = 'border-right: 1px solid var(--list-right-border-color);';
 			} else {
 				TabletMode = false;
-				if (document.getElementById('editor').style.display == 'block' || document.getElementById('settings').style.display == 'block')
-					document.getElementById('list').style.display = 'none';
+				if (LayoutEditor.style.display == 'block' || LayoutSettings.style.display == 'block')
+					LayoutList.style.display = 'none';
 				document.getElementsByClassName('sub-panel')[0].style.cssText = '';
 			}
 		}
@@ -1016,12 +1312,61 @@
 		}
 	}
 	
+	// Скрытие кнопок удаления заметок в Items
+	function HideAllDeleteBlocks(exceptItem) {
+		document.querySelectorAll('#list #items .note .remove').forEach(function(block) {
+			const item = block.parentElement;
+
+			if (item !== exceptItem) {
+				block.style.transition = 'width 0.3s ease, flex-basis 0.3s ease';
+
+				block.style.width = '0';
+				block.style.flexBasis = '0';
+				
+				if (ConfirmSwipeDelete)
+					HideItemsCancelBtn();
+				if (ConfirmBeforeDelete)
+					if (TabletMode && DeleteConfirmShown)
+						HideNoteCancelBtn();
+			}
+		});
+	}
+	
+	// Android кнопка назад
+	function OnBackButtonPressed() {
+		if (SearchShown || CategoriesShownList) {
+			if (SearchShown) SearchShowHide();
+			if (CategoriesShownList) ShowHideCategoriesList();
+			return;
+		}
+	
+		if (TabletMode || LayoutList.style.display === 'block') {
+			if (typeof Android !== 'undefined' && Android.exitApp)
+				Android.exitApp();
+		} else {
+			if (LayoutEditor.style.display === 'block')
+				BackNote();
+			else
+				BackSettings();
+		}
+	}
+	
 	// Инициализация
 	document.addEventListener('DOMContentLoaded', function(){
+	
+		LayoutList = document.getElementById('list');
+		LayoutSettings = document.getElementById('settings');
+		LayoutEditor = document.getElementById('editor');
+			
+		NoteMemo = document.getElementById('memo');
+		NoteTitle = document.getElementById('NoteTitle');
+			
+		DaysAgoTitle = document.getElementById('DaysAgo');
+		DayNoteTitle = document.getElementById('DateNote');
 		
 		// Перевод
 		document.getElementById('NotesCount').innerHTML = IDS_NOTES + ' (0)';
-		document.getElementById('NoteTitle').innerHTML = IDS_NEW_NOTE;
+		NoteTitle.innerHTML = IDS_NEW_NOTE;
 		document.getElementById('Search').placeholder = IDS_SEARCH;
 		document.getElementById('SettingsTitle').innerText = IDS_SETTINGS;
 		
@@ -1041,11 +1386,15 @@
 		document.getElementById('AboutThemeTime').innerText = IDS_ABOUT_THEME_TIME;
 		document.getElementById('CategoriesTitle').innerText = IDS_CATEGORIES;
 		document.getElementById('CategoriesAtRunTitle').innerText = IDS_CATEGORIES_AT_RUN;
+		document.getElementById('ConfirmBeforeDeleteTitle').innerText = IDS_CONFIRM_BEFORE_DELETE;
+		document.getElementById('ConfirmSwipeDeleteTitle').innerText = IDS_CONFIRM_SWIPE_DELETE;
+		document.getElementById('ImportNotesBtn').innerText = IDS_IMPORT_NOTES;
+		document.getElementById('ExportNotesBtn').innerText = IDS_EXPORT_NOTES;
 		document.getElementById('LastUpdate').innerText = IDS_LAST_UPDATE;
 		document.getElementById('ResetBtn').innerText = IDS_FULL_RESET;
 		
-		document.getElementById('DaysAgo').innerHTML = NoteDateAgo(GetUTCTimeStamp());
-		document.getElementById('DateNote').innerHTML = NoteDate(GetUTCTimeStamp());
+		DaysAgoTitle.innerHTML = NoteDateAgo(GetUTCTimeStamp());
+		DayNoteTitle.innerHTML = NoteDate(GetUTCTimeStamp());
 		
 		// Заметки и события
 		if (localStorage.getItem('Notes') != '' && localStorage.getItem('Notes') != null)
@@ -1057,8 +1406,8 @@
 		if (localStorage.getItem('DarkThemeStartHour') != null) {
 			DarkThemeStartHour = parseInt(localStorage.getItem('DarkThemeStartHour'));
 			DarkThemeEndHour = parseInt(localStorage.getItem('DarkThemeEndHour'));
-			document.getElementById('DarkThemeStartHour').value=DarkThemeStartHour;
-			document.getElementById('DarkThemeEndHour').value=DarkThemeEndHour;
+			document.getElementById('DarkThemeStartHour').value = DarkThemeStartHour;
+			document.getElementById('DarkThemeEndHour').value = DarkThemeEndHour;
 		}
 		
 		document.getElementsByTagName('meta')['color-scheme']?.setAttribute('content', 'light'); // Сброс, по умолчанию почему-то сохраняется прошлый
@@ -1080,7 +1429,7 @@
 			document.getElementById('CategorySettingsInput').value = IDS_CATEGORIES_LIST;
 		Categories = document.getElementById('CategorySettingsInput').value.split('\n');
 		//console.log(Categories);
-
+		
 		CheckTabletMode();
 
 		ShowNotes('');
@@ -1092,6 +1441,18 @@
 			CategoriesAtRunOnce = true;
 			ShowHideCategoriesList(); // Чтобы не мерцали заметки, до выполнения или ошибки синхронизации
 			CategoriesShownList = false; // Обходной путь
+		}
+		
+		// Подтверждение удаления
+		if (localStorage.getItem('ConfirmBeforeDelete') != null && localStorage.getItem('ConfirmBeforeDelete') == 'true') {
+			document.getElementById('ConfirmBeforeDeleteCB').checked = true;
+			ConfirmBeforeDelete = true;
+		}
+		
+		// Подтверждение удаления свайпом
+		if (localStorage.getItem('ConfirmSwipeDelete') != null && localStorage.getItem('ConfirmSwipeDelete') == 'true') {
+			document.getElementById('ConfirmSwipeDeleteCB').checked = true;
+			ConfirmSwipeDelete = true;
 		}
 				
 		// Настройки, IP
@@ -1120,6 +1481,10 @@
 		
 		// Первый запуск
 		FirstRun = localStorage.getItem('FirstRun') == null;
+		// Успешная синхронизация, чтобы не сохранять Actions если не было синхронизации
+		if (localStorage.getItem('SyncSuccess') != null && localStorage.getItem('SyncSuccess') == 'true') {
+			SyncSuccess = true;
+		}
 		
 		// Настройки, Device ID
 		if (localStorage.getItem('DeviceID') === null) {
@@ -1127,15 +1492,15 @@
 			localStorage.setItem('DeviceID', DeviceID);
 		} else
 			DeviceID = localStorage.getItem('DeviceID');
-		document.getElementById('DeviceID').innerHTML = 'ID: ' + DeviceID;
+		document.getElementById('DeviceID').innerHTML = IDS_ID + ': ' + DeviceID;
 		
 		// Настройки, автоматическая синхронизация при запуске
 		if (localStorage.getItem('AutoSync') != null && localStorage.getItem('AutoSync') == 'true') {
 			document.getElementById('AutoSyncCB').checked = true;
-			
+			if (FirstRun) HideFirstNotifyError = false;
 			SyncAdvance();
 		} else
-			HideFirstNotifyError = false; // На Android не работает navigator.onLine, поэтому так
+			HideFirstNotifyError = false; // На замену navigator.onLine (постоянно стала возвращать true на Android), для iOS ставим true
 	
 		// Блокируем скролинг вне приложения для iOS
 		if (DevicePlatform == PlatformIOS)
@@ -1153,6 +1518,195 @@
 			AutoSearchIPBlock.style.borderTopRightRadius = '15px';
 		}
 		
+		// Клик по заметке и свайпы
+		let NoteItemStartX = 0;
+		let NoteItemStartY = 0;
+		let NoteItemSwiping = false;
+		let NoteItemVertical = false;
+		let NoteItemCurrent = null;
+		let NoteItemSwipeThreshold = 0;
+		let NoteItemTouchTarget = null;   // элемент, на котором началось касание
+		let NoteItemHandled = false;      // флаг для подавления дублирующего click
+
+		const NotesItems = document.getElementById('items');
+
+		NotesItems.addEventListener('click', function(e) {
+			// Если тап уже обработан в touchend – пропускаем
+			if (NoteItemHandled) {
+				NoteItemHandled = false;
+				return;
+			}
+
+			const RemoveBlock = e.target.closest('.remove');
+			if (RemoveBlock) {
+				e.preventDefault();
+				e.stopPropagation();
+				const Item = RemoveBlock.closest('.note');
+				if (Item) {
+					RemoveNoteID = parseInt(Item.getAttribute('data-id'));
+					if (ConfirmSwipeDelete) {
+						ShowItemsRemoveBtn();
+						if (TabletMode && DeleteConfirmShown)
+							HideNoteCancelBtn();
+					} else
+						RemNoteByID(RemoveNoteID);
+				}
+				return;
+			}
+
+			const Item = e.target.closest('.note');
+			if (Item)
+				GetNote(parseInt(Item.getAttribute('data-id')));
+		});
+
+		NotesItems.addEventListener('touchstart', function(e) {
+			const Item = e.target.closest('.note');
+			if (!Item) return;
+
+			NoteItemTouchTarget = e.target;          // запоминаем начальный элемент
+			const Touch = e.touches[0];
+
+			HideAllDeleteBlocks(Item);               // скрываем другие блоки удаления
+
+			NoteItemCurrent = Item;
+			NoteItemHandled = false;
+			NoteItemStartX = Touch.clientX;
+			NoteItemStartY = Touch.clientY;
+			NoteItemSwiping = false;
+			NoteItemVertical = false;
+			NoteItemSwipeThreshold = Item.offsetWidth * 0.15;
+			Item.NoteItemOtherClosed = false;
+		});
+
+		NotesItems.addEventListener('touchmove', function(e) {
+			if (!NoteItemCurrent) return;
+
+			const Item = NoteItemCurrent;
+			const DeleteBlock = Item.querySelector('.remove');
+			const Touch = e.touches[0];
+			const DiffX = Touch.clientX - NoteItemStartX;
+			const DiffY = Touch.clientY - NoteItemStartY;
+
+			// Определяем основное направление
+			const IsHorizontal = Math.abs(DiffX) > Math.abs(DiffY);
+
+			if (!IsHorizontal) {
+				// Вертикальное движение (скролл) – сбрасываем любые попытки свайпа
+				if (NoteItemSwiping) {
+					DeleteBlock.style.transition = 'width 0.3s ease, flex-basis 0.3s ease';
+					DeleteBlock.style.width = '0';
+					DeleteBlock.style.flexBasis = '0';
+					NoteItemSwiping = false;
+					NoteItemVertical = true; // помечаем, чтобы в touchend не было тапа
+				} else {
+					NoteItemVertical = true;
+				}
+				return;
+			}
+
+			// Горизонтальное движение
+			if (DiffX < 0) {
+				// Свайп влево – открываем кнопку
+				const Swipe = Math.abs(DiffX);
+				const Threshold = NoteItemSwipeThreshold;
+
+				if (Swipe < Threshold) {
+					return;
+				}
+
+				if (!Item.NoteItemOtherClosed) {
+					HideAllDeleteBlocks(Item);
+					Item.NoteItemOtherClosed = true;
+				}
+
+				DeleteBlock.style.transition = 'none';
+				const Width = Math.min(Swipe - Threshold, 64);
+				DeleteBlock.style.width = Width + 'px';
+				DeleteBlock.style.flexBasis = Width + 'px';
+				NoteItemSwiping = true;
+				NoteItemVertical = false;
+			} else { // DiffX > 0 – свайп вправо
+				// Если кнопка уже открыта (или частично), закрываем её плавно
+				if (parseInt(DeleteBlock.style.width) > 0 || NoteItemSwiping) {
+					DeleteBlock.style.transition = 'width 0.3s ease, flex-basis 0.3s ease';
+					DeleteBlock.style.width = '0';
+					DeleteBlock.style.flexBasis = '0';
+					NoteItemSwiping = false;
+					// Устанавливаем вертикальный флаг, чтобы в touchend не было тапа
+					NoteItemVertical = true;
+				}
+				// Если кнопка закрыта – ничего не делаем
+			}
+		});
+
+		NotesItems.addEventListener('touchend', function(e) {
+			if (!NoteItemCurrent) return;
+
+			const Item = NoteItemCurrent;
+			const DeleteBlock = Item.querySelector('.remove');
+			const Touch = e.changedTouches[0];
+			const DiffX = Touch.clientX - NoteItemStartX;
+			const DiffY = Touch.clientY - NoteItemStartY;
+
+			// Определяем, было ли это тапом (кликом):
+			// – не было свайпа
+			// – не было вертикального движения (или вертикаль не доминировала)
+			// – горизонтальное смещение меньше порога
+			const IsTap = !NoteItemSwiping && !NoteItemVertical && Math.abs(DiffX) < NoteItemSwipeThreshold;
+
+			if (IsTap) {
+				NoteItemHandled = true;
+
+				const RemoveBlock = NoteItemTouchTarget.closest ? NoteItemTouchTarget.closest('.remove') : null;
+				if (RemoveBlock) {
+					const itemForRemove = RemoveBlock.closest('.note');
+					if (itemForRemove) {
+						RemoveNoteID = parseInt(itemForRemove.getAttribute('data-id'));
+						if (ConfirmSwipeDelete) {
+							ShowItemsRemoveBtn();
+							if (TabletMode && DeleteConfirmShown)
+								HideNoteCancelBtn();
+						} else
+							RemNoteByID(RemoveNoteID);
+					}
+				} else {
+					const noteItem = NoteItemTouchTarget.closest ? NoteItemTouchTarget.closest('.note') : null;
+					if (noteItem) {
+						GetNote(parseInt(noteItem.getAttribute('data-id')));
+					}
+				}
+			}
+
+			// Анимация закрытия / фиксации блока удаления
+			DeleteBlock.style.transition = 'width 0.3s ease, flex-basis 0.3s ease';
+			if (NoteItemSwiping) {
+				const CurrentWidth = parseInt(DeleteBlock.style.width) || 0;
+				if (CurrentWidth >= NoteItemSwipeThreshold) {
+					DeleteBlock.style.width = '64px';
+					DeleteBlock.style.flexBasis = '64px';
+				} else {
+					DeleteBlock.style.width = '0';
+					DeleteBlock.style.flexBasis = '0';
+				}
+			} else {
+				DeleteBlock.style.width = '0';
+				DeleteBlock.style.flexBasis = '0';
+			}
+
+			// Сброс
+			NoteItemCurrent = null;
+			NoteItemTouchTarget = null;
+			NoteItemSwiping = false;
+			NoteItemVertical = false;
+		});
+		
+		// Кнопка импорта заметок
+		document.getElementById('ImportFileInput').addEventListener('change', function(e) {
+			if (e.target.files.length > 0)
+				ProcessImportFile(e.target.files[0]);
+			e.target.value = ''; // Сброс, чтобы можно было повторно выбрать тот же файл
+		});
+		
 		// PWA
 		if (IsPWA && 'serviceWorker' in navigator) {
 			navigator.serviceWorker.register('pwa.js');
@@ -1165,9 +1719,9 @@
 <div id="container">
 	<div id="list">
 		<div id="panel">
-			<div id="btn" onclick="SyncAdvance();rotateSyncBtn(this);"><img src="images/sync.png" /></div>
+			<div class="btn" onclick="SyncAdvance();rotateSyncBtn(this);"><img src="images/sync.png" /></div>
 			<div class="title" id="NotesCount">Заметки (0)</div>
-			<div id="btn" onclick="if (SearchShown) SearchShowHide(); if (CategoriesShownList) ShowHideCategoriesList(); NewNote(true);"><img src="images/new.png" /></div>
+			<div class="btn" onclick="if (SearchShown) SearchShowHide(); if (CategoriesShownList) ShowHideCategoriesList(); NewNote(true);"><img src="images/new.png" /></div>
 		</div>
 		<div id="panel-bg"></div>
 		
@@ -1178,18 +1732,20 @@
 			</div>-->
 		</div>
 		<div class="sub-panel">
-			<div id="btn" onclick="ShowSettings()"><img src="images/settings.png" /></div>
-			<div id="btn" onclick="ShowHideCategoriesList()"><img src="images/folders.png" /></div>
+			<div class="btn" id="RemoveBtn" onclick="HideItemsCancelBtn();RemNoteByID(RemoveNoteID);"><img src="images/rm.png" /></div>
+			<div class="btn" id="CancelItemsBtn" onclick="HideItemsCancelBtn()"><img src="images/cancel.png" /></div>
+			<div class="btn" id="SettingsBtn" onclick="ShowSettings()"><img src="images/settings.png" /></div>
+			<div class="btn" id="CatListBtn" onclick="ShowHideCategoriesList()"><img src="images/folders.png" /></div>
 			<div id="search-block"><input id="Search" type="text" onkeyup="ShowNotes(this.value.trim().toLowerCase())" placeholder="Поиск..."></div>
-			<div id="btn" onclick="SearchShowHide()"><img src="images/search.png" /></div>
+			<div class="btn" id="SearchBtn" onclick="SearchShowHide()"><img src="images/search.png" /></div>
 		</div>
 	</div>
 	
 	<div id="editor">
 		<div id="panel">
-			<div id="btn" class="hide-btn" onclick="BackNote()"><img src="images/back.png" /></div>
+			<div class="btn hide-btn" onclick="BackNote()"><img src="images/back.png" /></div>
 			<div class="title" id="NoteTitle">Заметка</div>
-			<div id="btn" onclick="NoteDone()"><img src="images/done.png" /></div>
+			<div class="btn" onclick="NoteDone()"><img src="images/done.png" /></div>
 		</div>
 		<div id="panel-bg"></div>
 		<div id="page">
@@ -1200,17 +1756,18 @@
 			<textarea id="memo" onclick="HideNoteCategories()" value="Текст"></textarea>
 		</div>
 		<div class="sub-panel">
-			<div id="btn" onclick="RemNote()"><img src="images/rm.png" /></div>
-			<div id="btn" onclick="ShowHideNoteCategories()"><img src="images/folders.png" /></div>
+			<div class="btn" id="CancelEditorBtn" onclick="HideNoteCancelBtn()"><img src="images/cancel.png" /></div>
+			<div class="btn" onclick="ShowCancelBtn()"><img src="images/rm.png" /></div>
+			<div class="btn" id="CatBtn" onclick="ShowHideNoteCategories()"><img src="images/folders.png" /></div>
 		</div>
 		<div id="note-categories"></div>
 	</div>
 	
 	<div id="settings">
 		<div id="panel">
-			<div id="btn" onclick="BackSettings()"><img src="images/back.png" /></div>
+			<div class="btn" onclick="BackSettings()"><img src="images/back.png" /></div>
 			<div class="title" id="SettingsTitle">Настройки</div>
-			<div id="btn" onclick="SettingsDone()"><img src="images/done.png" /></div>
+			<div class="btn" onclick="SettingsDone()"><img src="images/done.png" /></div>
 		</div>
 		<div id="panel-bg"></div>
 		<div id="page">
@@ -1285,8 +1842,35 @@
 					</div>
 				</div>
 			</div>
+
+			<div id="items">
+				<div id="item">
+					<div class="title" id="ConfirmBeforeDeleteTitle">Подтверждать удаление в заметке</div>
+					<div id="control" style="width:30%;margin-top:-3px;">
+						<input type="checkbox" id="ConfirmBeforeDeleteCB" class="checkbox" /><label for="ConfirmBeforeDeleteCB" class="switch"></label>
+					</div>
+				</div>
+				<div id="item">
+					<div class="title" id="ConfirmSwipeDeleteTitle">Подтверждать удаление в списке</div>
+					<div id="control" style="width:30%;margin-top:-3px;">
+						<input type="checkbox" id="ConfirmSwipeDeleteCB" class="checkbox" /><label for="ConfirmSwipeDeleteCB" class="switch"></label>
+					</div>
+				</div>
+			</div>
 			
-			<div class="titlebox" style="text-align:center;"><br><span id="DeviceID"></span><br><span id="localstoragesize">-</span><br><br>EasyNotes<br><span id="LastUpdate"></span> 29.06.25<br><a style="border-bottom:1px dashed var(--title-box-color)" href="https://r57zone.github.io" target="_blank">https://r57zone.github.io</a></div>
+			<div id="items">
+				<div id="item">
+					<div class="title" id="ImportNotesBtn" style="width:95%;" onclick="ImportNotes()">Импорт заметок</div>
+					<div id="control" style="width:5%;">►</div>
+					<input type="file" id="ImportFileInput" accept=".ntxt" style="display:none">
+				</div>
+				<div id="item">
+					<div class="title" id="ExportNotesBtn" style="width:95%;" onclick="ExportNotes()">Экспорт заметок</div>
+					<div id="control" style="width:5%;">►</div>
+				</div>
+			</div>
+			
+			<div class="titlebox" style="text-align:center;"><br><span id="DeviceID"></span><br><span id="localstoragesize">-</span><br><br>EasyNotes<br><span id="LastUpdate"></span> 28.08.26<br><a style="border-bottom:1px dashed var(--title-box-color)" href="https://r57zone.github.io" target="_blank">https://r57zone.github.io</a></div>
 			<br>
 			<div id="items">
 				<div id="item">

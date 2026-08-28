@@ -21,25 +21,32 @@ let IDS_ABOUT_AUTO_SYNC = 'Automatically sync on app launch.';
 let IDS_FULL_RESET = 'Full reset';
 let IDS_CONFIRM_FULL_RESET = 'Do you really want to reset everything? All notes and settings will be deleted.';
 let IDS_DARK_THEME = 'Dark theme';
-let IDS_THEME_TIME_DEPENDENT = 'Theme is time dependent';
+let IDS_THEME_TIME_DEPENDENT = 'Theme depends on time';
 let IDS_DARK_THEME_START = 'Dark theme start';
 let IDS_DARK_THEME_END = 'Dark theme end';
-let IDS_ABOUT_THEME_TIME = 'The dark theme is enabled automatically by time. Specify the time in 24-hour format.';
+let IDS_ABOUT_THEME_TIME = 'The dark theme is enabled automatically based on the time. Specify the time in 24-hour format.';
 let IDS_CATEGORIES = 'Categories';
 let IDS_CATEGORIES_LIST = '#Shopping\n#Ideas\n#Work\n#Projects\n#Family\n#Health\n#Finances\n#Education\n#Travel\n#Hobbies\n#Personal';
 let IDS_CATEGORIES_AT_RUN = 'Categories at startup';
 let IDS_LAST_UPDATE = 'Last update: ';
 let IDS_LOCAL_STORAGE = 'Local storage: %s of 5000 KB';
+let IDS_CONFIRM_BEFORE_DELETE = 'Confirm note deletion';
+let IDS_CONFIRM_SWIPE_DELETE = 'Confirm list deletion';
+let IDS_IMPORT_NOTES = 'Import notes';
+let IDS_EXPORT_NOTES = 'Export notes';
+let IDS_ID = 'Identifier';
 
 // Уведомления
-let IDS_DATE_UPDATE = 'Date will be update';
-let IDS_DATE_NOT_UPDATE = 'Date will not be update';
+let IDS_DATE_UPDATE = 'Date will be updated';
+let IDS_DATE_NOT_UPDATE = 'Date will not be updated';
 let IDS_AUTH_REJECT = 'Authorization rejected';
 let IDS_SYNC_SUCCESSFUL = 'Sync successful';
 let IDS_SYNC_ERROR = 'Sync error';
 //let IDS_SYNC_NEED_CONNECT = 'Need connect to the network for sync'; // Больше не используется, может пригодится в будущем
 let IDS_CONNECTION_FAILED = 'Connection failed';
 //let IDS_AUTH_MISSING = 'Authorization is missing,<br>save and reset your notes'; // Не используется, может пригодится
+let IDS_SYNC_PC_NOT_FOUND = 'PC for synchronization not found';
+let IDS_DONE = 'Done';
 
 let lang = navigator.language.toLowerCase();
 //navigator.language.toLowerCase() == 'ru-ru' || navigator.language == 'ru' // В iOS языки прописными буквами, вторая проверка нужна для Edge
@@ -59,14 +66,14 @@ if (lang.startsWith('ru')) {
 	IDS_SYNC_ADDRESS = 'IP или домен';
 	IDS_SYNC_PORT = 'Порт';
 	IDS_AUTOSEARCH_IP = 'Автопоиск IP адреса';
-	IDS_ABOUT_SYNC = 'IP адрес и порт или домен для синхронизации заметок, с вашим ПК или веб-сервером.';
+	IDS_ABOUT_SYNC = 'IP адрес и порт или домен для синхронизации заметок с вашим ПК или веб-сервером.';
 	IDS_AUTO_SYNC = 'Синхронизация при запуске';
 	IDS_ABOUT_AUTO_SYNC = 'Автоматическая синхронизация при запуске приложения.';
 	
 	// Для всех
 	IDS_FULL_RESET = 'Полный сброс';
 	IDS_CONFIRM_FULL_RESET = 'Вы действительно хотите сбросить всё? Все заметки и настройки будут удалены.';
-	IDS_DARK_THEME = 'Темная тема';
+	IDS_DARK_THEME = 'Тёмная тема';
 	IDS_THEME_TIME_DEPENDENT = 'Тема в зависимости от времени';
 	IDS_DARK_THEME_START = 'Начало тёмной темы';
 	IDS_DARK_THEME_END = 'Конец тёмной темы';
@@ -76,6 +83,11 @@ if (lang.startsWith('ru')) {
 	IDS_CATEGORIES_AT_RUN = 'Категории при запуске';
 	IDS_LAST_UPDATE = 'Последнее обновление: ';
 	IDS_LOCAL_STORAGE = 'Локальное хранилище: %s из 5000 Кб';
+	IDS_CONFIRM_BEFORE_DELETE = 'Подтверждать удаление в заметке';
+	IDS_CONFIRM_SWIPE_DELETE = 'Подтверждать удаление в списке';
+	IDS_IMPORT_NOTES = 'Импорт заметок';
+	IDS_EXPORT_NOTES = 'Экспорт заметок';
+	IDS_ID = 'Идентификатор';
 	
 	// Уведомления
 	IDS_DATE_UPDATE = 'Дата обновится';
@@ -84,13 +96,15 @@ if (lang.startsWith('ru')) {
 	IDS_SYNC_SUCCESSFUL = 'Синхронизация успешно завершена';
 	IDS_SYNC_ERROR = 'Ошибка синхронизации';
 	// IDS_SYNC_NEED_CONNECT = 'Для синхронизации нужно<br>подключиться к сети';
-	IDS_CONNECTION_FAILED = 'Cоединение не удалось';
+	IDS_CONNECTION_FAILED = 'Соединение не удалось';
 	// IDS_AUTH_MISSING = 'Авторизация отсутствует,<br>сохраните и сбросьте заметки';
+	IDS_SYNC_PC_NOT_FOUND = 'ПК для синхронизации не найден';
+	IDS_DONE = 'Готово';
 
 // Chinese
 } else if (lang.startsWith('zh')) {
 	// Chinese (Simplified)
-	if (lang === 'zh' || lang === 'zh-cn' || lang === 'zh-sg' || lang.startsWith('zh-hans')) {
+	if (lang === 'zh' || lang === 'zh-cn' || lang === 'zh-sg' || lang === 'zh-my' || lang.startsWith('zh-hans')) {
 		IDS_MONTHS = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
 		IDS_DAYOFWEEK = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'];
 		IDS_TODAY = '今天';
@@ -120,6 +134,11 @@ if (lang.startsWith('ru')) {
 		IDS_CATEGORIES_AT_RUN = '启动时分类';
 		IDS_LAST_UPDATE = '最后更新: ';
 		IDS_LOCAL_STORAGE = '本地存储: %s / 5000 KB';
+		IDS_CONFIRM_BEFORE_DELETE = '确认删除笔记';
+		IDS_CONFIRM_SWIPE_DELETE = '确认删除列表中的笔记';
+		IDS_IMPORT_NOTES = '导入笔记';
+		IDS_EXPORT_NOTES = '导出笔记';
+		IDS_ID = '标识符';
 
 		IDS_DATE_UPDATE = '日期将更新';
 		IDS_DATE_NOT_UPDATE = '日期不会更新';
@@ -129,6 +148,8 @@ if (lang.startsWith('ru')) {
 		// IDS_SYNC_NEED_CONNECT = '同步需要<br>连接网络';
 		IDS_CONNECTION_FAILED = '连接失败';
 		// IDS_AUTH_MISSING = '授权缺失，<br>请保存并重置笔记';
+		IDS_SYNC_PC_NOT_FOUND = '未找到用于同步的电脑';
+		IDS_DONE = '完成';
 
 	} else { // Chinese (Traditional)
 		IDS_MONTHS = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
@@ -160,6 +181,11 @@ if (lang.startsWith('ru')) {
 		IDS_CATEGORIES_AT_RUN = '啟動時分類';
 		IDS_LAST_UPDATE = '最後更新: ';
 		IDS_LOCAL_STORAGE = '本機儲存: %s / 5000 KB';
+		IDS_CONFIRM_BEFORE_DELETE = '確認刪除筆記';
+		IDS_CONFIRM_SWIPE_DELETE = '確認刪除列表中的筆記';
+		IDS_IMPORT_NOTES = '匯入筆記';
+		IDS_EXPORT_NOTES = '匯出筆記';
+		IDS_ID = '識別碼';
 
 		IDS_DATE_UPDATE = '日期將更新';
 		IDS_DATE_NOT_UPDATE = '日期不會更新';
@@ -169,17 +195,20 @@ if (lang.startsWith('ru')) {
 		// IDS_SYNC_NEED_CONNECT = '同步需要<br>連接網路';
 		IDS_CONNECTION_FAILED = '連線失敗';
 		// IDS_AUTH_MISSING = '授權缺失，<br>請儲存並重置筆記';
+		IDS_SYNC_PC_NOT_FOUND = '找不到用於同步的電腦';
+		IDS_DONE = '完成';
 	}
 	
 // Spanish
 } else if (lang.startsWith('es')) {
-	IDS_MONTHS = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Dic'];
+	IDS_MONTHS = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 	IDS_DAYOFWEEK = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 	IDS_TODAY = 'Hoy';
 	IDS_YESTERDAY = 'Ayer';
 	IDS_DAYSAGO = 'días atrás';
 	IDS_NEW_NOTE = 'Nueva nota';
 	IDS_NOTES = 'Notas';
+	IDS_SEARCH = 'Buscar...';
 
 	IDS_SETTINGS = 'Configuración';
 	IDS_SYNC_ADDRESS = 'IP o dominio';
@@ -190,7 +219,7 @@ if (lang.startsWith('ru')) {
 	IDS_ABOUT_AUTO_SYNC = 'Sincronizar automáticamente al iniciar la aplicación.';
 
 	IDS_FULL_RESET = 'Restablecer';
-	IDS_CONFIRM_FULL_RESET = 'Realmente deseas restablecer todo? Todas las notas y ajustes serán eliminados.';
+	IDS_CONFIRM_FULL_RESET = '¿Realmente deseas restablecer todo? Todas las notas y ajustes serán eliminados.';
 	IDS_DARK_THEME = 'Tema oscuro';
 	IDS_THEME_TIME_DEPENDENT = 'Tema es dependiente del tiempo';
 	IDS_DARK_THEME_START = 'Inicio del tema oscuro';
@@ -201,6 +230,11 @@ if (lang.startsWith('ru')) {
 	IDS_CATEGORIES_AT_RUN = 'Categorías al iniciar';
 	IDS_LAST_UPDATE = 'Última actualización: ';
 	IDS_LOCAL_STORAGE = 'Almacenamiento local: %s de 5000 KB';
+	IDS_CONFIRM_BEFORE_DELETE = 'Confirmar borrado de nota';
+	IDS_CONFIRM_SWIPE_DELETE = 'Confirmar borrado en lista';
+	IDS_IMPORT_NOTES = 'Importar notas';
+	IDS_EXPORT_NOTES = 'Exportar notas';
+	IDS_ID = 'Identificador';
 
 	IDS_DATE_UPDATE = 'La fecha se actualizará';
 	IDS_DATE_NOT_UPDATE = 'La fecha no se actualizará';
@@ -210,6 +244,8 @@ if (lang.startsWith('ru')) {
 	// IDS_SYNC_NEED_CONNECT = 'Necesita conectarse a la red para sincronizar';
 	IDS_CONNECTION_FAILED = 'Error de conexión';
 	// IDS_AUTH_MISSING = 'Falta la autorización,<br>guarda y reinicia tus notas';
+	IDS_SYNC_PC_NOT_FOUND = 'No se encontró el PC para la sincronización';
+	IDS_DONE = 'Listo';
 	
 // Portuguese (Brazilian Portuguese)
 } else if (lang.startsWith('pt')) {
@@ -242,6 +278,11 @@ if (lang.startsWith('ru')) {
 	IDS_CATEGORIES_AT_RUN = 'Categorias ao iniciar';
 	IDS_LAST_UPDATE = 'Última atualização: ';
 	IDS_LOCAL_STORAGE = 'Armazenamento local: %s de 5000 KB';
+	IDS_CONFIRM_BEFORE_DELETE = 'Confirmar exclusão de nota';
+	IDS_CONFIRM_SWIPE_DELETE = 'Confirmar exclusão na lista';
+	IDS_IMPORT_NOTES = 'Importar notas';
+	IDS_EXPORT_NOTES = 'Exportar notas';
+	IDS_ID = 'Identificador';
 
 	IDS_DATE_UPDATE = 'Data será atualizada';
 	IDS_DATE_NOT_UPDATE = 'Data não será atualizada';
@@ -251,6 +292,8 @@ if (lang.startsWith('ru')) {
 	// IDS_SYNC_NEED_CONNECT = 'Para sincronizar, é necessário<br>conectar à rede';
 	IDS_CONNECTION_FAILED = 'Falha na conexão';
 	// IDS_AUTH_MISSING = 'Autorização ausente,<br>salve e reinicie suas notas';
+	IDS_SYNC_PC_NOT_FOUND = 'PC para sincronização não encontrado';
+	IDS_DONE = 'Concluído';
 
 // French
 } else if (lang.startsWith('fr')) {
@@ -258,7 +301,7 @@ if (lang.startsWith('ru')) {
 	IDS_DAYOFWEEK = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
 	IDS_TODAY = 'Aujourd\'hui';
 	IDS_YESTERDAY = 'Hier';
-	IDS_DAYSAGO = 'jours avant';
+	IDS_DAYSAGO = 'jours';
 	IDS_NEW_NOTE = 'Nouvelle note';
 	IDS_NOTES = 'Notes';
 	IDS_SEARCH = 'Recherche...';
@@ -283,6 +326,11 @@ if (lang.startsWith('ru')) {
 	IDS_CATEGORIES_AT_RUN = 'Catégories au démarrage';
 	IDS_LAST_UPDATE = 'Dernière mise à jour : ';
 	IDS_LOCAL_STORAGE = 'Stockage local : %s sur 5000 Ko';
+	IDS_CONFIRM_BEFORE_DELETE = 'Confirmer suppression note';
+	IDS_CONFIRM_SWIPE_DELETE = 'Confirmer suppression liste';
+	IDS_IMPORT_NOTES = 'Importer des notes';
+	IDS_EXPORT_NOTES = 'Exporter des notes';
+	IDS_ID = 'Identifiant';
 
 	IDS_DATE_UPDATE = 'La date sera mise à jour';
 	IDS_DATE_NOT_UPDATE = 'La date ne sera pas mise à jour';
@@ -292,6 +340,8 @@ if (lang.startsWith('ru')) {
 	// IDS_SYNC_NEED_CONNECT = 'Pour synchroniser, vous devez<br>vous connecter au réseau';
 	IDS_CONNECTION_FAILED = 'Échec de la connexion';
 	// IDS_AUTH_MISSING = 'Autorisation manquante,<br>sauvegardez et réinitialisez<br>vos notes';
+	IDS_SYNC_PC_NOT_FOUND = 'PC de synchronisation introuvable';
+	IDS_DONE = 'Terminé';
 	
 // German
 } else if (lang.startsWith('de')) {
@@ -299,7 +349,7 @@ if (lang.startsWith('ru')) {
 	IDS_DAYOFWEEK = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
 	IDS_TODAY = 'Heute';
 	IDS_YESTERDAY = 'Gestern';
-	IDS_DAYSAGO = 'Tg. her';
+	IDS_DAYSAGO = 'Tage her';
 	IDS_NEW_NOTE = 'Neue Notiz';
 	IDS_NOTES = 'Notizen';
 	IDS_SEARCH = 'Suche...';
@@ -315,7 +365,7 @@ if (lang.startsWith('ru')) {
 	IDS_FULL_RESET = 'Komplett zurücksetzen';
 	IDS_CONFIRM_FULL_RESET = 'Sind Sie sicher, dass Sie alles zurücksetzen möchten? Alle Notizen und Einstellungen werden gelöscht.';
 	IDS_DARK_THEME = 'Dunkles Thema';
-	IDS_THEME_TIME_DEPENDENT = 'Thema abhängig von der Zeit';
+	IDS_THEME_TIME_DEPENDENT = 'Thema abhängig von der Uhrzeit';
 	IDS_DARK_THEME_START = 'Beginn des Dunkelmodus';
 	IDS_DARK_THEME_END = 'Ende des Dunkelmodus';
 	IDS_ABOUT_THEME_TIME = 'Das dunkle Design wird automatisch mit der Zeit aktiviert. Geben Sie die Uhrzeit im 24-Stunden-Format an.';
@@ -324,6 +374,11 @@ if (lang.startsWith('ru')) {
 	IDS_CATEGORIES_AT_RUN = 'Kategorien beim Start';
 	IDS_LAST_UPDATE = 'Letzte Aktualisierung: ';
 	IDS_LOCAL_STORAGE = 'Lokaler Speicher: %s von 5000 KB';
+	IDS_CONFIRM_BEFORE_DELETE = 'Notizenlöschung bestätigen';
+	IDS_CONFIRM_SWIPE_DELETE = 'Listenlöschung bestätigen';
+	IDS_IMPORT_NOTES = 'Notizen importieren';
+	IDS_EXPORT_NOTES = 'Notizen exportieren';
+	IDS_ID = 'Kennung';
 
 	IDS_DATE_UPDATE = 'Datum wird aktualisiert';
 	IDS_DATE_NOT_UPDATE = 'Datum wird nicht aktualisiert';
@@ -333,6 +388,8 @@ if (lang.startsWith('ru')) {
 	// IDS_SYNC_NEED_CONNECT = 'Zur Synchronisierung<br>müssen Sie sich verbinden';
 	IDS_CONNECTION_FAILED = 'Verbindung fehlgeschlagen';
 	// IDS_AUTH_MISSING = 'Autorisierung fehlt,<br>speichern Sie und setzen<br>Sie Ihre Notizen zurück';
+	IDS_SYNC_PC_NOT_FOUND = 'Synchronisierungs-PC nicht gefunden';
+	IDS_DONE = 'Fertig';
 
 // Japanese
 } else if (lang.startsWith('ja')) {
@@ -365,6 +422,11 @@ if (lang.startsWith('ru')) {
 	IDS_CATEGORIES_AT_RUN = '起動時のカテゴリ';
 	IDS_LAST_UPDATE = '最終更新: ';
 	IDS_LOCAL_STORAGE = 'ローカルストレージ: %s / 5000 KB';
+	IDS_CONFIRM_BEFORE_DELETE = 'ノート削除を確認';
+	IDS_CONFIRM_SWIPE_DELETE = 'リスト削除を確認';
+	IDS_IMPORT_NOTES = 'ノートをインポート';
+	IDS_EXPORT_NOTES = 'ノートをエクスポート';
+	IDS_ID = '識別子';
 
 	IDS_DATE_UPDATE = '日付が更新されます';
 	IDS_DATE_NOT_UPDATE = '日付は更新されません';
@@ -374,6 +436,8 @@ if (lang.startsWith('ru')) {
 	// IDS_SYNC_NEED_CONNECT = '同期するには<br>ネットワークに接続する必要があります';
 	IDS_CONNECTION_FAILED = '接続に失敗しました';
 	// IDS_AUTH_MISSING = '認証がありません。<br>ノートを保存してリセットしてください';
+	IDS_SYNC_PC_NOT_FOUND = '同期するPCが見つかりません';
+	IDS_DONE = '完了';
 
 // Arabic
 } else if (lang.startsWith('ar')) {
@@ -406,6 +470,11 @@ if (lang.startsWith('ru')) {
 	IDS_CATEGORIES_AT_RUN = 'الفئات عند التشغيل';
 	IDS_LAST_UPDATE = 'آخر تحديث: ';
 	IDS_LOCAL_STORAGE = 'التخزين المحلي: %s من 5000 كيلوبايت';
+	IDS_CONFIRM_BEFORE_DELETE = 'تأكيد حذف الملاحظة';
+	IDS_CONFIRM_SWIPE_DELETE = 'تأكيد حذف القائمة';
+	IDS_IMPORT_NOTES = 'استيراد الملاحظات';
+	IDS_EXPORT_NOTES = 'تصدير الملاحظات';
+	IDS_ID = 'المعرّف';
 
 	IDS_DATE_UPDATE = 'سيتم تحديث التاريخ';
 	IDS_DATE_NOT_UPDATE = 'لن يتم تحديث التاريخ';
@@ -414,7 +483,9 @@ if (lang.startsWith('ru')) {
 	IDS_SYNC_ERROR = 'خطأ في المزامنة';
 	// IDS_SYNC_NEED_CONNECT = 'لإجراء المزامنة، يجب<br>الاتصال بالشبكة';
 	IDS_CONNECTION_FAILED = 'فشل الاتصال';
-	// IDS_AUTH_MISSING = 'التفويض مفقود،<br>يرجى حفظ ملاحظا<br>وإعادة تعيينها';
+	// IDS_AUTH_MISSING = 'التفويض مفقود،<br>يرجى حفظ ملاحظاتك<br>وإعادة تعيينها';
+	IDS_SYNC_PC_NOT_FOUND = 'لم يتم العثور على الكمبيوتر المطلوب للمزامنة';
+	IDS_DONE = 'تم';
 
 // Italian
 } else if (lang.startsWith('it')) {
@@ -447,6 +518,11 @@ if (lang.startsWith('ru')) {
 	IDS_CATEGORIES_AT_RUN = 'Categorie all\'avvio';
 	IDS_LAST_UPDATE = 'Ultimo aggiornamento: ';
 	IDS_LOCAL_STORAGE = 'Archiviazione locale: %s su 5000 KB';
+	IDS_CONFIRM_BEFORE_DELETE = 'Conferma eliminazione nota';
+	IDS_CONFIRM_SWIPE_DELETE = 'Conferma eliminazione lista';
+	IDS_IMPORT_NOTES = 'Importa note';
+	IDS_EXPORT_NOTES = 'Esporta note';
+	IDS_ID = 'Identificatore';
 
 	IDS_DATE_UPDATE = 'La data verrà aggiornata';
 	IDS_DATE_NOT_UPDATE = 'La data non verrà aggiornata';
@@ -456,6 +532,8 @@ if (lang.startsWith('ru')) {
 	// IDS_SYNC_NEED_CONNECT = 'Per sincronizzare, è necessario<br>connettersi alla rete';
 	IDS_CONNECTION_FAILED = 'Connessione fallita';
 	// IDS_AUTH_MISSING = 'Autorizzazione mancante,<br>salva e reimposta le tue note';
+	IDS_SYNC_PC_NOT_FOUND = 'PC per la sincronizzazione non trovato';
+	IDS_DONE = 'Fatto';
 
 // Korean
 } else if (lang.startsWith('ko')) {
@@ -488,6 +566,11 @@ if (lang.startsWith('ru')) {
 	IDS_CATEGORIES_AT_RUN = '실행 시 카테고리';
 	IDS_LAST_UPDATE = '마지막 업데이트: ';
 	IDS_LOCAL_STORAGE = '로컬 저장소: %s / 5000 KB';
+	IDS_CONFIRM_BEFORE_DELETE = '노트 삭제 확인';
+	IDS_CONFIRM_SWIPE_DELETE = '목록 삭제 확인';
+	IDS_IMPORT_NOTES = '노트 가져오기';
+	IDS_EXPORT_NOTES = '노트 내보내기';
+	IDS_ID = '식별자';
 	
 	IDS_DATE_UPDATE = '날짜가 업데이트됩니다';
 	IDS_DATE_NOT_UPDATE = '날짜가 업데이트되지 않습니다';
@@ -497,6 +580,8 @@ if (lang.startsWith('ru')) {
 	// IDS_SYNC_NEED_CONNECT = '동기화를 위해서는<br>네트워크에 연결해야 합니다';
 	IDS_CONNECTION_FAILED = '연결 실패';
 	// IDS_AUTH_MISSING = '인증이 없습니다,<br>노트를 저장하고 재설정하세요';
+	IDS_SYNC_PC_NOT_FOUND = '동기화할 PC를 찾을 수 없습니다';
+	IDS_DONE = '완료';
 
 // Turkish
 } else if (lang.startsWith('tr')) {
@@ -529,6 +614,11 @@ if (lang.startsWith('ru')) {
 	IDS_CATEGORIES_AT_RUN = 'Başlangıçta kategoriler';
 	IDS_LAST_UPDATE = 'Son güncelleme: ';
 	IDS_LOCAL_STORAGE = 'Yerel depolama: %s / 5000 KB';
+	IDS_CONFIRM_BEFORE_DELETE = 'Not silmeyi onayla';
+	IDS_CONFIRM_SWIPE_DELETE = 'Liste silmeyi onayla';
+	IDS_IMPORT_NOTES = 'Notları içe aktar';
+	IDS_EXPORT_NOTES = 'Notları dışa aktar';
+	IDS_ID = 'Tanımlayıcı';
 
 	IDS_DATE_UPDATE = 'Tarih güncellenecek';
 	IDS_DATE_NOT_UPDATE = 'Tarih güncellenmeyecek';
@@ -538,4 +628,6 @@ if (lang.startsWith('ru')) {
 	// IDS_SYNC_NEED_CONNECT = 'Senkronizasyon için<br>ağa bağlanmalısınız';
 	IDS_CONNECTION_FAILED = 'Bağlantı başarısız';
 	// IDS_AUTH_MISSING = 'Yetkilendirme eksik,<br>notlarınızı kaydedin<br>ve sıfırlayın';
+	IDS_SYNC_PC_NOT_FOUND = 'Senkronizasyon için PC bulunamadı';
+	IDS_DONE = 'Tamamlandı';
 }

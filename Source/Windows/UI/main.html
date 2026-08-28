@@ -23,9 +23,9 @@ scrollbar-darkshadow-color: #dedede;}
 
 #wrapper{position:fixed; width:100%;height:100%;}
 
-#panel{width:100%; height:40px; overflow:hidden; background-color:#017d93; color:white; text-align:center; cursor:default;}
-#btn{width:40px; height:40px; cursor:pointer; flex-shrink: 0;}
-#btn:hover{opacity:0.7;}
+.panel{width:100%; height:40px; overflow:hidden; background-color:#017d93; color:white; text-align:center; cursor:default;}
+.btn{width:40px; height:40px; cursor:pointer; flex-shrink: 0;}
+.btn:hover{opacity:0.7;}
 .sub-panel{width:calc(100% - 1px); height:40px; border-right:1px solid #d5d5d5; display:flex; align-items:center; justify-content: space-between;}
 .sub-panel #search-block{display: none; width:calc(100% - 80px); margin:0 auto;}
 .sub-panel #search-block input[type=text]{
@@ -37,14 +37,14 @@ scrollbar-darkshadow-color: #dedede;}
     border: 1px solid #d5d5d5;
 }
 
-#panel .title{display:inline-block; max-width:60%; margin-top:8px; font-size:16px; font-weight:400px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.panel .title{display:inline-block; max-width:60%; margin-top:8px; font-size:16px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
 
 #list{float:left; width:37%; height:100%; font-size:14px; color:black;}
 #list #items{height:calc(100% - 80px); overflow:auto; border-right:1px solid #d5d5d5;}
-#list #items #note{display:flex; flex-direction:row; justify-content:space-between; align-items:center; cursor:pointer; height:40px; border-bottom:1px solid #ededed; overflow:hidden;}
-#list #items #note:hover{background-color:#ededed;}
-#list #items #note #title{display:inline-block; margin-left:8px; margin-right:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-#list #items #note #date{display:inline-block; margin-right:10px; margin-left:4px; color:#454545; font-size:13px; white-space:nowrap; text-align:right;}
+#list #items .note{display:flex; flex-direction:row; justify-content:space-between; align-items:center; cursor:pointer; height:40px; border-bottom:1px solid #ededed; overflow:hidden;}
+#list #items .note:hover{background-color:#ededed;}
+#list #items .note .title{display:inline-block; margin-left:8px; margin-right:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+#list #items .note .date{display:inline-block; margin-right:10px; margin-left:4px; color:#454545; font-size:13px; white-space:nowrap; text-align:right;}
 
 #editor{float:right; width:63%; height:100%;}
 #meta{color:#ac5942; height:38px; width:100%; font-size:14px; cursor:default; overflow:hidden; white-space:nowrap;}
@@ -77,55 +77,72 @@ scrollbar-darkshadow-color: #dedede;}
 #note-categories #item:last-child {border-bottom:none;}
 
 #editor #memo{display:block; width:calc(100% - 24px); height:calc(100% - 126px); padding:0 12px 8px 12px; background-color:transparent; font-family:Segoe UI; font-size: 14px; border:none; overflow:auto;}
+
+#CancelBtn,#RemoveAfterAskBtn{display:none;}
 </style>
 <!--<link rel="stylesheet" href="darktheme.css">-->
 <script type="text/javascript">
-let SearchShown = false;
-let CategoriesShownList = false;
-let CategoriesNoteShown = false;
+	let NoteMemo;
+	let SearchInput;
+	let SearchBlock;
+	let NoteCategories;
+	let RemoveButton;
+	let DoneButton;
+	let CancelButton;
+	let RemoveAfterAskButton;
 
-function SearchShowHide() {
-	if (SearchShown) { // Скрытие
-		SearchShown = false;
-		document.getElementById('search-block').style.display = 'none';
-		document.getElementById('Search').value = '';
-		document.location='#search=';
-	} else { // Показ
-		SearchShown = true;
-		document.getElementById('search-block').style.display = 'inline-block';
+	let SearchShown = false;
+	let CategoriesShownList = false;
+	let CategoriesNoteShown = false;
+	let ConfirmBeforeDelete = false;
+	let DeleteConfirmShown = false;
+
+	function HideOnGetNote() {
+		HideNoteCategories();
+		HideCancelBtn();
 	}
-}
 
-function AddNoteCategory(Category) {
-	CategoriesNoteShown = false;
-	document.getElementById('note-categories').style.display = 'none';
-	let Memo = document.getElementById('memo');
-	let MemoValue = Memo.value.trim();
-	if (MemoValue.indexOf(Category) == -1) {
-		let LastLine = MemoValue.split('\n').pop();
-		if (LastLine && LastLine.charAt(0) === '#') {
-			Memo.value += Category + '\n';
-		} else {
-			if (MemoValue !== '') Memo.value += '\n\n';
-			Memo.value += Category + '\n';
+	function SearchShowHide() {
+		if (SearchShown) { // Скрытие
+			SearchShown = false;
+			SearchBlock.style.display = 'none';
+			SearchInput.value = '';
+			document.location='#search=';
+		} else { // Показ
+			SearchShown = true;
+			SearchBlock.style.display = 'inline-block';
 		}
 	}
-}
 
-function ShowHideNoteCategories() {
-	if (CategoriesNoteShown) {
-			document.getElementById('note-categories').style.display = 'none';
-			CategoriesNoteShown = false;
-	} else {
-		document.getElementById('note-categories').style.display = 'block';
-		document.getElementById('note-categories').scrollTop = 0;
-		CategoriesNoteShown = true;
+	function AddNoteCategory(Category) {
+		CategoriesNoteShown = false;
+		NoteCategories.style.display = 'none';
+		let MemoValue = NoteMemo.value.trim();
+		if (MemoValue.indexOf(Category) == -1) {
+			let LastLine = MemoValue.split('\n').pop();
+			if (LastLine && LastLine.charAt(0) === '#') {
+				NoteMemo.value += Category + '\n';
+			} else {
+				if (MemoValue !== '') NoteMemo.value += '\n\n';
+				NoteMemo.value += Category + '\n';
+			}
+		}
 	}
-}
 
-function ShowHideCategoriesList() {
+	function ShowHideNoteCategories() {
+		if (CategoriesNoteShown) {
+			NoteCategories.style.display = 'none';
+			CategoriesNoteShown = false;
+		} else {
+			NoteCategories.style.display = 'block';
+			NoteCategories.scrollTop = 0;
+			CategoriesNoteShown = true;
+		}
+	}
+
+	function ShowHideCategoriesList() {
 		if (SearchShown) SearchShowHide();
-	
+
 		if (CategoriesShownList) {
 			CategoriesShownList = false;
 			document.location='#search=';
@@ -136,42 +153,81 @@ function ShowHideCategoriesList() {
 		CategoriesShownList = true;	
 	}
 
-function HideNoteCategories() {
-	if (CategoriesNoteShown) {
-		CategoriesNoteShown = false;
-		document.getElementById('note-categories').style.display = 'none';
+	function HideNoteCategories() {
+		if (CategoriesNoteShown) {
+			CategoriesNoteShown = false;
+			NoteCategories.style.display = 'none';
+		}
 	}
-}
+
+	function ShowCancelBtn() {
+		if (ConfirmBeforeDelete == false) {
+			document.location='#rem';
+			HideNoteCategories();
+		} else {
+			if (DeleteConfirmShown) {
+				 HideCancelBtn();
+			} else if (document.location.hash != '#new' && document.location.hash != 'main.html') {
+				RemoveButton.style.display = 'none';
+				DoneButton.style.display = 'none';
+				CancelButton.style.display = 'block';
+				RemoveAfterAskButton.style.display = 'block';
+				DeleteConfirmShown = true;
+			}
+			HideNoteCategories();
+		}
+	}
+
+	function HideCancelBtn() {
+		CancelButton.style.display = 'none';
+		RemoveAfterAskButton.style.display = 'none';
+		RemoveButton.style.display = 'block';
+		DoneButton.style.display = 'block';
+		DeleteConfirmShown = false;
+	}
+	
+	document.addEventListener('DOMContentLoaded', function(){
+		NoteMemo = document.getElementById('memo');
+		SearchInput = document.getElementById('Search');
+		SearchBlock = document.getElementById('search-block');
+		NoteCategories = document.getElementById('note-categories');
+		RemoveButton = document.getElementById('RemoveBtn');
+		DoneButton = document.getElementById('DoneBtn');
+		CancelButton = document.getElementById('CancelBtn');
+		RemoveAfterAskButton = document.getElementById('RemoveAfterAskBtn');
+	});
 </script>
 </head>
 <body oncontextmenu="return false">
 <div id="wrapper">
 	<div id="list" onselectstart="return false">
-		<div id="panel">
-			<div id="btn" style="float:left;" onclick="document.location='#new';"><img src="images/new.png" /></div>
+		<div class="panel">
+			<div class="btn" style="float:left;" onclick="document.location='#new';HideCancelBtn();"><img src="images/new.png" /></div>
 			<div class="title" id="NotesCount">Заметки (3)</div>
-			<div id="btn" style="float:right;" onclick="document.location='#settings';"><img src="images/settings.png" /></div>
-			<!--<div id="btn" style="float:right;cursor:default;"></div>-->
+			<div class="btn" style="float:right;" onclick="document.location='#settings'"><img src="images/settings.png" /></div>
+			<!--<div class="btn" style="float:right;cursor:default;"></div>-->
 		</div>
 		<div id="items">
-			<div onclick="document.location='#note1';" id="note">
+			<div onclick="document.location='#note1'" id="note">
 				<div id="title">Заголовок</div>
 				<div id="date">28 сен. 2018</div>
 			</div>
 		</div>
 		<div class="sub-panel">
-			<div id="btn" style="float:left;" onclick="ShowHideCategoriesList()"><img src="images/folders.png" /></div>
-			<div id="search-block"><input type="text" id="Search" onkeyup="document.location='#search=' + this.value;" placeholder="Поиск..." /></div>
-			<div id="btn" style="float:right;" onclick="SearchShowHide()"><img src="images/search.png" /></div>
-			<!--<div id="btn" style="float:right;cursor:default;"></div>-->
+			<div class="btn" style="float:left;" onclick="ShowHideCategoriesList()"><img src="images/folders.png" /></div>
+			<div id="search-block"><input type="text" id="Search" oninput="document.location='#search=' + this.value;" placeholder="Поиск..." /></div>
+			<div class="btn" style="float:right;" onclick="SearchShowHide()"><img src="images/search.png" /></div>
+			<!--<div class="btn" style="float:right;cursor:default;"></div>-->
 		</div>
 	</div>
 	
 	<div id="editor">
-		<div id="panel" onselectstart="return false">
-			<div id="btn" style="float:left;" onclick="document.location='#rem';HideNoteCategories();"><img src="images/rm.png" /></div>
+		<div class="panel" onselectstart="return false">
+			<div class="btn" id="RemoveBtn" style="float:left;" onclick="ShowCancelBtn()"><img src="images/rm.png" /></div>
+			<div class="btn" id="CancelBtn" style="float:left;" onclick="HideCancelBtn()"><img src="images/cancel.png" /></div>
 			<div class="title" id="NoteTitle">Заметка</div>
-			<div id="btn" style="float:right;" onclick="document.location='#done';HideNoteCategories();"><img src="images/done.png" /></div>
+			<div class="btn" id="DoneBtn" style="float:right;" onclick="document.location='#done';HideNoteCategories();"><img src="images/done.png" /></div>
+			<div class="btn" id="RemoveAfterAskBtn" style="float:right;" onclick="document.location='#rem';HideNoteCategories();HideCancelBtn();"><img src="images/rm.png" /></div>
 		</div>
 		<div id="meta" onselectstart="return false">
 			<div id="DaysAgo">3 дня назад</div>
@@ -180,7 +236,7 @@ function HideNoteCategories() {
 		<div id="clear"></div>
 		<textarea id="memo" onclick="HideNoteCategories()" oncontextmenu="document.location='#memo-menu';">Текст</textarea>
 		<div class="sub-panel" style="border-right:0;width:100%;" onselectstart="return false">
-			<div id="btn" style="margin-left:auto" onclick="ShowHideNoteCategories()"><img src="images/folders.png" /></div>
+			<div class="btn" style="margin-left:auto" onclick="ShowHideNoteCategories()"><img src="images/folders.png" /></div>
 		</div>
 		<div id="note-categories">
 			<!--<div onclick="AddNoteCategory('#Покупки')" id="item">#Покупки</div>

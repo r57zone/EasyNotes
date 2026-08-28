@@ -7,7 +7,11 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.OleCtrls, SHDocVw, IdContext,
   IdCustomHTTPServer, IdBaseComponent, IdComponent, IdCustomTCPServer,
   IdHTTPServer, SQLite3, SQLite3Wrap, ActiveX, DateUtils, IniFiles, Registry,
-  XMLDoc, XMLIntf, MSHTML, Vcl.StdCtrls, Vcl.Menus, ClipBrd, LangFile;
+  XMLDoc, XMLIntf, MSHTML, Vcl.StdCtrls, Vcl.Menus, ClipBrd, LangFile,
+  Vcl.ExtCtrls;
+
+const
+  WM_SHOWME = WM_USER + 1;
 
 type
   TMain = class(TForm)
@@ -17,6 +21,13 @@ type
     CutBtn: TMenuItem;
     CopyBtn: TMenuItem;
     PasteBtn: TMenuItem;
+    TrayIcon: TTrayIcon;
+    TrayPopupMenu: TPopupMenu;
+    ExitBtn: TMenuItem;
+    PopupLine: TMenuItem;
+    ShowBtn: TMenuItem;
+    AboutBtn: TMenuItem;
+    PopupLine2: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure WebViewBeforeNavigate2(ASender: TObject;
       const pDisp: IDispatch; const URL, Flags, TargetFrameName, PostData,
@@ -31,15 +42,24 @@ type
     procedure CutBtnClick(Sender: TObject);
     procedure CopyBtnClick(Sender: TObject);
     procedure PasteBtnClick(Sender: TObject);
+    procedure ExitBtnClick(Sender: TObject);
+    procedure TrayIconDblClick(Sender: TObject);
+    procedure ShowBtnClick(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure AboutBtnClick(Sender: TObject);
   private
     procedure AddStyle(FileName: string);
     procedure ShowCategories;
     procedure NewNote(MemoFocus: boolean);
     procedure NoteDone(UpdateList: integer);
     procedure MessageHandler(var Msg: TMsg; var Handled: Boolean);
+    procedure WMShowMe(var Msg: TMessage); message WM_SHOWME;
+    procedure WMSysCommand(var Msg: TWMSysCommand); message WM_SYSCOMMAND;
+    procedure WMQueryEndSession(var Msg: TWMQueryEndSession); message WM_QUERYENDSESSION;
+    procedure CheckThemeTime;
     { Private declarations }
   public
-    CategoriesAtRun: boolean;
+    MinimizeToTray, CategoriesAtRun, ConfirmBeforeDelete: boolean;
     function SQLDBTableExists(TableName: string): boolean;
 	  function SQLTBCount(TableName: string): integer;
     procedure ShowNotes(SearchValue: string);
@@ -50,9 +70,9 @@ type
 
 var
   Main: TMain;
-  CloseDuplicate: boolean;
+  CloseDuplicate, AllowClose: boolean;
   SQLDB: TSQLite3Database;
-  DBFileName: string;
+  AppPath, DBFileName: string;
 
   OldWidth, OldHeight, DarkThemeStartHour, DarkThemeEndHour: integer;
   NoteIndex, NoteTimeStamp: int64; LatestNote: string;
@@ -63,18 +83,20 @@ var
   IDS_NEW_NOTE, IDS_NOTES, IDS_TODAY, IDS_YESTERDAY, IDS_DAYSAGO, IDS_SEARCH: string;
   IDS_SYNC, IDS_DEV_SYNC_CONFIRM, IDS_CUT, IDS_COPY, IDS_PASTE, IDS_LAST_UPDATE: string;
 
-  IDS_SETTINGS, IDS_INTERFACE, IDS_DARK_THEME, IDS_THEME_TIME, IDS_DARK_THEME_START,
-  IDS_DARK_THEME_END, IDS_SYNCHRONIZATION, IDS_SYNC_PORT, IDS_SYNC_WITH_ANY_IPS, IDS_ALLOW_IPS,
-  IDS_ALLOW_DEVS, IDS_ALLOW_DEV_REM, IDS_ENTER_DEV_ID, IDS_BLOCK_REQUEST_NEW_DEVS, IDS_IMPORT,
+  IDS_SETTINGS, IDS_INTERFACE, IDS_MINIMIZE_TO_TRAY, IDS_DARK_THEME, IDS_THEME_TIME,
+  IDS_DARK_THEME_START, IDS_DARK_THEME_END, IDS_SYNCHRONIZATION, IDS_SYNC_PORT,
+  IDS_SYNC_WITH_ANY_IPS, IDS_ALLOW_IPS, IDS_ALLOW_DEVS, IDS_ALLOW_DEV_REM,
+  IDS_ENTER_DEV_ID, IDS_BLOCK_REQUEST_NEW_DEVS, IDS_CONFIRM_DELETE_NOTE, IDS_IMPORT,
   IDS_EXPORT, IDS_CATEGORIES, IDS_CATEGORIES_AT_RUN, IDS_DONE, IDS_OK, IDS_CANCEL: string;
 
   AllowedIPs, AuthorizedDevices, CategoriesList: TStringList;
   AllowAnyIPs, BlockReqNewDevs: boolean;
-  UseDarkTheme, UseThemeTime: boolean;
+  UseDarkTheme, UseThemeTime, DarkThemeEnabled, LastDarkThemeStatus: boolean;
 
 const
   AppName = 'EasyNotes';
   AllowedIPsFile = 'AllowedIPs.txt';
+  MainUIFile = 'UI\main.html';
 
 implementation
 
@@ -139,7 +161,7 @@ begin
   end;
 end;
 
-function TMain.SQLTBCount(TableName: string): integer;
+{function TMain.SQLTBCount(TableName: string): integer;
 var
   SQLTB: TSQLite3Statement;
 begin
@@ -152,6 +174,33 @@ begin
   finally
     SQLTB.Free;
   end;
+end;}
+
+function TMain.SQLTBCount(TableName: string): integer;
+var
+  SQLTB: TSQLite3Statement;
+begin
+  Result:=0;
+  SQLTB:=SQLDB.Prepare('SELECT COUNT(*) FROM ' + TableName);
+  try
+    if SQLTB.Step = SQLITE_ROW then
+      Result:=SQLTB.ColumnInt(0);
+  finally
+    SQLTB.Free;
+  end;
+end;
+
+procedure TMain.TrayIconDblClick(Sender: TObject);
+begin
+  ShowBtnClick(Sender);
+end;
+
+procedure TMain.CheckThemeTime;
+var
+  CurHour, NilTime: Word;
+begin
+  DecodeTime(Now, CurHour, NilTime, NilTime, NilTime);
+  DarkThemeEnabled:=(CurHour < DarkThemeEndHour) or (CurHour >= DarkThemeStartHour);
 end;
 
 procedure TMain.FormCreate(Sender: TObject);
@@ -160,46 +209,46 @@ var
   Reg: TRegistry;
   WND: HWND;
 
-  CurDate: TDateTime;
-  CurHour, NilTime: Word;
-
   i: integer;
 
   SQLTB: TSQLite3Statement;
-  SystemLang, LangFileName: string;
+  SystemLang, LangFileName, ForceLangFile: string;
 
   LangFile: TLangFile;
-begin
-  // Предотвращение повторого запуска
-  WND:=FindWindow('TMain', AppName);
-  if (WND <> 0) and (ParamStr(1) <> '-show') then begin
-    SetForegroundWindow(WND);
-    Halt;
-  end;
-  Caption:=AppName;
 
-  Ini:=TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Config.ini');
+  PID: DWORD;
+begin
+  AppPath:=ExtractFilePath(ParamStr(0));
+  DBFileName:='Notes.db';
+  for i:=1 to ParamCount do
+    if (LowerCase(ParamStr(i)) = '-db') then
+      DBFileName:=ParamStr(i + 1)
+    else if (LowerCase(ParamStr(i)) = '-lang') then
+      ForceLangFile:=ParamStr(i + 1);
+
+  Ini:=TIniFile.Create(AppPath + 'Config.ini');
   IdHTTPServer.DefaultPort:=Ini.ReadInteger('Main', 'Port', 735);
   AllowAnyIPs:=Ini.ReadBool('Sync', 'AllowAnyIPs', false);
   BlockReqNewDevs:=Ini.ReadBool('Sync', 'BlockRequestNewDevs', false);
 
+  MinimizeToTray:=Ini.ReadBool('Main', 'MinimizeToTray', false);
+  AllowClose:=not MinimizeToTray;
+
   UseDarkTheme:=Ini.ReadBool('Main', 'DarkTheme', false);
   UseThemeTime:=Ini.ReadBool('Main', 'ThemeTime', false);
+  DarkThemeEnabled:=UseDarkTheme;
 
   DarkThemeStartHour:=Ini.ReadInteger('Main', 'DarkThemeStartHour', 19);
   DarkThemeEndHour:=Ini.ReadInteger('Main', 'DarkThemeEndHour', 7);
+  // Автоматическое изменение темы от времени суток
+  if UseThemeTime then CheckThemeTime();
 
   CategoriesList:=TStringList.Create;
   CategoriesList.Text:=Ini.ReadString('Main', 'Categories', '');
 
   CategoriesAtRun:=Ini.ReadBool('Main', 'CategoriesAtRun', false);
 
-  // Автоматическое изменение темы от времени суток
-  if (UseDarkTheme = false) and (UseThemeTime) then begin
-    DecodeTime(Now, CurHour, NilTime, NilTime, NilTime);
-    if (CurHour < DarkThemeEndHour) or (CurHour >= DarkThemeStartHour) then
-      UseDarkTheme:=true;
-  end;
+  ConfirmBeforeDelete:=Ini.ReadBool('Main', 'ConfirmBeforeDelete', false);
 
   Width:=Ini.ReadInteger('Main', 'Width', Width);
   Height:=Ini.ReadInteger('Main', 'Height', Height);
@@ -217,6 +266,19 @@ begin
   end;
   Ini.Free;
 
+  // Предотвращение повторого запуска, в середине из-за чтения трея
+  WND:=FindWindow('TMain', AppName);
+  if (WND <> 0) and (ParamStr(1) <> '-show') then begin
+    if MinimizeToTray then begin
+      GetWindowThreadProcessId(WND, @PID);
+      AllowSetForegroundWindow(PID);   // разрешаем "старому" процессу встать на передний пла
+      PostMessage(WND, WM_SHOWME, 0, 0);
+    end else
+      SetForegroundWindow(WND);
+    Halt;
+  end;
+  Caption:=AppName;
+
   IdHTTPServer.Active:=true;
 
   // Перевод
@@ -229,8 +291,10 @@ begin
     SystemLang:='Portuguese';
 
   LangFileName:=SystemLang + '.txt';
-  if not FileExists(ExtractFilePath(ParamStr(0)) + 'Languages\' + LangFileName) then
+  if not FileExists(AppPath + 'Languages\' + LangFileName) then
     LangFileName:='English.txt';
+  if ForceLangFile <> '' then
+    LangFileName:=ForceLangFile;
   //LangFileName:='English.txt';
   //LangFileName:='Chinese (Simplified).txt';
   //LangFileName:='Chinese (Traditional).txt';
@@ -244,7 +308,7 @@ begin
   //LangFileName:='Turkish.txt';
   //LangFileName:='Empty';
 
-  LangFile:=TLangFile.Create(ExtractFilePath(ParamStr(0)) + 'Languages\' + LangFileName);
+  LangFile:=TLangFile.Create(AppPath + 'Languages\' + LangFileName);
   try
     IDS_NEW_NOTE:=LangFile.GetString('NEW_NOTE', 'New note');
     IDS_NOTES:=LangFile.GetString('NOTES', 'Notes');
@@ -258,9 +322,13 @@ begin
     IDS_COPY:=LangFile.GetString('COPY', 'Copy');
     IDS_PASTE:=LangFile.GetString('PASTE', 'Paste');
     IDS_LAST_UPDATE:=LangFile.GetString('LAST_UPDATE', 'Last update:');
+    ShowBtn.Caption:=LangFile.GetString('SHOW', 'Show');
+    AboutBtn.Caption:=LangFile.GetString('ABOUT', 'About...');
+    ExitBtn.Caption:=LangFile.GetString('EXIT', 'Exit');
 
     IDS_SETTINGS:=LangFile.GetString('SETTINGS', 'Settings');
     IDS_INTERFACE:=LangFile.GetString('INTERFACE', 'Interface');
+    IDS_MINIMIZE_TO_TRAY:=LangFile.GetString('MINIMIZE_TO_TRAY', 'Minimize to notification area');
     IDS_DARK_THEME:=LangFile.GetString('DARK_THEME', 'Dark theme');
     IDS_THEME_TIME:=LangFile.GetString('THEME_TIME', 'Theme is time dependent');
     IDS_DARK_THEME_START:=LangFile.GetString('DARK_THEME_START', 'Dark theme start:');
@@ -269,10 +337,11 @@ begin
     IDS_SYNC_PORT:=LangFile.GetString('SYNC_PORT', 'Port:');
     IDS_SYNC_WITH_ANY_IPS:=LangFile.GetString('SYNC_WITH_ANY_IPS', 'Synchronization with any IP (not secure)');
     IDS_ALLOW_IPS:=LangFile.GetString('ALLOW_IPS', 'Allowed IP addresses:');
-    IDS_ALLOW_DEVS:=LangFile.GetString('ALLOW_DEVS', 'Allowed devices:');
-    IDS_ALLOW_DEV_REM:=LangFile.GetString('ALLOW_DEV_REM', 'Remove');
-    IDS_ENTER_DEV_ID:=LangFile.GetString('ENTER_DEV_ID', 'Enter the device ID');
-    IDS_BLOCK_REQUEST_NEW_DEVS:=LangFile.GetString('BLOCK_REQUEST_NEW_DEVS', 'Block requests for new devices');
+    IDS_ALLOW_DEVS:=LangFile.GetString('ALLOW_DEVICES', 'Allowed devices:');
+    IDS_ALLOW_DEV_REM:=LangFile.GetString('ALLOW_DEVICE_REMOVE', 'Remove');
+    IDS_ENTER_DEV_ID:=LangFile.GetString('ENTER_DEVICE_ID', 'Enter device identifier');
+    IDS_BLOCK_REQUEST_NEW_DEVS:=LangFile.GetString('BLOCK_REQUEST_NEW_DEVICES', 'Block requests for new devices');
+    IDS_CONFIRM_DELETE_NOTE:=LangFile.GetString('CONFIRM_DELETE_NOTE', 'Confirm deletion');
     IDS_IMPORT:=LangFile.GetString('IMPORT', 'Import');
     IDS_EXPORT:=LangFile.GetString('EXPORT', 'Export');
     IDS_CATEGORIES:=LangFile.GetString('CATEGORIES', 'Categories');
@@ -294,15 +363,7 @@ begin
   Application.Title:=Caption;
   Main.Visible:=false;
   WebView.Silent:=true;
-  WebView.Navigate(ExtractFilePath(ParamStr(0)) + 'UI\main.html');
-
-  DBFileName:='Notes.db';
-  for i:=1 to ParamCount do
-    if (LowerCase(ParamStr(i)) = '-db') and (Trim(ParamStr(i + 1)) <> '') then begin
-      DBFileName:=ParamStr(i + 1);
-      break;
-    end;
-
+  WebView.Navigate(AppPath + MainUIFile);
 
   SQLDB:=TSQLite3Database.Create;
   SQLDB.Open(DBFileName);
@@ -311,8 +372,8 @@ begin
 
   // Ограничение IP адресов для синхронизации
   AllowedIPs:=TStringList.Create;
-  if FileExists(ExtractFilePath(ParamStr(0)) + AllowedIPsFile) then
-    AllowedIPs.LoadFromFile(ExtractFilePath(ParamStr(0)) + AllowedIPsFile);
+  if FileExists(AppPath + AllowedIPsFile) then
+    AllowedIPs.LoadFromFile(AppPath + AllowedIPsFile);
 
   // Авторизованные устройства
   AuthorizedDevices:=TStringList.Create;
@@ -331,6 +392,16 @@ begin
 
     if (LowerCase(ParamStr(i)) = '-import') and (Trim(ParamStr(i + 1)) <> '') then
       ImportNotes(ParamStr(i + 1));
+  end;
+
+  // Свернуть окно при старте и показать иконку в трее
+  if MinimizeToTray then begin
+    LastDarkThemeStatus:=DarkThemeEnabled;
+    TrayIcon.Hint:=Application.Title;
+    if ParamStr(1) <> '-show' then begin
+      TrayIcon.Visible:=true;
+      Application.ShowMainForm:=false;
+    end;
   end;
 end;
 
@@ -392,7 +463,7 @@ procedure TMain.ShowNotes(SearchValue: string);
 var
   SQLTB: TSQLite3Statement;
   NotesCount: integer;
-  NoteStr: string;
+  NoteStr, AllNotes: string;
 begin
   //if SearchValue = '' then
   SQLTB:=SQLDB.Prepare('SELECT * FROM Notes ORDER BY DateTime DESC');
@@ -403,29 +474,47 @@ begin
     NotesCount:=0;
     WebView.OleObject.Document.getElementById('NotesCount').innerHTML:=IDS_NOTES + ' (0)';
     WebView.OleObject.Document.getElementById('items').innerHTML:='';
+    AllNotes:='';
     while SQLTB.Step = SQLITE_ROW do begin
       NoteStr:=CharCodesToStr(SQLTB.ColumnText(1));
       if (SearchValue <> '') and (Pos(SearchValue, AnsiLowerCase(NoteStr)) = 0) then Continue;
 
-      WebView.OleObject.Document.getElementById('items').innerHTML:=WebView.OleObject.Document.getElementById('items').innerHTML +
-      '<div onclick="document.location=''#note' + SQLTB.ColumnText(0) + ''';HideNoteCategories();" id="note"><div id="title">' + ExtractTitle(NoteStr) + '</div><div id="date">' + ListDateTime(SQLTB.ColumnText(2))  + '</div></div>';
+      AllNotes:=AllNotes + '<div onclick="document.location=''#note' + SQLTB.ColumnText(0) + ''';HideOnGetNote();" class="note"><div class="title">' + ExtractTitle(NoteStr) + '</div><div class="date">' + ListDateTime(SQLTB.ColumnText(2))  + '</div></div>';
       Inc(NotesCount);
     end;
+    WebView.OleObject.Document.getElementById('items').innerHTML:=AllNotes;
   finally
     WebView.OleObject.Document.getElementById('NotesCount').innerHTML:=IDS_NOTES + ' (' + IntToStr(NotesCount) + ')';
     SQLTB.Free;
   end;
 end;
 
+function EscapeHTML(const Str: string): string;
+begin
+  Result:=StringReplace(Str, '&', '&amp;', [rfReplaceAll]);
+  Result:=StringReplace(Result, '<', '&lt;', [rfReplaceAll]);
+  Result:=StringReplace(Result, '>', '&gt;', [rfReplaceAll]);
+  Result:=StringReplace(Result, '"', '&quot;', [rfReplaceAll]);
+  Result:=StringReplace(Result, '''', '&#39;', [rfReplaceAll]);
+end;
+
+function RemoveFirstHash(const Str: string): string;
+begin
+  Result:=Str;
+  if (Result <> '') and (Result[1] = '#') then
+    Delete(Result, 1, 1);
+end;
+
 procedure TMain.ShowCategories;
 var
-  i: integer;
+  i: integer; AllNotes: string;
 begin
   WebView.OleObject.Document.getElementById('NotesCount').innerHTML:=IDS_CATEGORIES + ' (' + IntToStr(CategoriesList.Count) + ')';
   WebView.OleObject.Document.getElementById('items').innerHTML:='';
+  AllNotes:='';
   for i:=0 to CategoriesList.Count - 1 do
-    WebView.OleObject.Document.getElementById('items').innerHTML:=WebView.OleObject.Document.getElementById('items').innerHTML +
-    '<div onclick="document.location=''#search=' + CategoriesList.Strings[i] + '''" id="note"><div id="title">' + CategoriesList.Strings[i] + '</div></div>';
+    AllNotes:=AllNotes + '<div onclick="document.location=''#search=' + EscapeHTML(CategoriesList.Strings[i]) + '''" class="note"><div class="title">' + RemoveFirstHash(EscapeHTML(CategoriesList.Strings[i])) + '</div></div>';
+  WebView.OleObject.Document.getElementById('items').innerHTML:=AllNotes;
 end;
 
 procedure TMain.NoteDone(UpdateList: integer);
@@ -434,32 +523,32 @@ var
 begin
   CurDateTime:=DateTimeToUnix(Now);
   // Update
-  if (NoteIndex <> -1) and ( Trim(LatestNote) <> Trim(WebView.OleObject.Document.getElementById('memo').innerHTML) ) then begin
+  if (NoteIndex <> -1) and ( Trim(LatestNote) <> Trim(WebView.OleObject.Document.getElementById('memo').value) ) then begin
 
     if (GetAsyncKeyState(VK_LSHIFT) and $8000 <> 0) or (GetAsyncKeyState(VK_RSHIFT) and $8000 <> 0) then // Если нажат Shift, то не обновляем дату
       CurDateTime:=NoteTimeStamp
     else
       CurDateTime:=DateTimeToUnix(Now);
 
-    SQLDB.Execute('UPDATE Notes SET Note="' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", DateTime="' + IntToStr(CurDateTime) + '" WHERE ID=' + IntToStr(NoteIndex));
+    SQLDB.Execute('UPDATE Notes SET Note="' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').value) + '", DateTime="' + IntToStr(CurDateTime) + '" WHERE ID=' + IntToStr(NoteIndex));
 
     // Добавляем действие во все таблицы авторизованных устройств. Проверка доступности нужна для использования иных баз данных
     for i:=0 to AuthorizedDevices.Count - 1 do
       if SQLDBTableExists('Actions_' + AuthorizedDevices.Strings[i]) then
-        SQLDB.Execute('INSERT INTO Actions_' + AuthorizedDevices.Strings[i] + ' (Action, ID, Note, DateTime) values("UPDATE", "' + IntToStr(NoteIndex) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", "' + IntToStr(CurDateTime) + '")');
+        SQLDB.Execute('INSERT INTO Actions_' + AuthorizedDevices.Strings[i] + ' (Action, ID, Note, DateTime) values("UPDATE", "' + IntToStr(NoteIndex) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').value) + '", "' + IntToStr(CurDateTime) + '")');
   end;
 
   // Add, обязательно под Update, потому что обновляется текущий NoteIndex
-  if (NoteIndex = -1) and (Trim(WebView.OleObject.Document.getElementById('memo').innerHTML) <> '') then begin
+  if (NoteIndex = -1) and (Trim(WebView.OleObject.Document.getElementById('memo').value) <> '') then begin
 	  CurTimeStamp:=GetTimeStamp;
     CurDateTime:=DateTimeToUnix(Now);
-	  SQLDB.Execute('INSERT INTO Notes (ID, Note, DateTime) values("' + IntToStr(CurTimeStamp) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", "' + IntToStr(CurDateTime) + '")');
+	  SQLDB.Execute('INSERT INTO Notes (ID, Note, DateTime) values("' + IntToStr(CurTimeStamp) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').value) + '", "' + IntToStr(CurDateTime) + '")');
 	  NoteIndex:=CurTimeStamp; //Для того, чтобы последняя запись не создавалась снова и снова
 
     // Добавляем действие во все базы авторизованных устройств. Проверка доступности нужна для использования иных баз данных
     for i:=0 to AuthorizedDevices.Count - 1 do
       if SQLDBTableExists('Actions_' + AuthorizedDevices.Strings[i]) then
-        SQLDB.Execute('INSERT INTO Actions_' + AuthorizedDevices.Strings[i] + ' (Action, ID, Note, DateTime) values("INSERT", "' + IntToStr(CurTimeStamp) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').innerHTML) + '", "' + IntToStr(CurDateTime) + '")');
+        SQLDB.Execute('INSERT INTO Actions_' + AuthorizedDevices.Strings[i] + ' (Action, ID, Note, DateTime) values("INSERT", "' + IntToStr(CurTimeStamp) + '", "' + StrToCharCodes(WebView.OleObject.Document.getElementById('memo').value) + '", "' + IntToStr(CurDateTime) + '")');
   end;
 
   if UpdateList = 0 then begin
@@ -558,7 +647,7 @@ begin
 
         WebView.OleObject.Document.getElementById('DaysAgo').innerHTML:=NoteDate;
         WebView.OleObject.Document.getElementById('DateNote').innerHTML:=NoteDateTime(SQLTB.ColumnText(2));
-        WebView.OleObject.Document.getElementById('memo').innerHTML:=CharCodesToStr(SQLTB.ColumnText(1));
+        WebView.OleObject.Document.getElementById('memo').value:=CharCodesToStr(SQLTB.ColumnText(1));
       finally
         SQLTB.Free;
       end;
@@ -575,7 +664,7 @@ begin
 
   // Удаляем
   if (sUrl = 'main.html#rem') and (NoteIndex <> -1) then begin
-    WebView.OleObject.Document.getElementById('memo').innerHTML:='';
+    WebView.OleObject.Document.getElementById('memo').value:='';
     SQLDB.Execute('DELETE FROM Notes WHERE ID=' + IntToStr(NoteIndex));
 
     // Добавляем действие во все доступные таблицы авторизованных устройств. Проверка доступности нужна для использования иных баз данных
@@ -606,53 +695,96 @@ end;
 procedure TMain.WebViewDocumentComplete(ASender: TObject;
   const pDisp: IDispatch; const URL: OleVariant);
 var
-  sUrl: string; i: integer;
+  sUrl: string; i: integer; AllCategoriesList: string;
 begin
   sUrl := ExtractFileName(StringReplace(Url, '/', '\', [rfReplaceAll]));
   // Проверяем, является ли pDisp основным объектом TWebBrowser
   if Assigned(pDisp) and (pDisp = (ASender as TWebBrowser).DefaultInterface) then begin
     if sUrl = 'main.html' then begin
-      Main.Visible := True;
+      Main.Visible:=true;
       ShowNotes('');
       NewNote(True);
-      WebView.OleObject.Document.getElementById('note-categories').innerHTML := '';
+      WebView.OleObject.Document.getElementById('note-categories').innerHTML:='';
       WebView.OleObject.Document.getElementById('Search').setAttribute('placeholder', IDS_SEARCH);
 
+      AllCategoriesList:='';
       for i:=0 to CategoriesList.Count - 1 do
-        WebView.OleObject.Document.getElementById('note-categories').innerHTML:=WebView.OleObject.Document.getElementById('note-categories').innerHTML +
-          '<div onclick="AddNoteCategory(''' + CategoriesList.Strings[i] + ''')" id="item">' + CategoriesList.Strings[i] + '</div>';
+        AllCategoriesList:=AllCategoriesList + '<div onclick="AddNoteCategory(''' + EscapeHTML(CategoriesList.Strings[i]) + ''')" id="item">' + RemoveFirstHash(EscapeHTML(CategoriesList.Strings[i])) + '</div>';
+      WebView.OleObject.Document.getElementById('note-categories').innerHTML:=AllCategoriesList;
 
-      if UseDarkTheme then
-        AddStyle(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'UI\darktheme.css');
+      if DarkThemeEnabled then
+        AddStyle(IncludeTrailingPathDelimiter(AppPath) + 'UI/darktheme.css'); // C:\Path\file -> C:/Path/file
 
       if CategoriesAtRun then
         ShowCategories;
+
+      if ConfirmBeforeDelete then
+        WebView.OleObject.Document.parentWindow.execScript('ConfirmBeforeDelete = true;', 'JavaScript');
     end;
   end;
+end;
+
+procedure TMain.WMQueryEndSession(var Msg: TWMQueryEndSession);
+begin
+  AllowClose:=true;
+  inherited; // -> CloseQuery
+end;
+
+procedure TMain.WMShowMe(var Msg: TMessage);
+begin
+  ShowBtn.Click;
+end;
+
+procedure TMain.WMSysCommand(var Msg: TWMSysCommand);
+begin
+  if (Msg.CmdType = SC_MINIMIZE) and (MinimizeToTray) then begin
+    Hide;
+    WindowState:=wsMinimized;
+    TrayIcon.Visible:=true;
+    TrayIcon.Animate:=true;
+    Exit;
+  end;
+
+  inherited;
 end;
 
 procedure TMain.FormClose(Sender: TObject; var Action: TCloseAction);
 var
   Ini: TIniFile;
 begin
+  if MinimizeToTray then
+    TrayIcon.Visible:=false;
   if (Main.WindowState <> wsMaximized) then
     if (OldWidth <> Width) or (OldHeight <> Height) then begin
-      Ini:=TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Config.ini');
+      Ini:=TIniFile.Create(AppPath + 'Config.ini');
       Ini.WriteInteger('Main', 'Width', Width);
       Ini.WriteInteger('Main', 'Height', Height);
       Ini.Free;
     end;
   IdHTTPServer.Active:=false;
 
-  // Добавляем, обновляем, статус "-1" не обновляет список заметок в интерфейсе
-  NoteDone(-1);
-
   SQLDB.Free;
-  Application.OnMessage:=SaveMessageHandler;
+  //Application.OnMessage:=SaveMessageHandler;
+  Application.OnMessage:=nil;
   FOleInPlaceActiveObject:=nil;
   AllowedIPs.Free;
   AuthorizedDevices.Free;
   CategoriesList.Free;
+
+  //Action:=caFree;
+end;
+
+procedure TMain.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+begin
+  CanClose:=AllowClose;
+  if (MinimizeToTray) and (AllowClose = false) then
+    SendMessage(Handle, WM_SYSCOMMAND, SC_MINIMIZE, 0);
+
+  // Добавляем, обновляем, статус "-1" не обновляет список заметок в интерфейсе
+  try
+    NoteDone(-1);
+  except // На случай если резко закрыли (WebView не загрузился)
+  end;
 end;
 
 procedure TMain.MessageHandler(var Msg: TMsg; var Handled: Boolean);
@@ -693,12 +825,38 @@ begin
   Application.OnMessage:=SaveMessageHandler;
 end;
 
+procedure TMain.ExitBtnClick(Sender: TObject);
+begin
+  AllowClose:=true;
+  TrayIcon.Visible:=false;
+  Close;
+end;
+
+procedure TMain.ShowBtnClick(Sender: TObject);
+begin
+  TrayIcon.Visible:=false;
+  TrayIcon.Animate:=false;
+  if WindowState = wsMinimized then
+    WindowState:=wsNormal;
+  Show;
+
+  if UseThemeTime then CheckThemeTime();
+
+  if DarkThemeEnabled <> LastDarkThemeStatus then begin
+    LastDarkThemeStatus:=DarkThemeEnabled;
+    WebView.Navigate(AppPath + MainUIFile);
+  end;
+
+  Application.BringToFront;
+  SetForegroundWindow(Handle);
+end;
+
 procedure TMain.NewNote(MemoFocus: boolean);
 begin
   WebView.OleObject.Document.getElementById('NoteTitle').innerHTML:=IDS_NEW_NOTE;
   WebView.OleObject.Document.getElementById('DaysAgo').innerHTML:=IDS_TODAY;
   WebView.OleObject.Document.getElementById('DateNote').innerHTML:=FormatDateTime('d mmm. h:nn', Now);
-  WebView.OleObject.Document.getElementById('memo').innerHTML:='';
+  WebView.OleObject.Document.getElementById('memo').value:='';
   if MemoFocus then
     WebView.OleObject.Document.getElementById('memo').focus;
   NoteIndex:=-1;
@@ -851,7 +1009,11 @@ begin
       AResponseInfo.ContentText:=ErrorStatus;
     end;
 
-    XMLNode:=XMLDoc.DocumentElement;
+    try
+      XMLNode:=XMLDoc.DocumentElement;
+    except;
+      XMLNode:=nil;
+    end;
     for i:=0 to XMLNode.ChildNodes.Count - 1 do
       try
         // Добавление
@@ -884,7 +1046,7 @@ begin
       end;
 
     // Проблема с мгновенным выводом, поэтому просто обновляем страницу и LoadNotes загружается снова.
-    WebView.Navigate(ExtractFilePath(ParamStr(0)) + 'UI\main.html');
+    WebView.Navigate(AppPath + MainUIFile);
 
     Caption:=AppName;
     Application.Title:=Caption;
@@ -893,10 +1055,10 @@ begin
   end;
 
   if (RequestDocument <> 'none') then begin
-    RequestDocument:=ExtractFilePath(ParamStr(0)) + '\webapp' + StringReplace(ARequestInfo.Document, '/', '\', [rfReplaceAll]);
+    RequestDocument:=AppPath + '\webapp' + StringReplace(ARequestInfo.Document, '/', '\', [rfReplaceAll]);
     RequestDocument:=StringReplace(RequestDocument, '\\', '\', [rfReplaceAll]);
     if ARequestInfo.Document = '/webapp' then // по webapp отдаем главный файл
-      RequestDocument:=ExtractFilePath(ParamStr(0)) + 'webapp\index.html';
+      RequestDocument:=AppPath + 'webapp\index.html';
 
     if FileExists(RequestDocument) then begin
       RequestFileExt:=AnsiLowerCase(ExtractFileExt(ARequestInfo.Document));
@@ -954,6 +1116,14 @@ begin
   keybd_event(Ord('X'), MapVirtualKey(Ord('X'), 0), 0, 0);
   keybd_event(Ord('X'), MapVirtualKey(Ord('X'), 0), KEYEVENTF_KEYUP, 0);
   keybd_event(VK_CONTROL, MapVirtualKey(VK_CONTROL, 0), KEYEVENTF_KEYUP, 0);
+end;
+
+procedure TMain.AboutBtnClick(Sender: TObject);
+begin
+  Application.MessageBox(PChar(Main.Caption + ' 1.4' + #13#10 +
+    IDS_LAST_UPDATE + ' 28.08.26' + #13#10 +
+    'https://r57zone.github.io' + #13#10 +
+    'r57zone@gmail.com'), PChar(Main.Caption), MB_ICONINFORMATION);
 end;
 
 procedure TMain.AddStyle(FileName: string);

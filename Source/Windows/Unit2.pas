@@ -39,6 +39,8 @@ type
     DarkThemeStartHourEdt: TEdit;
     DarkThemeEndHourEdt: TEdit;
     CategoriesAtRunCB: TCheckBox;
+    ConfirmBeforeDeleteCB: TCheckBox;
+    MinimizeToTrayCB: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure CancelBtnClick(Sender: TObject);
     procedure AboutBtnClick(Sender: TObject);
@@ -73,10 +75,7 @@ uses Unit1;
 
 procedure TSettings.AboutBtnClick(Sender: TObject);
 begin
-  Application.MessageBox(PChar(Main.Caption + ' 1.3' + #13#10 +
-    IDS_LAST_UPDATE + ' 29.06.25' + #13#10 +
-    'https://r57zone.github.io' + #13#10 +
-    'r57zone@gmail.com'), PChar(Main.Caption), MB_ICONINFORMATION);
+  Main.AboutBtn.Click;
 end;
 
 procedure TSettings.AddManualDevClick(Sender: TObject);
@@ -168,6 +167,7 @@ begin
 
   Caption:=IDS_SETTINGS;
   InterfaceGB.Caption:=IDS_INTERFACE;
+  MinimizeToTrayCB.Caption:=IDS_MINIMIZE_TO_TRAY;
   DarkThemeCB.Caption:=IDS_DARK_THEME;
   ThemeTimeCB.Caption:=IDS_THEME_TIME;
   DarkThemeStartHourLbl.Caption:=IDS_DARK_THEME_START;
@@ -183,19 +183,22 @@ begin
   CategoriesMemo.Text:=Trim(CategoriesList.Text);
   CategoriesAtRunCB.Caption:=IDS_CATEGORIES_AT_RUN;
   CategoriesAtRunCB.Checked:=Main.CategoriesAtRun;
+  ConfirmBeforeDeleteCB.Checked:=Main.ConfirmBeforeDelete;
 
   NotesGB.Caption:=IDS_NOTES;
   OpenDialog.Filter:=IDS_NOTES + ' (*.ntxt)|*.ntxt';
   SaveDialog.Filter:=OpenDialog.Filter;
   SaveDialog.DefaultExt:=SaveDialog.Filter;
+  ConfirmBeforeDeleteCB.Caption:=IDS_CONFIRM_DELETE_NOTE;
   ImportBtn.Caption:=IDS_IMPORT;
   ExportBtn.Caption:=IDS_EXPORT;
 
   OkBtn.Caption:=IDS_OK;
   CancelBtn.Caption:=IDS_CANCEL;
 
-  Ini:=TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Config.ini');
+  Ini:=TIniFile.Create(AppPath + 'Config.ini');
   PortEdt.Text:=IntToStr(Main.IdHTTPServer.DefaultPort);
+  MinimizeToTrayCB.Checked:=Main.MinimizeToTray;
   DarkThemeCB.Checked:=UseDarkTheme;
   ThemeTimeCB.Checked:=UseThemeTime;
   DarkThemeStartHourEdt.Text:=IntToStr(DarkThemeStartHour);
@@ -228,31 +231,57 @@ end;
 procedure TSettings.OkBtnClick(Sender: TObject);
 var
   Ini: TIniFile; ParamsStr: string; i: integer;
+  StartHour, EndHour, TempHour: integer;
 begin
-  Ini:=TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Config.ini');
+  Ini:=TIniFile.Create(AppPath + 'Config.ini');
   Ini.WriteInteger('Sync', 'Port', StrToIntDef(PortEdt.Text, 735));
-  if ThemeTimeCB.Checked then
-    DarkThemeCB.Checked:=false;
-  Ini.WriteBool('Main', 'DarkTheme', DarkThemeCB.Checked);
-  Ini.WriteBool('Main', 'ThemeTime', ThemeTimeCB.Checked);
-  Ini.WriteString('Main', 'DarkThemeStartHour', DarkThemeStartHourEdt.Text);
-  Ini.WriteString('Main', 'DarkThemeEndHour', DarkThemeEndHourEdt.Text);
+  Ini.WriteBool('Main', 'MinimizeToTray', MinimizeToTrayCB.Checked);
+  Main.MinimizeToTray:=MinimizeToTrayCB.Checked;
   Ini.WriteBool('Sync', 'AllowAnyIPs', AllowAnyIPsCB.Checked);
   Ini.WriteBool('Sync', 'BlockRequestNewDevs', BlockReqNewDevsCB.Checked);
-  AllowedIPsMemo.Lines.SaveToFile(ExtractFilePath(ParamStr(0)) + AllowedIPsFile); // В Ini ограничение на кол-во символов в строке
+  AllowedIPsMemo.Lines.SaveToFile(AppPath + AllowedIPsFile); // В Ini ограничение на кол-во символов в строке
   CategoriesMemo.Text:=StringReplace(Trim(CategoriesMemo.Text), ' ', '_', [rfReplaceAll]);
   Ini.WriteString('Main', 'Categories', StringReplace(CategoriesMemo.Text, #13#10, '\n', [rfReplaceAll]));
   Main.CategoriesAtRun:=CategoriesAtRunCB.Checked;
   Ini.WriteBool('Main', 'CategoriesAtRun', CategoriesAtRunCB.Checked);
+  Ini.WriteBool('Main', 'ConfirmBeforeDelete', ConfirmBeforeDeleteCB.Checked);
+  if ThemeTimeCB.Checked then
+    DarkThemeCB.Checked:=false;
+  Ini.WriteBool('Main', 'DarkTheme', DarkThemeCB.Checked);
+  Ini.WriteBool('Main', 'ThemeTime', ThemeTimeCB.Checked);
+
+  StartHour:=StrToIntDef(DarkThemeStartHourEdt.Text, 19);
+  EndHour:=StrToIntDef(DarkThemeEndHourEdt.Text, 7);
+
+  if StartHour < 0 then StartHour:=0;
+  if StartHour > 23 then StartHour:=23;
+  if EndHour < 0 then EndHour:=0;
+  if EndHour > 23 then EndHour:=23;
+
+  if StartHour < EndHour then begin
+    TempHour:=StartHour;
+    StartHour:=EndHour;
+    EndHour:=TempHour;
+  end;
+
+  Ini.WriteInteger('Main', 'DarkThemeStartHour', StartHour);
+  Ini.WriteInteger('Main', 'DarkThemeEndHour', EndHour);
   Ini.Free;
   Main.IdHTTPServer.Active:=false;
-  for i:=1 to ParamCount do
-    if (LowerCase(ParamStr(i)) = '-db') and (Trim(ParamStr(i + 1)) <> '') then begin
-      ParamsStr:=' -db ' + ParamStr(i + 1);
-      break;
-    end;
 
-  WinExec(PAnsiChar(AnsiString(ParamStr(0) + ' -show' + ParamsStr)), SW_SHOW);
+  ParamsStr:='';
+  for i:=1 to ParamCount do begin
+    if (LowerCase(ParamStr(i)) = '-db') and (Trim(ParamStr(i + 1)) <> '') then
+      ParamsStr:=ParamsStr + ' -db "' + ParamStr(i + 1) + '"';
+
+    if (LowerCase(ParamStr(i)) = '-lang') and (Trim(ParamStr(i + 1)) <> '') then
+      ParamsStr:=ParamsStr + ' -lang "' + ParamStr(i + 1) + '"';
+  end;
+
+  WinExec(PAnsiChar(AnsiString('"' + ParamStr(0) + '" -show' + ParamsStr)), SW_SHOW);
+
+  AllowClose:=true; // Разрешаем для любых случаев, поскольку может быть включен Tray, а мы ео выключили
+  Close;
   Main.Close;
 end;
 

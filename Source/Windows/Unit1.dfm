@@ -12,6 +12,7 @@ object Main: TMain
   Position = poScreenCenter
   OnActivate = FormActivate
   OnClose = FormClose
+  OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDeactivate = FormDeactivate
   TextHeight = 15
@@ -24,7 +25,6 @@ object Main: TMain
     TabOrder = 0
     OnBeforeNavigate2 = WebViewBeforeNavigate2
     OnDocumentComplete = WebViewDocumentComplete
-    ExplicitHeight = 399
     ControlData = {
       4C00000048460000572900000000000000000000000000000000000000000000
       000000004C000000000000000000000001000000E0D057007335CF11AE690800
@@ -53,6 +53,34 @@ object Main: TMain
     object PasteBtn: TMenuItem
       Caption = #1042#1089#1090#1072#1074#1080#1090#1100
       OnClick = PasteBtnClick
+    end
+  end
+  object TrayIcon: TTrayIcon
+    PopupMenu = TrayPopupMenu
+    OnDblClick = TrayIconDblClick
+    Left = 176
+    Top = 8
+  end
+  object TrayPopupMenu: TPopupMenu
+    Left = 248
+    Top = 8
+    object ShowBtn: TMenuItem
+      Caption = #1055#1086#1082#1072#1079#1072#1090#1100
+      OnClick = ShowBtnClick
+    end
+    object PopupLine: TMenuItem
+      Caption = '-'
+    end
+    object AboutBtn: TMenuItem
+      Caption = #1054' '#1087#1088#1086#1075#1088#1072#1084#1084#1077'...'
+      OnClick = AboutBtnClick
+    end
+    object PopupLine2: TMenuItem
+      Caption = '-'
+    end
+    object ExitBtn: TMenuItem
+      Caption = #1042#1099#1093#1086#1076
+      OnClick = ExitBtnClick
     end
   end
 end
