@@ -2,12 +2,13 @@
 body{font-size:14px;}
 #panel,#panel-bg{height:40px;}
 #panel .title{font-size:16px;}
-#btn{width:40px; height:40px;}
+.btn{width:40px; height:40px;}
 #list #items{font-size:14px; height:calc(100% - 80px)}
-#list #items #note{height:40px;}
+#list #items .note{height:40px;}
 #editor #page{height:calc(100% - 80px);}
 #editor #memo{height:calc(100% - 40px); font-size:14px;}
 .sub-panel{height:40px;}
+#note-categories #item{height:20px; padding:4px 8px;}
 #settings #page{height:calc(100% - 40px);}
 #settings #items{font-size:14px;}
 #settings #items #item{padding:10px 5px;}

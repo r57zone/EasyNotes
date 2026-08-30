@@ -97,7 +97,7 @@
 			DevicePlatform = PlatformWindows;
 		localStorage.setItem('DevicePlatform', DevicePlatform);
 	} else
-		DevicePlatform = localStorage.getItem('DevicePlatform');
+		DevicePlatform = parseInt(localStorage.getItem('DevicePlatform'));
 		
 	// Дополнительные стили
 	function AddCSSFile(cssFile) {
@@ -480,8 +480,10 @@
 		ConfirmBeforeDelete = document.getElementById('ConfirmBeforeDeleteCB').checked;
 		localStorage.setItem('ConfirmBeforeDelete', ConfirmBeforeDelete);
 		
-		ConfirmSwipeDelete = document.getElementById('ConfirmSwipeDeleteCB').checked;
-		localStorage.setItem('ConfirmSwipeDelete', ConfirmSwipeDelete);
+		if (!IsWindowsClient) { // Для Windows клиента удалена
+			ConfirmSwipeDelete = document.getElementById('ConfirmSwipeDeleteCB').checked;
+			localStorage.setItem('ConfirmSwipeDelete', ConfirmSwipeDelete);
+		}
 		
 		if (DeleteConfirmShown)
 			if (TabletMode)
@@ -531,7 +533,7 @@
 		let UTCTimeStamp = GetUTCTimeStamp();
 		let MemoText = NoteMemo.value;
 		let LatestCurNoteID = CurNoteID; // Для мновенного переключения на новую заметку, без ожидания выполнения SQL
-		let NotesChanded = false;
+		let NotesChanged = false;
 		
 		// Новая заметка
 		if (CurNoteID == '-1') {
@@ -550,7 +552,7 @@
 						DateTime: UTCTimeStamp,
 						Note: StrToCharCodes(MemoText)
 					});
-				NotesChanded = true;
+				NotesChanged = true;
 			}
 			//console.log('Inserted done');
 		} else if (LatestNote.trim() != MemoText.trim()) { // Добавлять только при наличии изменений
@@ -584,12 +586,12 @@
 				
 			}
 			
-			NotesChanded = true;
+			NotesChanged = true;
 			//console.log('Updated done');
 		}
 		
 		
-		if (NotesChanded) { // Если заметка добавлена / обновлена
+		if (NotesChanged) { // Если заметка добавлена / обновлена
 			// Сортировка по времени
 			NotesAr.sort(function(a, b) { return b.DateTime - a.DateTime; }); 
 			
@@ -1224,7 +1226,7 @@
 				
 		// Список наиболее популярных локальных IP адресов
 		let IPs = ['192.168.0.', '192.168.0.', '192.168.1.', '192.168.1.', '192.168.2.', '192.168.3.', '192.168.31.', '192.168.50.'];
-		let LastAddrs = [     0,            100,          0,            100,          0,            0,          0,            0]; // Начальный адрес
+		let LastAddrs = [     1,            100,          1,            100,          1,            1,          1,            1]; // Начальный адрес
 		
 		for (let i = 0; i < IPs.length; i++)
 			for (let j = 0; j <= 15; j++)
@@ -1387,7 +1389,8 @@
 		document.getElementById('CategoriesTitle').innerText = IDS_CATEGORIES;
 		document.getElementById('CategoriesAtRunTitle').innerText = IDS_CATEGORIES_AT_RUN;
 		document.getElementById('ConfirmBeforeDeleteTitle').innerText = IDS_CONFIRM_BEFORE_DELETE;
-		document.getElementById('ConfirmSwipeDeleteTitle').innerText = IDS_CONFIRM_SWIPE_DELETE;
+		if (!IsWindowsClient)
+			document.getElementById('ConfirmSwipeDeleteTitle').innerText = IDS_CONFIRM_SWIPE_DELETE;
 		document.getElementById('ImportNotesBtn').innerText = IDS_IMPORT_NOTES;
 		document.getElementById('ExportNotesBtn').innerText = IDS_EXPORT_NOTES;
 		document.getElementById('LastUpdate').innerText = IDS_LAST_UPDATE;
@@ -1508,15 +1511,13 @@
 			
 		// Скрываем лишние пункты меню для статичного адреса
 		if (UseManualAddress == false) {
-			document.querySelectorAll('.HideForStatAddr').forEach(function(element) {
-				element.style.display = 'none';
-			});
-			let AutoSearchIPBlock = document.getElementById('AutoSearchIP').parentElement;
-
-			AutoSearchIPBlock.style.border = '1px solid var(--settings-item-border-color)';
-			AutoSearchIPBlock.style.borderTopLeftRadius = '15px';
-			AutoSearchIPBlock.style.borderTopRightRadius = '15px';
+			document.getElementById('AutoSearchIPTitle').parentElement.parentElement.remove();
+			document.getElementById('AboutSync').remove();
 		}
+		
+		// Скрываем лишнее для Windows клиента
+		if (IsWindowsClient)
+			document.getElementById('ConfirmSwipeDeleteTitle').parentElement.remove();
 		
 		// Клик по заметке и свайпы
 		let NoteItemStartX = 0;
@@ -1771,7 +1772,7 @@
 		</div>
 		<div id="panel-bg"></div>
 		<div id="page">
-			<div id="items" class="HideForStatAddr">
+			<div id="items">
 				<div id="item" >
 					<div class="title" id="SyncAddressTitle">IP или домен</div>
 					<div id="control"><input type="text" id="ServerAddress" oninput="if (IsDomain(this.value)) document.getElementById('ServerPort').value='80';" value="192.168.0.1" placeholder="192.168.0.1"></div>
