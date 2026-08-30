@@ -43,7 +43,7 @@ There is a 5-megabyte limit for notes (except PC), you can monitor the available
 For Windows there are 2 applications, one is a server application that other client applications synchronize with, and the other is a client application that synchronizes with a server application or web server.
 
 ### Android
-Install `EasyNotes.apk`, select automatic IP address search or enter a reserved permanent IP of your computer (more on this below). If your router assigns the following IP addresses: `192.168.0.0/15`, `192.168.0.100/115`, `192.168.1.0/15`, `192.168.1.100/115`, `192.168.2.0/15`, `192.168.3.0/15`, then you can simply enable automatic IP address search, and the application will automatically detect your computer.
+Install `EasyNotes.apk`, select automatic IP address search or enter a reserved permanent IP of your computer (more on this below). If your router assigns the following IP addresses: `192.168.0.1/16`, `192.168.0.100/115`, `192.168.1.1/16`, `192.168.1.100/115`, `192.168.2.1/16`, `192.168.3.1/16`, `192.168.31.1/16`, `192.168.50.1/16`, then you can simply enable automatic IP address search, and the application will automatically detect your computer.
 
 ### iOS 13+
 If you want to synchronize directly with a PC or http web server, you need to do the following:
