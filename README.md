@@ -95,4 +95,4 @@ Follow the instructions described [here](https://github.com/r57zone/EasyNotes/tr
 **[Download](https://github.com/r57zone/EasyNotes/releases)**
 
 ## Feedback
-`r57zone[at]gmail.com`
+`r57zone@gmail.com`

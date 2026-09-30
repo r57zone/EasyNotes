@@ -70,7 +70,7 @@ type
 
 var
   Main: TMain;
-  CloseDuplicate, AllowClose: boolean;
+  CloseDuplicate, AllowClose: boolean; UILoaded: boolean = false;
   SQLDB: TSQLite3Database;
   AppPath, DBFileName: string;
 
@@ -701,7 +701,12 @@ begin
   // Проверяем, является ли pDisp основным объектом TWebBrowser
   if Assigned(pDisp) and (pDisp = (ASender as TWebBrowser).DefaultInterface) then begin
     if sUrl = 'main.html' then begin
-      Main.Visible:=true;
+      if UILoaded = false then begin
+        UILoaded:=true;
+        if not MinimizeToTray then
+          Main.Visible:=true;
+      end;
+
       ShowNotes('');
       NewNote(True);
       WebView.OleObject.Document.getElementById('note-categories').innerHTML:='';
@@ -1120,8 +1125,8 @@ end;
 
 procedure TMain.AboutBtnClick(Sender: TObject);
 begin
-  Application.MessageBox(PChar(Main.Caption + ' 1.4' + #13#10 +
-    IDS_LAST_UPDATE + ' 28.08.26' + #13#10 +
+  Application.MessageBox(PChar(Main.Caption + ' 1.4.1' + #13#10 +
+    IDS_LAST_UPDATE + ' 30.09.26' + #13#10 +
     'https://r57zone.github.io' + #13#10 +
     'r57zone@gmail.com'), PChar(Main.Caption), MB_ICONINFORMATION);
 end;

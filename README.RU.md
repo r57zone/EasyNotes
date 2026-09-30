@@ -93,4 +93,4 @@
 **[Загрузить](https://github.com/r57zone/EasyNotes/releases)**
 
 ## Обратная связь
-`r57zone[собака]gmail.com`
+`r57zone@gmail.com`
